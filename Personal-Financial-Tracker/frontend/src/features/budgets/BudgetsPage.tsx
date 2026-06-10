@@ -952,6 +952,7 @@ function BudgetsPageContainer() {
   }
 
   const categoryOptions: BudgetModalCategoryOption[] = categories
+    .filter((cat: any) => cat.type === 'expense')
     .map((cat: any) => ({
       value: cat.id,
       label: isAr ? cat.nameAr : cat.nameEn,
