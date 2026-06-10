@@ -17,7 +17,8 @@ import {
   WalletCards,
   type LucideIcon,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import type { ReportsDocument } from './ReportsPage'
 
 export type ReportPreviewLanguage = 'en' | 'ar'
 export type ReportPreviewIconName =
@@ -673,7 +674,9 @@ function heightClass(value: number) {
 function ReportPreviewPageContainer() {
   const language = useSelector(selectLanguage)
   const navigate = useNavigate()
+  const location = useLocation()
   const fallbackData = useReportPreviewPageData()
+  const locationState = location.state as { report?: ReportsDocument } | null
 
   const navItems: ReportPreviewNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
@@ -684,12 +687,55 @@ function ReportPreviewPageContainer() {
     { id: 'settings', label: 'Settings', icon: 'settings', href: '/profile-settings' },
   ]
 
+  const sourceReport = locationState?.report
+
+  const reportDoc: ReportDocument | undefined = sourceReport
+    ? {
+        brandName: 'PFT',
+        brandInitials: 'PA',
+        title: sourceReport.title,
+        periodLabel: sourceReport.periodLabel,
+        clientName: sourceReport.clientName,
+        accountId: '',
+        generatedAtLabel: sourceReport.generatedAtLabel,
+        summaryStats: sourceReport.summaryStats.map((s) => ({
+          id: s.id, label: s.label, valueLabel: s.valueLabel, tone: s.tone,
+        })),
+        cashFlowTitle: sourceReport.cashFlowTitle,
+        cashFlowBars: sourceReport.cashFlowBars.map((b) => ({
+          id: b.id, label: b.label, valueLabel: b.valueLabel, percent: b.percent, tone: b.tone,
+        })),
+        breakdown: {
+          title: 'Expense Breakdown',
+          centerValueLabel: sourceReport.summaryStats[2]?.valueLabel || '$0.00',
+          centerLabel: 'Net Savings',
+        },
+        expenseCategoriesTitle: sourceReport.expenseCategoriesTitle,
+        expenseCategories: sourceReport.expenseCategories.map((c) => ({
+          id: c.id, label: c.label, amountLabel: c.amountLabel, percentLabel: c.percentLabel,
+        })),
+        transactionsTitle: sourceReport.transactionsTitle,
+        transactions: sourceReport.transactions.map((t) => ({
+          id: t.id, dateLabel: t.dateLabel, description: t.description,
+          categoryLabel: t.categoryLabel, amountLabel: t.amountLabel, tone: t.tone,
+        })),
+        footerStatement: 'This report is for informational purposes only.',
+        confidentialityLabel: 'Confidential',
+        pageLabel: 'Page 1 of 1',
+      }
+    : undefined
+
+  const handleDownload = () => {
+    window.print()
+  }
+
   return (
     <ReportPreviewPage
       language={language}
-      data={{ ...fallbackData, navItems }}
+      data={{ ...fallbackData, navItems, report: reportDoc }}
       onLogout={() => navigate('/login')}
-      onDownload={() => alert('Download – backend not connected yet')}
+      onPrint={() => window.print()}
+      onDownload={handleDownload}
     />
   )
 }

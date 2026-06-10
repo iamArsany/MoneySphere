@@ -1,7 +1,7 @@
 {
   "project": "Personal Finance Tracker (PFT)",
   "parity_target": "100% Frontend-Backend Feature Parity",
-  "current_milestone": "4. Budget Planning & Data Relations Integration",
+  "current_milestone": "5. Financial Reports & Analytics Integration",
   "status": "COMPLETED",
   "completed_features": [
     "Auth (Register, Login, Refresh)",
@@ -9,15 +9,15 @@
     "Transactions Feed & Management",
     "Accounts Overview & Details",
     "Recurring Transactions Management",
-    "Budget Planning & Data Relations Integration"
+    "Budget Planning & Data Relations Integration",
+    "Financial Reports & Analytics Integration"
   ],
   "active_task": {
-    "target_page": "Personal-Financial-Tracker/frontend/src/features/budgets/BudgetsPage.tsx",
+    "target_page": "Personal-Financial-Tracker/frontend/src/features/reports/ReportsPage.tsx",
     "target_endpoints": [
-      "GET /budgets",
-      "POST /budgets",
-      "PATCH /budgets/:id",
-      "DELETE /budgets/:id",
+      "POST /reports/generate",
+      "POST /reports/export/pdf",
+      "GET /reports/history",
       "GET /categories",
       "GET /accounts"
     ],

@@ -17,9 +17,10 @@ import {
   WalletCards,
   type LucideIcon,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { selectLanguage } from '../../store'
+import { api } from '../../services/api'
 import { useNavigate } from 'react-router-dom'
 
 export type ReportsLanguage = 'en' | 'ar'
@@ -204,8 +205,16 @@ interface ReportBuilderProps {
   data: ReportsPageData
   activeReportMode: 'monthly' | 'annual'
   isGenerateDisabled: boolean
+  filterMonth: string
+  filterYear: string
+  filterAccount: string
+  filterCategory: string
   onGenerateReport?: () => void
   onReportModeChange?: (mode: 'monthly' | 'annual') => void
+  onFilterMonthChange?: (v: string) => void
+  onFilterYearChange?: (v: string) => void
+  onFilterAccountChange?: (v: string) => void
+  onFilterCategoryChange?: (v: string) => void
 }
 
 interface SummaryCardProps {
@@ -325,6 +334,26 @@ const ICONS: Record<ReportsIconName, LucideIcon> = {
   wallet: WalletCards,
 }
 
+function formatCurrency(value: number | string, currency: string = 'USD'): string {
+  const n = typeof value === 'string' ? parseFloat(value) : value
+  if (!isFinite(n)) return `${currency} 0.00`
+  return `${currency} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function formatDateISO(iso: string): string {
+  try {
+    const d = new Date(iso)
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  } catch { return iso }
+}
+
+function formatShortDate(iso: string): string {
+  try {
+    const d = new Date(iso)
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  } catch { return iso }
+}
+
 const DEFAULT_DATA: ReportsPageData = {
   navItems: [],
   monthOptions: [],
@@ -341,12 +370,27 @@ export function useReportsPageData(): ReportsPageData {
   return DEFAULT_DATA
 }
 
+export interface ReportsPageFilterHandlers {
+  filterMonth: string
+  filterYear: string
+  filterAccount: string
+  filterCategory: string
+  onFilterMonthChange?: (v: string) => void
+  onFilterYearChange?: (v: string) => void
+  onFilterAccountChange?: (v: string) => void
+  onFilterCategoryChange?: (v: string) => void
+}
+
 export function ReportsPage({
   data,
   language = 'en',
   text,
   activeReportMode = 'monthly',
   isGenerateDisabled = false,
+  filterMonth = '',
+  filterYear = '',
+  filterAccount = '',
+  filterCategory = '',
   hasUnreadNotifications: _hasUnreadNotifications = false,
   onLanguageToggle: _onLanguageToggle,
   onMenuClick: _onMenuClick,
@@ -355,12 +399,15 @@ export function ReportsPage({
   onHistoryItemClick,
   onNavItemClick: _onNavItemClick,
   onReportModeChange,
+  onFilterMonthChange,
+  onFilterYearChange,
+  onFilterAccountChange,
+  onFilterCategoryChange,
   onLogout: _onLogout,
-}: ReportsPageProps) {
+}: ReportsPageProps & Partial<ReportsPageFilterHandlers>) {
   const pageText = { ...useReportsPageText(language), ...text }
   const fallbackData = useReportsPageData()
   const pageData = data ?? fallbackData
-  const isRtl = language === 'ar'
 
   return (
     <>
@@ -370,8 +417,16 @@ export function ReportsPage({
           data={pageData}
           activeReportMode={activeReportMode}
           isGenerateDisabled={isGenerateDisabled}
+          filterMonth={filterMonth}
+          filterYear={filterYear}
+          filterAccount={filterAccount}
+          filterCategory={filterCategory}
           onGenerateReport={onGenerateReport}
           onReportModeChange={onReportModeChange}
+          onFilterMonthChange={onFilterMonthChange}
+          onFilterYearChange={onFilterYearChange}
+          onFilterAccountChange={onFilterAccountChange}
+          onFilterCategoryChange={onFilterCategoryChange}
         />
 
         <ReportPreviewSection
@@ -528,8 +583,16 @@ function ReportBuilder({
   data,
   activeReportMode,
   isGenerateDisabled,
+  filterMonth,
+  filterYear,
+  filterAccount,
+  filterCategory,
   onGenerateReport,
   onReportModeChange,
+  onFilterMonthChange,
+  onFilterYearChange,
+  onFilterAccountChange,
+  onFilterCategoryChange,
 }: ReportBuilderProps) {
   return (
     <section className="relative overflow-hidden rounded-2xl border border-[#005c55] bg-white p-5 shadow-sm sm:p-6 lg:p-8">
@@ -541,10 +604,12 @@ function ReportBuilder({
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <FilterField label={text.monthLabel} options={data.monthOptions} />
-        <FilterField label={text.yearLabel} options={data.yearOptions} />
-        <FilterField label={text.accountLabel} options={data.accountOptions} />
-        <FilterField label={text.categoryLabel} options={data.categoryOptions} />
+        {activeReportMode === 'monthly' ? (
+          <FilterField label={text.monthLabel} value={filterMonth} options={data.monthOptions} onChange={onFilterMonthChange} />
+        ) : null}
+        <FilterField label={text.yearLabel} value={filterYear} options={data.yearOptions} onChange={onFilterYearChange} />
+        <FilterField label={text.accountLabel} value={filterAccount} options={data.accountOptions} onChange={onFilterAccountChange} />
+        <FilterField label={text.categoryLabel} value={filterCategory} options={data.categoryOptions} onChange={onFilterCategoryChange} />
       </div>
 
       <div className="mt-6 flex justify-end">
@@ -750,11 +815,15 @@ function TabButton({ label, isActive, onClick }: { label: string; isActive: bool
   )
 }
 
-function FilterField({ label, options }: { label: string; options: ReportsFilterOption[] }) {
+function FilterField({ label, value, options, onChange }: { label: string; value?: string; options: ReportsFilterOption[]; onChange?: (value: string) => void }) {
   return (
     <label className="flex flex-col gap-2">
       <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6e7977]">{label}</span>
-      <select className="rounded-xl border border-[#bdc9c6] bg-white px-4 py-3 text-sm text-[#0b1c30] focus:border-[#005c55] focus:outline-none focus:ring-2 focus:ring-[#80d5cb]/30">
+      <select
+        value={value ?? ''}
+        onChange={(e) => onChange?.(e.target.value)}
+        className="rounded-xl border border-[#bdc9c6] bg-white px-4 py-3 text-sm text-[#0b1c30] focus:border-[#005c55] focus:outline-none focus:ring-2 focus:ring-[#80d5cb]/30"
+      >
         {options.length > 0 ? (
           options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -791,7 +860,7 @@ function SummaryCard({ stat, text }: SummaryCardProps) {
 function CashFlowBar({ bar }: { bar: ReportsCashFlowBar }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2">
-      <div className="flex h-full min-h-44 w-full items-end justify-center">
+      <div className="flex flex-1 w-full items-end justify-center">
         <div
           className={`w-8 rounded-t-sm ${toneBarClass(bar.tone)}`}
           style={{ height: `${Math.max(8, Math.min(100, bar.percent))}%` }}
@@ -875,8 +944,212 @@ function toneAmountClass(tone: ReportTone) {
 function ReportsPageContainer() {
   const language = useSelector(selectLanguage)
   const navigate = useNavigate()
-  const fallbackData = useReportsPageData()
+  const isAr = language === 'ar'
+  const authUser = useSelector((state: any) => state.auth.user)
+
+  const now = new Date()
   const [reportMode, setReportMode] = useState<'monthly' | 'annual'>('monthly')
+  const [filterMonth, setFilterMonth] = useState(String(now.getMonth() + 1))
+  const [filterYear, setFilterYear] = useState(String(now.getFullYear()))
+  const [filterAccount, setFilterAccount] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+
+  const [accounts, setAccounts] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
+  const [generatedReport, setGeneratedReport] = useState<ReportsDocument | null>(null)
+  const [historyItems, setHistoryItems] = useState<ReportsHistoryItem[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchDropdowns = useCallback(async () => {
+    try {
+      setLoading(true)
+      const [accountsRes, categoriesRes] = await Promise.all([
+        api.get('/accounts'),
+        api.get('/categories'),
+      ])
+      setAccounts(accountsRes.data.accounts || [])
+      setCategories(categoriesRes.data.categories || [])
+    } catch (err) {
+      console.error('Failed to load report filters:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      const res = await api.get('/reports/history')
+      const reports = res.data.reports || []
+      setHistoryItems(reports.map((h: any) => ({
+        id: h.id,
+        title: h.reportType === 'monthly'
+          ? (isAr ? 'تقرير شهري' : 'Monthly Report')
+          : (isAr ? 'تقرير سنوي' : 'Annual Report'),
+        subtitle: h.period,
+        icon: h.reportType === 'annual' ? 'pie' as const : 'chart' as const,
+      })))
+    } catch (err) {
+      console.error('Failed to load report history:', err)
+    }
+  }, [isAr])
+
+  useEffect(() => {
+    fetchDropdowns()
+    fetchHistory()
+  }, [fetchDropdowns, fetchHistory])
+
+  const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+  const months = isAr ? MONTHS_AR : MONTHS_EN
+
+  const currentYear = now.getFullYear()
+
+  const monthOptions: ReportsFilterOption[] = months.map((name, i) => ({
+    value: String(i + 1),
+    label: name,
+  }))
+
+  const yearOptions: ReportsFilterOption[] = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map((y) => ({
+    value: String(y),
+    label: String(y),
+  }))
+
+  const accountOptions: ReportsFilterOption[] = [
+    { value: '', label: isAr ? 'كل الحسابات' : 'All Accounts' },
+    ...accounts.map((a: any) => ({ value: a.id, label: a.accountName })),
+  ]
+
+  const categoryOptions: ReportsFilterOption[] = [
+    { value: '', label: isAr ? 'كل الفئات' : 'All Categories' },
+    ...categories.map((c: any) => ({ value: c.id, label: isAr ? c.nameAr : c.nameEn })),
+  ]
+
+  const buildRequestBody = useCallback(() => {
+    const body: Record<string, any> = {
+      reportType: reportMode,
+      year: parseInt(filterYear, 10),
+    }
+    if (reportMode === 'monthly') {
+      body.month = parseInt(filterMonth, 10)
+    }
+    if (filterAccount) body.accountId = filterAccount
+    if (filterCategory) body.categoryId = filterCategory
+    return body
+  }, [reportMode, filterMonth, filterYear, filterAccount, filterCategory])
+
+  const computeCashFlowBars = (transactions: any[]): ReportsCashFlowBar[] => {
+    if (!transactions || transactions.length === 0) return []
+
+    const groups: Record<string, { income: number; expense: number }> = {}
+    transactions.forEach((tx: any) => {
+      if (tx.type !== 'income' && tx.type !== 'expense') return
+      const d = new Date(tx.transactionDate)
+      let key: string
+      if (reportMode === 'annual') {
+        key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      } else {
+        const weekOfMonth = Math.ceil(d.getDate() / 7)
+        key = `W${weekOfMonth}`
+      }
+      if (!groups[key]) groups[key] = { income: 0, expense: 0 }
+      if (tx.type === 'income') groups[key].income += parseFloat(tx.amount) || 0
+      else groups[key].expense += parseFloat(tx.amount) || 0
+    })
+
+    const keys = Object.keys(groups).sort()
+    const allValues: number[] = []
+    const bars: ReportsCashFlowBar[] = []
+
+    keys.forEach((key) => {
+      const { income, expense } = groups[key]
+      allValues.push(income, expense)
+      bars.push(
+        { id: `${key}-inc`, label: key, valueLabel: formatCurrency(income), percent: 0, tone: 'income' },
+        { id: `${key}-exp`, label: key, valueLabel: formatCurrency(expense), percent: 0, tone: 'expense' },
+      )
+    })
+
+    const maxVal = Math.max(...allValues, 1)
+    bars.forEach((bar) => {
+      const val = parseFloat(bar.valueLabel.replace(/[^0-9.\-]/g, ''))
+      bar.percent = Math.round((val / maxVal) * 100)
+    })
+
+    return bars
+  }
+
+  const handleGenerate = async () => {
+    setGenerating(true)
+    setError(null)
+    try {
+      const body = buildRequestBody()
+      const res = await api.post('/reports/generate', body)
+      const backendReport = res.data.report
+
+      const totals = backendReport.totals
+      const totalExpensesNum = parseFloat(totals.totalExpenses) || 0
+      const bars = computeCashFlowBars(backendReport.transactions || [])
+
+      const report: ReportsDocument = {
+        reportMode,
+        title: reportMode === 'monthly'
+          ? (isAr ? 'الملخص المالي الشهري' : 'Monthly Financial Summary')
+          : (isAr ? 'الملخص المالي السنوي' : 'Annual Financial Summary'),
+        periodLabel: reportMode === 'monthly'
+          ? `${months[(parseInt(filterMonth) || 1) - 1]} ${filterYear}`
+          : filterYear,
+        clientName: authUser?.name || '',
+        generatedAtLabel: formatDateISO(new Date().toISOString()),
+        summaryStats: [
+          { id: 'income', label: isAr ? 'إجمالي الدخل' : 'Total Income', valueLabel: formatCurrency(totals.totalIncome), tone: 'income' },
+          { id: 'expenses', label: isAr ? 'إجمالي المصروفات' : 'Total Expenses', valueLabel: formatCurrency(totals.totalExpenses), tone: 'expense' },
+          { id: 'savings', label: isAr ? 'صافي الادخار' : 'Net Savings', valueLabel: formatCurrency(totals.netSavings), tone: 'primary' },
+          { id: 'rate', label: isAr ? 'معدل الادخار' : 'Savings Rate', valueLabel: `${totals.savingsRate}%`, tone: 'neutral' },
+        ],
+        cashFlowTitle: isAr ? 'اتجاه التدفق النقدي' : 'Cash Flow Trend',
+        cashFlowBars: bars,
+        expenseCategoriesTitle: isAr ? 'أعلى فئات المصروفات' : 'Top Expense Categories',
+        expenseCategories: (backendReport.topExpenseCategories || []).map((cat: any, i: number) => ({
+          id: String(i),
+          label: cat.category,
+          amountLabel: formatCurrency(cat.amount),
+          percentLabel: totalExpensesNum > 0 ? `${((parseFloat(cat.amount) / totalExpensesNum) * 100).toFixed(1)}%` : '0%',
+          tone: 'expense' as const,
+        })),
+        transactionsTitle: reportMode === 'monthly'
+          ? (isAr ? `معاملات ${months[(parseInt(filterMonth) || 1) - 1]} ${filterYear}` : `Transactions (${months[(parseInt(filterMonth) || 1) - 1]} ${filterYear})`)
+          : (isAr ? `معاملات ${filterYear}` : `Transactions (${filterYear})`),
+        transactions: (backendReport.transactions || []).map((tx: any) => ({
+          id: tx.id,
+          dateLabel: formatShortDate(tx.transactionDate),
+          description: tx.description || '',
+          categoryLabel: isAr ? (tx.category?.nameAr || '') : (tx.category?.nameEn || ''),
+          accountLabel: tx.account?.accountName || '',
+          amountLabel: `${tx.type === 'expense' ? '- ' : '+ '}${formatCurrency(tx.amount)}`,
+          tone: tx.type === 'income' ? 'income' as const : 'expense' as const,
+        })),
+        historyTitle: isAr ? 'التقارير المنشأة سابقًا' : 'Previously Generated Reports',
+        historyItems,
+      }
+
+      setGeneratedReport(report)
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || (isAr ? 'فشل إنشاء التقرير' : 'Failed to generate report')
+      setError(msg)
+      console.error('Report generation failed:', err)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleExportPdf = () => {
+    if (!generatedReport) return
+    navigate('/reports/preview', {
+      state: { report: generatedReport, requestBody: buildRequestBody() },
+    })
+  }
 
   const navItems: ReportsNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
@@ -887,14 +1160,43 @@ function ReportsPageContainer() {
     { id: 'settings', label: 'Settings', icon: 'settings', href: '/profile-settings' },
   ]
 
+  const pageData: ReportsPageData = {
+    navItems,
+    monthOptions,
+    yearOptions,
+    accountOptions,
+    categoryOptions,
+    report: generatedReport ?? undefined,
+  }
+
+  const isGenerateDisabled = generating || loading
+
   return (
     <ReportsPage
       language={language}
-      data={{ ...fallbackData, navItems }}
+      data={pageData}
       activeReportMode={reportMode}
-      onReportModeChange={setReportMode}
-      onGenerateReport={() => alert('Generate Report – backend not connected yet')}
-      onExportPdf={() => alert('Export PDF – backend not connected yet')}
+      isGenerateDisabled={isGenerateDisabled}
+      filterMonth={filterMonth}
+      filterYear={filterYear}
+      filterAccount={filterAccount}
+      filterCategory={filterCategory}
+      onReportModeChange={(mode) => {
+        setReportMode(mode)
+        setGeneratedReport(null)
+      }}
+      onFilterMonthChange={setFilterMonth}
+      onFilterYearChange={setFilterYear}
+      onFilterAccountChange={setFilterAccount}
+      onFilterCategoryChange={setFilterCategory}
+      onGenerateReport={handleGenerate}
+      onExportPdf={handleExportPdf}
+      onHistoryItemClick={(id) => {
+        const h = historyItems.find((item) => item.id === id)
+        if (h) {
+          navigate('/reports/preview', { state: { report: generatedReport } })
+        }
+      }}
       onNavItemClick={(id) => {
         const routes: Record<string, string> = {
           dashboard: '/dashboard', accounts: '/accounts', transactions: '/transactions',

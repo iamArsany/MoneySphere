@@ -1,18 +1,16 @@
 paths:
-  /budgets:
-    get:
-      summary: List budgets
-      operationId: get_budgets
+  /reports/generate:
     post:
-      summary: Create budget
-      operationId: post_budgets
-  /budgets/{id}:
-    patch:
-      summary: Update budget
-      operationId: patch_budgets_id
-    delete:
-      summary: Delete budget
-      operationId: delete_budgets_id
+      summary: Generate report (returns structured data)
+      operationId: post_reports_generate
+  /reports/export/pdf:
+    post:
+      summary: Generate and export PDF
+      operationId: post_reports_export_pdf
+  /reports/history:
+    get:
+      summary: List previously generated reports
+      operationId: get_reports_history
   /categories:
     get:
       summary: List all active categories
