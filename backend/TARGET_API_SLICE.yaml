@@ -1,15 +1,23 @@
 paths:
+  /budgets:
+    get:
+      summary: List budgets
+      operationId: get_budgets
+    post:
+      summary: Create budget
+      operationId: post_budgets
+  /budgets/{id}:
+    patch:
+      summary: Update budget
+      operationId: patch_budgets_id
+    delete:
+      summary: Delete budget
+      operationId: delete_budgets_id
+  /categories:
+    get:
+      summary: List all active categories
+      operationId: get_categories
   /accounts:
     get:
       summary: List all accounts
       operationId: get_accounts
-    post:
-      summary: Create account
-      operationId: post_accounts
-  /accounts/{id}:
-    delete:
-      summary: Delete or archive account
-      operationId: delete_accounts_id
-    patch:
-      summary: Update account metadata
-      operationId: patch_accounts_id

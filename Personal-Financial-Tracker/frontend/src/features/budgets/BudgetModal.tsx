@@ -115,7 +115,7 @@ interface FieldGroupProps {
 
 type BudgetModalTone = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'neutral'
 
-type BudgetModalIconName =
+export type BudgetModalIconName =
   | 'analytics'
   | 'dining'
   | 'education'

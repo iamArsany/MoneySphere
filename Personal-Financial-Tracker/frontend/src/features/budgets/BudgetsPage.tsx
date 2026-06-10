@@ -1,5 +1,7 @@
 import { useSelector } from 'react-redux'
 import { selectLanguage } from '../../store'
+import { api } from '../../services/api'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   BarChart3,
   Bell,
@@ -26,6 +28,12 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import BudgetModal, {
+  type BudgetModalValues,
+  type BudgetModalCategoryOption,
+  type BudgetModalOption,
+  type BudgetModalIconName,
+} from './BudgetModal'
 
 export type BudgetsLanguage = 'en' | 'ar'
 export type BudgetStatus = 'onTrack' | 'warning' | 'exceeded'
@@ -150,11 +158,13 @@ const AR_TEXT = {
   nextMonthAriaLabel: 'الشهر التالي',
 };
 
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+
 export function useBudgetsPageText() {
   const language = useSelector(selectLanguage);
   return language === 'ar' ? AR_TEXT : EN_TEXT;
 }
-
 
 const ICONS: Record<BudgetsIconName, LucideIcon> = {
   accounts: Building2,
@@ -185,6 +195,64 @@ const DEFAULT_DATA: BudgetsPageData = {
 
 export function useBudgetsPageData(): BudgetsPageData {
   return DEFAULT_DATA
+}
+
+function mapBudgetsIcon(catName: string, catIcon?: string | null): BudgetsIconName {
+  if (catIcon) {
+    const m: Record<string, BudgetsIconName> = {
+      restaurant: 'dining', dining: 'dining', food: 'dining',
+      car: 'transportation', transportation: 'transportation', directions_car: 'transportation',
+      home: 'home', house: 'home',
+      shopping_bag: 'shopping', bag: 'shopping', shopping: 'shopping', entertainment: 'shopping',
+      cart: 'groceries', shopping_cart: 'groceries', grocery: 'groceries', supermarket: 'groceries',
+      book: 'education', school: 'education', education: 'education',
+      fitness: 'fitness', gym: 'fitness', health: 'fitness', dumbbell: 'fitness', local_hospital: 'fitness',
+    }
+    const mapped = m[catIcon.toLowerCase()]
+    if (mapped) return mapped
+  }
+  if (!catName) return 'budgets'
+  const lower = catName.toLowerCase()
+  if (lower.includes('dining') || lower.includes('restaurant') || lower.includes('eat')) return 'dining'
+  if (lower.includes('transport') || lower.includes('car') || lower.includes('fuel') || lower.includes('gas') || lower.includes('travel')) return 'transportation'
+  if (lower.includes('shop') || lower.includes('entertain') || lower.includes('movie')) return 'shopping'
+  if (lower.includes('grocery') || lower.includes('supermarket')) return 'groceries'
+  if (lower.includes('home') || lower.includes('rent') || lower.includes('mortgage') || lower.includes('utility')) return 'home'
+  if (lower.includes('educat') || lower.includes('school') || lower.includes('course') || lower.includes('book')) return 'education'
+  if (lower.includes('fit') || lower.includes('gym') || lower.includes('health') || lower.includes('sport') || lower.includes('medical')) return 'fitness'
+  return 'budgets'
+}
+
+function mapModalIcon(catIcon?: string | null): BudgetModalIconName {
+  const m: Record<string, BudgetModalIconName> = {
+    restaurant: 'dining', dining: 'dining', food: 'dining',
+    car: 'transportation', transportation: 'transportation', directions_car: 'transportation',
+    home: 'home', house: 'home',
+    shopping_bag: 'shopping', bag: 'shopping', shopping: 'shopping', entertainment: 'shopping',
+    cart: 'groceries', shopping_cart: 'groceries', grocery: 'groceries', supermarket: 'groceries',
+    book: 'education', school: 'education', education: 'education',
+    fitness: 'fitness', gym: 'fitness', health: 'fitness', dumbbell: 'fitness', local_hospital: 'fitness',
+  }
+  if (catIcon) {
+    const mapped = m[catIcon.toLowerCase()]
+    if (mapped) return mapped
+  }
+  return 'analytics'
+}
+
+function parseDecimal(raw: string): string {
+  const cleaned = raw.replace(/[^0-9.\-]/g, '')
+  const n = parseFloat(cleaned)
+  if (!isFinite(n)) return '0.00'
+  return n.toFixed(2)
+}
+
+function formatCurrency(value: number, currency: string = 'USD'): string {
+  const formatted = value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  return `${currency} ${formatted}`
 }
 
 export function BudgetsPage({
@@ -663,10 +731,133 @@ function progressWidthClass(value: number) {
   return 'w-full'
 }
 
+function LoadingSpinner() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#f8f9ff]">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#005c55] border-t-transparent" />
+    </div>
+  )
+}
+
 function BudgetsPageContainer() {
   const language = useSelector(selectLanguage)
   const navigate = useNavigate()
-  const fallbackData = useBudgetsPageData()
+  const isAr = language === 'ar'
+
+  const now = new Date()
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth() + 1)
+  const [currentYear, setCurrentYear] = useState(now.getFullYear())
+
+  const [budgets, setBudgets] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [editBudgetId, setEditBudgetId] = useState<string | null>(null)
+  const [formValues, setFormValues] = useState<BudgetModalValues>({
+    categoryId: '',
+    month: String(currentMonth),
+    year: String(currentYear),
+    limit: '',
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const [budgetsRes, categoriesRes, accountsRes] = await Promise.all([
+        api.get('/budgets'),
+        api.get('/categories'),
+        api.get('/accounts'),
+      ])
+      setBudgets(budgetsRes.data.budgets || [])
+      setCategories(categoriesRes.data.categories || [])
+    } catch (err) {
+      console.error('Failed to fetch budget data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const categoryMap = useMemo(() => {
+    const map = new Map<string, any>()
+    categories.forEach((cat: any) => {
+      map.set(cat.id, cat)
+    })
+    return map
+  }, [categories])
+
+  const months = isAr ? MONTHS_AR : MONTHS_EN
+  const monthLabel = `${months[currentMonth - 1]} ${currentYear}`
+
+  const { budgetCards, totalBudget, totalSpent } = useMemo(() => {
+    let tb = 0
+    let ts = 0
+
+    const statusMap: Record<string, BudgetStatus> = {
+      'On Track': 'onTrack',
+      'Warning': 'warning',
+      'Exceeded': 'exceeded',
+    }
+
+    const cards: BudgetCardItem[] = budgets
+      .filter((b: any) => b.month === currentMonth && b.year === currentYear)
+      .map((b: any) => {
+        const category = b.category || categoryMap.get(b.categoryId)
+        const limit = parseFloat(b.amount) || 0
+        const spent = parseFloat(b.totalSpent) || 0
+        const pct = b.percentUsed !== undefined ? Math.round(b.percentUsed) : (limit > 0 ? Math.round((spent / limit) * 100) : 0)
+        tb += limit
+        ts += spent
+        const catName = isAr ? category?.nameAr : category?.nameEn
+
+        return {
+          id: b.id,
+          title: catName || 'Unknown',
+          periodLabel: monthLabel,
+          spentLabel: formatCurrency(spent),
+          limitLabel: formatCurrency(limit),
+          progressLabel: `${pct}%`,
+          progressValue: pct,
+          status: statusMap[b.status] || (pct >= 100 ? 'exceeded' : pct >= 80 ? 'warning' : 'onTrack'),
+          icon: mapBudgetsIcon(catName || '', category?.icon),
+        }
+      })
+
+    return { budgetCards: cards, totalBudget: tb, totalSpent: ts }
+  }, [budgets, categoryMap, currentMonth, currentYear, monthLabel, isAr])
+
+  const totalRemaining = totalBudget - totalSpent
+
+  const summaryItems: BudgetSummaryItem[] = [
+    {
+      id: 'total-budget',
+      label: isAr ? 'إجمالي الميزانية' : 'Total Budget',
+      value: formatCurrency(totalBudget),
+      icon: 'budgets',
+      tone: 'primary',
+    },
+    {
+      id: 'total-spent',
+      label: isAr ? 'إجمالي المنفق' : 'Total Spent',
+      value: formatCurrency(totalSpent),
+      icon: 'transactions',
+      tone: 'secondary',
+    },
+    {
+      id: 'total-remaining',
+      label: isAr ? 'المتبقي' : 'Total Remaining',
+      value: formatCurrency(totalRemaining),
+      icon: 'accounts',
+      tone: 'tertiary',
+    },
+  ]
 
   const navItems: BudgetsNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
@@ -677,14 +868,144 @@ function BudgetsPageContainer() {
     { id: 'settings', label: 'Settings', icon: 'settings', href: '/profile-settings' },
   ]
 
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12)
+      setCurrentYear((y) => y - 1)
+    } else {
+      setCurrentMonth((m) => m - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1)
+      setCurrentYear((y) => y + 1)
+    } else {
+      setCurrentMonth((m) => m + 1)
+    }
+  }
+
+  const openAddModal = () => {
+    setModalMode('add')
+    setEditBudgetId(null)
+    setFormValues({ categoryId: '', month: String(currentMonth), year: String(currentYear), limit: '' })
+    setSubmitError(null)
+    setModalOpen(true)
+  }
+
+  const openEditModal = (budgetId: string) => {
+    const b = budgets.find((x: any) => x.id === budgetId)
+    if (!b) return
+    setModalMode('edit')
+    setEditBudgetId(budgetId)
+    setFormValues({
+      categoryId: b.categoryId,
+      month: String(b.month),
+      year: String(b.year),
+      limit: b.amount,
+    })
+    setSubmitError(null)
+    setModalOpen(true)
+  }
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    if (!window.confirm(isAr ? 'هل أنت متأكد من حذف هذه الميزانية؟' : 'Are you sure you want to delete this budget?')) return
+    try {
+      await api.delete(`/budgets/${budgetId}`)
+      fetchData()
+    } catch (err) {
+      console.error('Failed to delete budget:', err)
+    }
+  }
+
+  const handleModalSubmit = async (vals: BudgetModalValues) => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    const amount = parseDecimal(vals.limit)
+
+    try {
+      if (modalMode === 'add') {
+        await api.post('/budgets', {
+          categoryId: vals.categoryId,
+          month: parseInt(vals.month, 10),
+          year: parseInt(vals.year, 10),
+          amount,
+        })
+      } else if (editBudgetId) {
+        await api.patch(`/budgets/${editBudgetId}`, {
+          categoryId: vals.categoryId,
+          month: parseInt(vals.month, 10),
+          year: parseInt(vals.year, 10),
+          amount,
+        })
+      }
+      setModalOpen(false)
+      fetchData()
+    } catch (err: any) {
+      const msg = err.response?.data?.error?.message || (isAr ? 'فشلت العملية' : 'Operation failed')
+      setSubmitError(msg)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const categoryOptions: BudgetModalCategoryOption[] = categories
+    .map((cat: any) => ({
+      value: cat.id,
+      label: isAr ? cat.nameAr : cat.nameEn,
+      icon: mapModalIcon(cat.icon),
+      tone: 'primary' as const,
+    }))
+
+  const monthOptions: BudgetModalOption[] = months.map((name, i) => ({
+    value: String(i + 1),
+    label: name,
+  }))
+
+  const yearOptions: BudgetModalOption[] = [currentYear - 1, currentYear, currentYear + 1].map((y) => ({
+    value: String(y),
+    label: String(y),
+  }))
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   return (
-    <BudgetsPage
-      language={language}
-      data={{ ...fallbackData, navItems, mobileNavItems: navItems }}
-      onAddBudget={() => alert('Add Budget – backend not connected yet')}
-      onAddTransaction={() => alert('Add Transaction – backend not connected yet')}
-      onLogout={() => navigate('/login')}
-    />
+    <>
+      <BudgetsPage
+        language={language}
+        data={{
+          user: undefined,
+          navItems,
+          mobileNavItems: navItems,
+          summaryItems,
+          budgets: budgetCards,
+          monthLabel,
+        }}
+        onAddBudget={openAddModal}
+        onPreviousMonth={handlePreviousMonth}
+        onNextMonth={handleNextMonth}
+        onEditBudget={openEditModal}
+        onDeleteBudget={handleDeleteBudget}
+        onLogout={() => navigate('/login')}
+      />
+
+      <BudgetModal
+        isOpen={modalOpen}
+        mode={modalMode}
+        values={formValues}
+        data={{ categoryOptions, monthOptions, yearOptions, currencyLabel: 'USD' }}
+        error={submitError ? { message: submitError } : undefined}
+        isSubmitting={isSubmitting}
+        onClose={() => setModalOpen(false)}
+        onCancel={() => setModalOpen(false)}
+        onValuesChange={setFormValues}
+        onSubmit={handleModalSubmit}
+      />
+    </>
   )
 }
 

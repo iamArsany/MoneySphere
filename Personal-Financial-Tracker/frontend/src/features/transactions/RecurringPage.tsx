@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { selectLanguage } from '../../store'
 import {
@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PauseCircle,
   Plus,
   Play,
   ReceiptText,
@@ -21,12 +22,18 @@ import {
   Trash2,
   UserCircle2,
   WalletCards,
+  ChevronDown,
+  X,
   type LucideIcon,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../services/api'
 
 export type RecurringLanguage = 'en' | 'ar'
 export type RecurringStatus = 'active' | 'paused' | 'completed'
+export type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly'
+export type RecurringTransactionType = 'income' | 'expense' | 'transfer' | 'initial_balance'
+
 export type RecurringIconName =
   | 'accounts'
   | 'analytics'
@@ -62,12 +69,14 @@ export interface RecurringNavItem {
 export interface RecurringFilterOption {
   value: string
   label: string
+  type?: 'income' | 'expense' | 'system'
 }
 
 export interface RecurringTemplateActionLabels {
   skip?: string
   edit?: string
   delete?: string
+  pause?: string
   resume?: string
   deleteHistory?: string
 }
@@ -90,6 +99,139 @@ export interface RecurringPageData {
   navItems: RecurringNavItem[]
   filters: RecurringFilterOption[]
   templates: RecurringTemplateRow[]
+}
+
+// ---------------------------------------------------------------------------
+// API shapes (backend contract)
+// ---------------------------------------------------------------------------
+
+interface ApiAccount {
+  id?: string | number
+  accountId?: string | number
+  account_id?: string | number
+  name?: string
+  accountName?: string
+  account_name?: string
+  title?: string
+}
+
+interface ApiCategory {
+  id: string
+  nameEn?: string
+  nameAr?: string
+  name?: string
+  type?: 'income' | 'expense' | 'system'
+}
+
+interface ApiRecurringTemplate {
+  id: string
+  userId?: string
+  accountId?: string | number
+  account?: string | { id?: string | number; name?: string; accountName?: string; account_name?: string }
+  type?: RecurringTransactionType
+  amount: string | number
+  categoryId?: string
+  category?: string | { id?: string; nameEn?: string; nameAr?: string; name?: string }
+  description?: string
+  frequency: RecurringFrequency
+  startDate: string
+  endDate?: string | null
+  nextRunDate: string
+  status: RecurringStatus
+  skippedDates?: string[]
+  createdAt?: string
+}
+
+// ---------------------------------------------------------------------------
+// Helpers – DECIMAL(18,2) safety
+// ---------------------------------------------------------------------------
+
+function parseDecimal(raw: string): string {
+  const cleaned = raw.replace(/[^0-9.\-]/g, '')
+  const n = parseFloat(cleaned)
+  if (!isFinite(n)) return '0.00'
+  return n.toFixed(2)
+}
+
+function formatAmount(raw: string | number | undefined): string {
+  if (raw === undefined || raw === null) return '$0.00'
+  const n = parseFloat(String(raw))
+  if (!isFinite(n)) return '$0.00'
+  return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return iso
+  }
+}
+
+function frequencyLabel(freq: RecurringFrequency): string {
+  const labels: Record<RecurringFrequency, string> = {
+    daily: 'Daily',
+    weekly: 'Weekly',
+    biweekly: 'Biweekly',
+    monthly: 'Monthly',
+    quarterly: 'Quarterly',
+    yearly: 'Yearly',
+  }
+  return labels[freq] ?? freq
+}
+
+function frequencyLabelAr(freq: RecurringFrequency): string {
+  const labels: Record<RecurringFrequency, string> = {
+    daily: 'يومي',
+    weekly: 'أسبوعي',
+    biweekly: 'كل أسبوعين',
+    monthly: 'شهري',
+    quarterly: 'ربع سنوي',
+    yearly: 'سنوي',
+  }
+  return labels[freq] ?? freq
+}
+
+function accountName(template: ApiRecurringTemplate): string {
+  const acc = typeof template.account === 'object' ? template.account : undefined
+  return acc?.name ?? acc?.accountName ?? acc?.account_name ?? String(template.accountId ?? '')
+}
+
+function isDateInPast(dateStr: string): boolean {
+  try {
+    const date = new Date(dateStr)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date < today
+  } catch {
+    return false
+  }
+}
+
+function mapApiRecurringTemplate(
+  t: ApiRecurringTemplate,
+  lang: RecurringLanguage,
+  accountFallback?: (id: string) => string,
+): RecurringTemplateRow {
+  const freq = frequencyLabel(t.frequency)
+  const freqLabel = lang === 'ar' ? frequencyLabelAr(t.frequency) : freq
+  const pastDue = t.status === 'active' && isDateInPast(t.nextRunDate)
+  const isCompleted = pastDue || t.status === 'completed'
+  const iconName: RecurringIconName = t.type === 'income' ? 'salary' : 'recurring'
+
+  return {
+    id: t.id,
+    title: t.description ?? `${freq} Transaction`,
+    accountLabel: accountName(t) || accountFallback?.(String(t.accountId)) || `Account ${t.accountId}`,
+    frequencyLabel: freqLabel,
+    nextLabel: isCompleted
+      ? `${lang === 'ar' ? 'انتهى' : 'Ended'}: ${formatDate(t.endDate ?? t.nextRunDate)}`
+      : `${lang === 'ar' ? 'التالي' : 'Next'}: ${formatDate(t.nextRunDate)}`,
+    amountLabel: formatAmount(t.amount),
+    status: isCompleted ? 'completed' : t.status,
+    icon: iconName,
+    completedAtLabel: isCompleted && t.endDate ? formatDate(t.endDate) : undefined,
+  }
 }
 
 export interface RecurringTextContent {
@@ -118,6 +260,7 @@ export interface RecurringTextContent {
   actionSkip: string
   actionEdit: string
   actionDelete: string
+  actionPause: string
   actionResume: string
   actionDeleteHistory: string
   tooltipSkipPrompt: string
@@ -139,6 +282,7 @@ export interface RecurringPageProps {
   onCreateTemplate?: () => void
   onFilterChange?: (value: string) => void
   onNavItemClick?: (itemId: string) => void
+  onPauseTemplate?: (templateId: string) => void
   onSkipTemplate?: (templateId: string) => void
   onEditTemplate?: (templateId: string) => void
   onDeleteTemplate?: (templateId: string) => void
@@ -173,6 +317,7 @@ interface TemplateListProps {
   templates: RecurringTemplateRow[]
   isCreateDisabled: boolean
   onCreateTemplate?: () => void
+  onPauseTemplate?: (templateId: string) => void
   onSkipTemplate?: (templateId: string) => void
   onEditTemplate?: (templateId: string) => void
   onDeleteTemplate?: (templateId: string) => void
@@ -183,6 +328,7 @@ interface TemplateListProps {
 interface TemplateCardProps {
   template: RecurringTemplateRow
   text: RecurringTextContent
+  onPauseTemplate?: (templateId: string) => void
   onSkipTemplate?: (templateId: string) => void
   onEditTemplate?: (templateId: string) => void
   onDeleteTemplate?: (templateId: string) => void
@@ -226,6 +372,7 @@ const TEXT: Record<RecurringLanguage, RecurringTextContent> = {
     actionSkip: 'Skip Next Occurrence',
     actionEdit: 'Edit',
     actionDelete: 'Delete',
+    actionPause: 'Pause',
     actionResume: 'Resume',
     actionDeleteHistory: 'Delete History',
     tooltipSkipPrompt: 'Skip the next occurrence?',
@@ -263,6 +410,7 @@ const TEXT: Record<RecurringLanguage, RecurringTextContent> = {
     actionSkip: 'تخطي التكرار التالي',
     actionEdit: 'تعديل',
     actionDelete: 'حذف',
+    actionPause: 'إيقاف',
     actionResume: 'استئناف',
     actionDeleteHistory: 'حذف السجل',
     tooltipSkipPrompt: 'هل تريد تخطي التكرار التالي؟',
@@ -318,6 +466,7 @@ export function RecurringPage({
   onCreateTemplate,
   onFilterChange,
   onNavItemClick: _onNavItemClick,
+  onPauseTemplate,
   onSkipTemplate,
   onEditTemplate,
   onDeleteTemplate,
@@ -369,6 +518,7 @@ export function RecurringPage({
           templates={pageData.templates}
           isCreateDisabled={isCreateDisabled}
           onCreateTemplate={onCreateTemplate}
+          onPauseTemplate={onPauseTemplate}
           onSkipTemplate={onSkipTemplate}
           onEditTemplate={onEditTemplate}
           onDeleteTemplate={onDeleteTemplate}
@@ -538,6 +688,7 @@ function TemplateList({
   templates,
   isCreateDisabled,
   onCreateTemplate,
+  onPauseTemplate,
   onSkipTemplate,
   onEditTemplate,
   onDeleteTemplate,
@@ -576,6 +727,7 @@ function TemplateList({
           key={template.id}
           template={template}
           text={text}
+          onPauseTemplate={onPauseTemplate}
           onSkipTemplate={onSkipTemplate}
           onEditTemplate={onEditTemplate}
           onDeleteTemplate={onDeleteTemplate}
@@ -590,6 +742,7 @@ function TemplateList({
 function TemplateCard({
   template,
   text,
+  onPauseTemplate,
   onSkipTemplate,
   onEditTemplate,
   onDeleteTemplate,
@@ -664,42 +817,50 @@ function TemplateCard({
 
           <div className="relative flex items-center gap-1 opacity-100 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
             {status === 'active' ? (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowTooltip((value) => !value)}
-                  className="rounded-full p-2 text-[#3e4947] transition hover:bg-[#eff4ff] hover:text-[#855300]"
-                  aria-label={labels.skip ?? text.actionSkip}
-                >
-                  <SkipForward className="h-5 w-5" aria-hidden="true" />
-                </button>
+              <>
+                <ActionButton
+                  label={labels.pause ?? text.actionPause}
+                  icon={PauseCircle}
+                  tone="neutral"
+                  onClick={() => onPauseTemplate?.(template.id)}
+                />
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowTooltip((value) => !value)}
+                    className="rounded-full p-2 text-[#3e4947] transition hover:bg-[#eff4ff] hover:text-[#855300]"
+                    aria-label={labels.skip ?? text.actionSkip}
+                  >
+                    <SkipForward className="h-5 w-5" aria-hidden="true" />
+                  </button>
 
-                {showTooltip ? (
-                  <div className="absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-xl bg-[#213145] p-3 text-white shadow-xl">
-                    <p className="text-center text-sm">{text.tooltipSkipPrompt}</p>
-                    <div className="mt-3 flex justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowTooltip(false)}
-                        className="rounded-md bg-[#d3e4fe] px-3 py-1 text-xs font-semibold text-[#3e4947]"
-                      >
-                        {text.tooltipCancel}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowTooltip(false)
-                          onSkipTemplate?.(template.id)
-                        }}
-                        className="rounded-md bg-[#fea619] px-3 py-1 text-xs font-semibold text-[#684000]"
-                      >
-                        {text.tooltipConfirm}
-                      </button>
+                  {showTooltip ? (
+                    <div className="absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-xl bg-[#213145] p-3 text-white shadow-xl">
+                      <p className="text-center text-sm">{text.tooltipSkipPrompt}</p>
+                      <div className="mt-3 flex justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowTooltip(false)}
+                          className="rounded-md bg-[#d3e4fe] px-3 py-1 text-xs font-semibold text-[#3e4947]"
+                        >
+                          {text.tooltipCancel}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowTooltip(false)
+                            onSkipTemplate?.(template.id)
+                          }}
+                          className="rounded-md bg-[#fea619] px-3 py-1 text-xs font-semibold text-[#684000]"
+                        >
+                          {text.tooltipConfirm}
+                        </button>
+                      </div>
+                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#213145]" />
                     </div>
-                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#213145]" />
-                  </div>
-                ) : null}
-              </div>
+                  ) : null}
+                </div>
+              </>
             ) : status === 'paused' ? (
               <ActionButton
                 label={labels.resume ?? text.actionResume}
@@ -776,12 +937,397 @@ function MobilePreviewLabel({ text }: { text: RecurringTextContent }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// RecurringTemplateModal (Create / Edit)
+// ---------------------------------------------------------------------------
+
+interface RecurringFormState {
+  description: string
+  amount: string
+  type: RecurringTransactionType
+  frequency: RecurringFrequency
+  accountId: string
+  categoryId: string
+  startDate: string
+  endDate: string
+}
+
+const EMPTY_RECURRING_FORM: RecurringFormState = {
+  description: '',
+  amount: '',
+  type: 'expense',
+  frequency: 'monthly',
+  accountId: '',
+  categoryId: '',
+  startDate: new Date().toISOString().split('T')[0],
+  endDate: '',
+}
+
+interface RecurringTemplateModalProps {
+  mode: 'add' | 'edit'
+  initial?: Partial<RecurringFormState> & { id?: string }
+  accountOptions: RecurringFilterOption[]
+  categoryOptions: RecurringFilterOption[]
+  onClose: () => void
+  onSaved: () => void
+  language: RecurringLanguage
+}
+
+function RecurringTemplateModal({
+  mode,
+  initial,
+  accountOptions,
+  categoryOptions,
+  onClose,
+  onSaved,
+  language,
+}: RecurringTemplateModalProps) {
+  const pageText = useRecurringPageText(language)
+  const [form, setForm] = useState<RecurringFormState>({ ...EMPTY_RECURRING_FORM, ...initial })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const isRtl = language === 'ar'
+
+  const visibleCategoryOptions = categoryOptions.filter((cat) => {
+    if (form.type === 'transfer') return cat.type === 'system'
+    if (!cat.type) return true
+    return cat.type === form.type
+  })
+
+  const field = (key: keyof RecurringFormState) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => setForm((prev) => ({ ...prev, [key]: e.target.value }))
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const type = e.target.value as RecurringTransactionType
+    const defaultCategoryId = type === 'transfer' ? categoryOptions.find((c) => c.type === 'system')?.value ?? '' : ''
+    setForm((prev) => ({ ...prev, type, categoryId: defaultCategoryId }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    const decimalAmount = parseDecimal(form.amount)
+    if (decimalAmount === '0.00') {
+      setError('Please enter a valid amount.')
+      return
+    }
+    if (!form.accountId.trim()) {
+      setError('Please select an account.')
+      return
+    }
+    if (!form.categoryId.trim()) {
+      setError('Please select a category.')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const payload: Record<string, string> = {
+        accountId: form.accountId.trim(),
+        type: form.type,
+        categoryId: form.categoryId.trim(),
+        description: form.description.trim(),
+        amount: decimalAmount,
+        frequency: form.frequency,
+        startDate: form.startDate,
+      }
+      if (form.endDate.trim()) payload.endDate = form.endDate.trim()
+
+      if (mode === 'add') {
+        await api.post('/recurring', payload)
+      } else if (initial?.id) {
+        await api.patch(`/recurring/${initial.id}`, payload)
+      }
+      onSaved()
+      onClose()
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? err?.message ?? 'An error occurred.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inputCls =
+    'w-full rounded-lg border border-[#bdc9c6] bg-white px-3 py-2.5 text-sm text-[#0b1c30] outline-none transition focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55]'
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-10"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div dir={isRtl ? 'rtl' : 'ltr'} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#0b1c30]">
+            {mode === 'add' ? pageText.createTemplate : pageText.actionEdit}
+          </h2>
+          <button type="button" onClick={onClose} className="rounded p-1 text-[#3e4947] hover:bg-[#e5eeff]">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {mode === 'add' && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Account</span>
+              <div className="relative">
+                <select value={form.accountId} onChange={field('accountId')} required className={inputCls + ' appearance-none pr-8'}>
+                  <option value="">Select account</option>
+                  {accountOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+              </div>
+            </label>
+          )}
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Type</span>
+            <div className="relative">
+              <select value={form.type} onChange={handleTypeChange} required className={inputCls + ' appearance-none pr-8'}>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+                <option value="transfer">Transfer</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+            </div>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Frequency</span>
+            <div className="relative">
+              <select value={form.frequency} onChange={field('frequency')} required className={inputCls + ' appearance-none pr-8'}>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Biweekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+            </div>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Category</span>
+            <div className="relative">
+              <select value={form.categoryId} onChange={field('categoryId')} required className={inputCls + ' appearance-none pr-8'}>
+                <option value="">Select category</option>
+                {visibleCategoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+            </div>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Description</span>
+            <input type="text" value={form.description} onChange={field('description')} placeholder="e.g. Monthly subscription" required className={inputCls} />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Amount</span>
+            <input type="number" min="0.01" step="0.01" value={form.amount} onChange={field('amount')} placeholder="0.00" required className={inputCls} />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">Start Date</span>
+            <input type="date" value={form.startDate} onChange={field('startDate')} required className={inputCls} />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">End Date (optional)</span>
+            <input type="date" value={form.endDate} onChange={field('endDate')} className={inputCls} />
+          </label>
+
+          {error && (
+            <p className="rounded-lg bg-[#ffdad6] px-3 py-2 text-sm text-[#ba1a1a]">{error}</p>
+          )}
+
+          <div className="mt-2 flex gap-3">
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-[#bdc9c6] py-2.5 text-sm font-semibold text-[#3e4947] transition hover:bg-[#e5eeff]">
+              {pageText.tooltipCancel}
+            </button>
+            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-[#005c55] py-2.5 text-sm font-semibold text-white transition hover:bg-[#004943] disabled:opacity-60">
+              {saving ? '…' : (mode === 'add' ? pageText.createTemplate : pageText.actionEdit)}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main container – all data-fetching & state lives here
+// ---------------------------------------------------------------------------
+
 function RecurringPageContainer() {
   const language = useSelector(selectLanguage)
   const navigate = useNavigate()
-  const fallbackData = useRecurringPageData()
+  const pageText = useRecurringPageText(language)
 
-  const navItems = [
+  // --- fetch state ---
+  const [rawTemplates, setRawTemplates] = useState<RecurringTemplateRow[]>([])
+  const [accountOptions, setAccountOptions] = useState<RecurringFilterOption[]>([])
+  const [categoryOptions, setCategoryOptions] = useState<RecurringFilterOption[]>([])
+  const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  // --- filter state ---
+  const [activeFilter, setActiveFilter] = useState<string>('all')
+
+  // --- modals ---
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<(Partial<RecurringFormState> & { id: string }) | null>(null)
+
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const res = await api.get<{ data?: ApiAccount[]; accounts?: ApiAccount[] } | ApiAccount[]>('/accounts')
+      const body = res.data
+      const accounts = Array.isArray(body) ? body : body.data ?? body.accounts ?? []
+      setAccountOptions(
+        accounts
+          .map((account) => {
+            const value = String(account.id ?? account.accountId ?? account.account_id ?? '')
+            const label = account.name ?? account.accountName ?? account.account_name ?? account.title ?? (value ? `Account ${value}` : '')
+            return { value, label }
+          })
+          .filter((option) => option.value && option.label),
+      )
+    } catch {
+      setAccountOptions([])
+    }
+  }, [])
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await api.get<{ data?: ApiCategory[]; categories?: ApiCategory[] } | ApiCategory[]>('/categories')
+      const body = res.data
+      const cats = Array.isArray(body) ? body : body.categories ?? body.data ?? []
+      setCategoryOptions(
+        cats.map((cat) => ({
+          value: cat.id,
+          label: cat.nameEn ?? cat.name ?? cat.id,
+          type: cat.type,
+        })),
+      )
+    } catch {
+      setCategoryOptions([])
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAccounts()
+    fetchCategories()
+  }, [fetchAccounts, fetchCategories])
+
+  const fetchTemplates = useCallback(async () => {
+    setLoading(true)
+    setFetchError(null)
+    try {
+      const res = await api.get<{ data?: ApiRecurringTemplate[]; recurring?: ApiRecurringTemplate[] } | ApiRecurringTemplate[]>('/recurring')
+      const body = res.data
+      const raw = Array.isArray(body) ? body : body.data ?? body.recurring ?? []
+      setRawTemplates(raw.map((t) => mapApiRecurringTemplate(t, language)))
+    } catch {
+      setFetchError('Failed to load recurring transactions.')
+    } finally {
+      setLoading(false)
+    }
+  }, [language])
+
+  useEffect(() => {
+    fetchTemplates()
+  }, [fetchTemplates])
+
+  // ---------------------------------------------------------------------------
+  // Client-side filtering
+  // ---------------------------------------------------------------------------
+
+  const filteredTemplates = useMemo(() => {
+    if (activeFilter === 'all') return rawTemplates
+    return rawTemplates.filter((t) => t.status === activeFilter)
+  }, [rawTemplates, activeFilter])
+
+  // ---------------------------------------------------------------------------
+  // Filter helpers
+  // ---------------------------------------------------------------------------
+
+  const filterOptions: RecurringFilterOption[] = [
+    { value: 'all', label: pageText.filterAll },
+    { value: 'active', label: pageText.activeLabel },
+    { value: 'paused', label: pageText.pausedLabel },
+    { value: 'completed', label: pageText.completedLabel },
+  ]
+
+  // ---------------------------------------------------------------------------
+  // Action handlers
+  // ---------------------------------------------------------------------------
+
+  const handlePause = async (id: string) => {
+    try {
+      await api.patch(`/recurring/${id}`, { status: 'paused' })
+      await fetchTemplates()
+    } catch {
+      // silent
+    }
+  }
+
+  const handleSkip = async (id: string) => {
+    try {
+      await api.post(`/recurring/${id}/skip`)
+      await fetchTemplates()
+    } catch {
+      // silent
+    }
+  }
+
+  const handleResume = async (id: string) => {
+    try {
+      await api.patch(`/recurring/${id}`, { status: 'active' })
+      await fetchTemplates()
+    } catch {
+      // silent
+    }
+  }
+
+  const handleEdit = (id: string) => {
+    const template = rawTemplates.find((t) => t.id === id)
+    if (!template) return
+    setEditTarget({
+      id,
+      description: template.title,
+      amount: template.amountLabel.replace(/[^0-9.]/g, ''),
+      type: 'expense',
+      frequency: 'monthly',
+      accountId: '',
+      categoryId: '',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: '',
+    })
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/recurring/${id}`)
+      await fetchTemplates()
+    } catch {
+      // silent
+    }
+  }
+
+  const handleDeleteHistory = async (id: string) => {
+    await handleDelete(id)
+  }
+
+  const navItems: RecurringNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' as const, href: '/dashboard' },
     { id: 'accounts', label: 'Accounts', icon: 'accounts' as const, href: '/accounts' },
     { id: 'transactions', label: 'Transactions', icon: 'transactions' as const, href: '/transactions' },
@@ -791,13 +1337,73 @@ function RecurringPageContainer() {
     { id: 'settings', label: 'Settings', icon: 'settings' as const, href: '/profile-settings' },
   ]
 
+  const pageData: RecurringPageData = {
+    navItems,
+    filters: filterOptions,
+    templates: filteredTemplates,
+  }
+
   return (
-    <RecurringPage
-      language={language}
-      data={{ ...fallbackData, navItems }}
-      onCreateTemplate={() => alert('Create Template – backend not connected yet')}
-      onLogout={() => navigate('/login')}
-    />
+    <>
+      {/* ── Modals ── */}
+      {addModalOpen && (
+        <RecurringTemplateModal
+          mode="add"
+          accountOptions={accountOptions}
+          categoryOptions={categoryOptions}
+          onClose={() => setAddModalOpen(false)}
+          onSaved={fetchTemplates}
+          language={language}
+        />
+      )}
+      {editTarget && (
+        <RecurringTemplateModal
+          mode="edit"
+          initial={editTarget}
+          accountOptions={accountOptions}
+          categoryOptions={categoryOptions}
+          onClose={() => setEditTarget(null)}
+          onSaved={fetchTemplates}
+          language={language}
+        />
+      )}
+
+      {/* Loading / Error banners */}
+      {loading && (
+        <p className="mx-auto mt-6 max-w-7xl px-4 text-center text-sm text-[#3e4947] sm:px-6 lg:px-8">
+          {language === 'ar' ? 'جارٍ التحميل…' : 'Loading…'}
+        </p>
+      )}
+      {fetchError && !loading && (
+        <div className="mx-auto mt-6 flex max-w-7xl items-center justify-center gap-4 rounded-xl border border-[#ffdad6] bg-[#fff8f7] px-4 py-4 text-sm text-[#ba1a1a] sm:px-6 lg:px-8">
+          {fetchError}
+          <button
+            type="button"
+            onClick={fetchTemplates}
+            className="font-semibold underline"
+          >
+            {language === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      )}
+
+      {/* ── Page ── */}
+      <RecurringPage
+        language={language}
+        data={pageData}
+        activeFilter={activeFilter}
+        isCreateDisabled={loading}
+        onCreateTemplate={() => setAddModalOpen(true)}
+        onFilterChange={(value) => setActiveFilter(value)}
+        onPauseTemplate={handlePause}
+        onSkipTemplate={handleSkip}
+        onEditTemplate={handleEdit}
+        onDeleteTemplate={handleDelete}
+        onResumeTemplate={handleResume}
+        onDeleteHistory={handleDeleteHistory}
+        onLogout={() => navigate('/login')}
+      />
+    </>
   )
 }
 
