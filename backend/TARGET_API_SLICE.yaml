@@ -1,16 +1,15 @@
 paths:
-  /transactions:
+  /accounts:
     get:
-      summary: "List transactions (filterable, paginated)"
-      operationId: get_transactions
+      summary: List all accounts
+      operationId: get_accounts
     post:
-      summary: Create transaction
-      operationId: post_transactions
-  /transactions/{id}:
-    patch:
-      summary: Update transaction
-      operationId: patch_transactions_id
-  /transactions/bulk:
+      summary: Create account
+      operationId: post_accounts
+  /accounts/{id}:
     delete:
-      summary: Bulk delete (up to 50)
-      operationId: delete_transactions_bulk
+      summary: Delete or archive account
+      operationId: delete_accounts_id
+    patch:
+      summary: Update account metadata
+      operationId: patch_accounts_id

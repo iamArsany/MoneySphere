@@ -118,42 +118,69 @@ export interface TransactionsPageData {
 
 interface ApiTransaction {
   id: string | number
-  date: string
-  account_id: string | number
+  date?: string
+  transactionDate?: string
+  accountId?: string | number
+  account_id?: string | number
   account_name?: string
-  category: string
-  description: string
+  accountName?: string
+  account?: { id?: string | number; name?: string }
+  category?: string | { id?: string | number; name?: string; label?: string }
+  categoryName?: string
+  description?: string
   amount: string | number          // DECIMAL(18,2) arrives as string from most drivers
   running_balance?: string | number
-  type: TransactionType
+  runningBalance?: string | number
+  type?: TransactionType
+  transactionType?: TransactionType
   is_recurring?: boolean
+  isRecurring?: boolean
 }
 
 interface ApiTransactionsResponse {
-  data: ApiTransaction[]
+  data?: ApiTransaction[]
+  transactions?: ApiTransaction[]
   pagination?: {
-    page: number
-    total_pages: number
-    total: number
-    per_page: number
+    page?: number
+    total_pages?: number
+    totalPages?: number
+    total?: number
+    per_page?: number
+    perPage?: number
   }
 }
 
+interface ApiAccount {
+  id?: string | number
+  accountId?: string | number
+  name?: string
+  accountName?: string
+  type?: string
+}
+
+interface ApiListResponse<T> {
+  data?: T[]
+  accounts?: T[]
+  transactions?: T[]
+}
+
 interface CreateTransactionPayload {
-  account_id: string
+  accountId: string
+  toAccountId?: string
   type: TransactionType
   category: string
   description: string
   amount: string          // always sent as fixed-decimal string
-  date: string            // ISO date string
+  transactionDate: string            // ISO date string
 }
 
 interface UpdateTransactionPayload {
+  toAccountId?: string
   type?: TransactionType
   category?: string
   description?: string
   amount?: string
-  date?: string
+  transactionDate?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -197,37 +224,52 @@ function formatDate(iso: string): string {
   }
 }
 
+function listFromResponse<T>(body: T[] | ApiListResponse<T>): T[] {
+  if (Array.isArray(body)) return body
+  return body.data ?? body.transactions ?? body.accounts ?? []
+}
+
+function categoryLabel(category: ApiTransaction['category'], fallback?: string): string {
+  if (typeof category === 'string') return category
+  return category?.name ?? category?.label ?? fallback ?? 'Uncategorized'
+}
+
 // ---------------------------------------------------------------------------
 // Map backend transaction → UI row
 // ---------------------------------------------------------------------------
 
 const CATEGORY_META: Record<string, { icon: TransactionsIconName; tone: TransactionCategory['tone'] }> = {
-  salary:      { icon: 'salary',    tone: 'income'   },
-  income:      { icon: 'salary',    tone: 'income'   },
-  groceries:   { icon: 'groceries', tone: 'expense'  },
-  dining:      { icon: 'dining',    tone: 'expense'  },
-  food:        { icon: 'dining',    tone: 'expense'  },
-  home:        { icon: 'home',      tone: 'expense'  },
-  recurring:   { icon: 'recurring', tone: 'primary'  },
-  transfer:    { icon: 'recurring', tone: 'primary'  },
-  analytics:   { icon: 'analytics', tone: 'neutral'  },
+  salary: { icon: 'salary', tone: 'income' },
+  income: { icon: 'salary', tone: 'income' },
+  groceries: { icon: 'groceries', tone: 'expense' },
+  dining: { icon: 'dining', tone: 'expense' },
+  food: { icon: 'dining', tone: 'expense' },
+  home: { icon: 'home', tone: 'expense' },
+  recurring: { icon: 'recurring', tone: 'primary' },
+  transfer: { icon: 'recurring', tone: 'primary' },
+  analytics: { icon: 'analytics', tone: 'neutral' },
 }
 
 function mapApiTransaction(t: ApiTransaction): TransactionRow {
-  const catKey = (t.category ?? '').toLowerCase().trim()
+  const type = t.type ?? t.transactionType ?? 'expense'
+  const category = categoryLabel(t.category, t.categoryName)
+  const accountId = t.accountId ?? t.account_id ?? t.account?.id ?? ''
+  const accountName = t.accountName ?? t.account_name ?? t.account?.name
+  const date = t.transactionDate ?? t.date ?? ''
+  const catKey = category.toLowerCase().trim()
   const meta = CATEGORY_META[catKey] ?? { icon: 'transactions' as TransactionsIconName, tone: 'neutral' as const }
 
   return {
-    id:           String(t.id),
-    dateLabel:    formatDate(t.date),
-    accountLabel: t.account_name ?? `Acct ${t.account_id}`,
-    accountTone:  'primary',
-    category:     { label: t.category, icon: meta.icon, tone: meta.tone },
-    description:  t.description,
-    amountLabel:  formatAmount(t.amount, t.type),
-    balanceLabel: formatBalance(t.running_balance),
-    type:         t.type,
-    isRecurring:  t.is_recurring ?? false,
+    id: String(t.id),
+    dateLabel: date ? formatDate(date) : '—',
+    accountLabel: accountName ?? `Acct ${accountId}`,
+    accountTone: 'primary',
+    category: { label: category, icon: meta.icon, tone: meta.tone },
+    description: t.description ?? '',
+    amountLabel: formatAmount(t.amount, type),
+    balanceLabel: formatBalance(t.runningBalance ?? t.running_balance),
+    type,
+    isRecurring: t.isRecurring ?? t.is_recurring ?? false,
   }
 }
 
@@ -389,19 +431,19 @@ export function useTransactionsPageText() {
 }
 
 const ICONS: Record<TransactionsIconName, LucideIcon> = {
-  accounts:     Building2,
-  analytics:    BarChart3,
-  budgets:      WalletCards,
-  calendar:     CalendarDays,
-  dashboard:    LayoutDashboard,
-  dining:       Utensils,
-  groceries:    ShoppingCart,
-  home:         Home,
+  accounts: Building2,
+  analytics: BarChart3,
+  budgets: WalletCards,
+  calendar: CalendarDays,
+  dashboard: LayoutDashboard,
+  dining: Utensils,
+  groceries: ShoppingCart,
+  home: Home,
   notifications: Bell,
-  recurring:    Repeat,
-  reports:      FileText,
-  salary:       CircleDollarSign,
-  settings:     Settings,
+  recurring: Repeat,
+  reports: FileText,
+  salary: CircleDollarSign,
+  settings: Settings,
   transactions: ReceiptText,
 }
 
@@ -418,11 +460,11 @@ interface FilterState {
 }
 
 const EMPTY_FILTERS: FilterState = {
-  dateFrom:  '',
-  dateTo:    '',
+  dateFrom: '',
+  dateTo: '',
   accountId: '',
-  category:  '',
-  type:      '',
+  category: '',
+  type: '',
 }
 
 // ---------------------------------------------------------------------------
@@ -430,33 +472,58 @@ const EMPTY_FILTERS: FilterState = {
 // ---------------------------------------------------------------------------
 
 interface TransactionFormState {
-  date:        string
-  account_id:  string
-  type:        TransactionType
-  category:    string
+  date: string
+  accountId: string
+  toAccountId: string
+  type: TransactionType
+  category: string
   description: string
-  amount:      string
+  amount: string
 }
 
 const EMPTY_FORM: TransactionFormState = {
-  date:        new Date().toISOString().split('T')[0],
-  account_id:  '',
-  type:        'expense',
-  category:    '',
+  date: new Date().toISOString().split('T')[0],
+  accountId: '',
+  toAccountId: '',
+  type: 'expense',
+  category: '',
   description: '',
-  amount:      '',
+  amount: '',
+}
+
+const DEFAULT_CATEGORY_OPTIONS: TransactionsFilterOption[] = [
+  { value: 'salary', label: 'Salary' },
+  { value: 'income', label: 'Income' },
+  { value: 'groceries', label: 'Groceries' },
+  { value: 'dining', label: 'Dining' },
+  { value: 'food', label: 'Food' },
+  { value: 'home', label: 'Home' },
+  { value: 'transfer', label: 'Transfer' },
+]
+
+function mergeOptions(base: TransactionsFilterOption[], next: TransactionsFilterOption[]): TransactionsFilterOption[] {
+  const byValue = new Map<string, TransactionsFilterOption>()
+  for (const option of [...base, ...next]) {
+    if (!option.value) continue
+    byValue.set(option.value, option)
+  }
+  return Array.from(byValue.values()).sort((a, b) => a.label.localeCompare(b.label))
 }
 
 function TransactionModal({
   mode,
   initial,
+  accountOptions,
+  categoryOptions,
   onClose,
   onSaved,
 }: {
-  mode:     'add' | 'edit'
+  mode: 'add' | 'edit'
   initial?: Partial<TransactionFormState> & { id?: string }
-  onClose:  () => void
-  onSaved:  () => void
+  accountOptions: TransactionsFilterOption[]
+  categoryOptions: TransactionsFilterOption[]
+  onClose: () => void
+  onSaved: () => void
 }) {
   const TEXT_VAR = useTransactionsPageText()
   const [form, setForm] = useState<TransactionFormState>({ ...EMPTY_FORM, ...initial })
@@ -476,26 +543,36 @@ function TransactionModal({
       setError('Please enter a valid amount.')
       return
     }
+    if (form.type === 'transfer' && !form.toAccountId.trim()) {
+      setError('Please choose the destination account.')
+      return
+    }
+    if (form.type === 'transfer' && form.accountId.trim() === form.toAccountId.trim()) {
+      setError('Transfer accounts must be different.')
+      return
+    }
 
     setSaving(true)
     try {
       if (mode === 'add') {
         const payload: CreateTransactionPayload = {
-          account_id:  form.account_id.trim(),
-          type:        form.type,
-          category:    form.category.trim(),
+          accountId: form.accountId.trim(),
+          ...(form.type === 'transfer' ? { toAccountId: form.toAccountId.trim() } : {}),
+          type: form.type,
+          category: form.category.trim(),
           description: form.description.trim(),
-          amount:      decimalAmount,
-          date:        form.date,
+          amount: decimalAmount,
+          transactionDate: form.date,
         }
         await api.post('/transactions', payload)
       } else if (initial?.id) {
         const payload: UpdateTransactionPayload = {
-          type:        form.type,
-          category:    form.category.trim(),
+          ...(form.type === 'transfer' ? { toAccountId: form.toAccountId.trim() } : {}),
+          type: form.type,
+          category: form.category.trim(),
           description: form.description.trim(),
-          amount:      decimalAmount,
-          date:        form.date,
+          amount: decimalAmount,
+          transactionDate: form.date,
         }
         await api.patch(`/transactions/${initial.id}`, payload)
       }
@@ -539,14 +616,28 @@ function TransactionModal({
           {mode === 'add' && (
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.fieldAccount}</span>
-              <input
-                type="text"
-                value={form.account_id}
-                onChange={field('account_id')}
-                placeholder="e.g. 1"
-                required
-                className={inputCls}
-              />
+              {accountOptions.length > 0 ? (
+                <div className="relative">
+                  <select value={form.accountId} onChange={field('accountId')} required className={inputCls + ' appearance-none pr-8'}>
+                    <option value="">Select account</option>
+                    {accountOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={form.accountId}
+                  onChange={field('accountId')}
+                  placeholder="e.g. 1"
+                  required
+                  className={inputCls}
+                />
+              )}
             </label>
           )}
 
@@ -554,7 +645,20 @@ function TransactionModal({
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.fieldType}</span>
             <div className="relative">
-              <select value={form.type} onChange={field('type')} required className={inputCls + ' appearance-none pr-8'}>
+              <select
+                value={form.type}
+                onChange={(e) => {
+                  const type = e.target.value as TransactionType
+                  setForm((prev) => ({
+                    ...prev,
+                    type,
+                    toAccountId: '',
+                    category: type === 'transfer' && !prev.category ? 'transfer' : prev.category,
+                  }))
+                }}
+                required
+                className={inputCls + ' appearance-none pr-8'}
+              >
                 <option value="income">Income</option>
                 <option value="expense">Expense</option>
                 <option value="transfer">Transfer</option>
@@ -563,17 +667,55 @@ function TransactionModal({
             </div>
           </label>
 
+          {form.type === 'transfer' && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">To Account</span>
+              {accountOptions.length > 0 ? (
+                <div className="relative">
+                  <select value={form.toAccountId} onChange={field('toAccountId')} required className={inputCls + ' appearance-none pr-8'}>
+                    <option value="">Select destination account</option>
+                    {accountOptions
+                      .filter((option) => option.value !== form.accountId)
+                      .map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={form.toAccountId}
+                  onChange={field('toAccountId')}
+                  placeholder="e.g. 2"
+                  required
+                  className={inputCls}
+                />
+              )}
+            </label>
+          )}
+
           {/* Category */}
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.fieldCategory}</span>
-            <input
-              type="text"
-              value={form.category}
-              onChange={field('category')}
-              placeholder="e.g. Groceries"
-              required
-              className={inputCls}
-            />
+            <div className="relative">
+              <select
+                value={form.category}
+                onChange={field('category')}
+                required
+                className={inputCls + ' appearance-none pr-8'}
+              >
+                <option value="">Select category</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+            </div>
           </label>
 
           {/* Description */}
@@ -638,19 +780,21 @@ const PAGE_SIZE = 20
 
 function TransactionsPageContainer() {
   const language = useSelector(selectLanguage)
-  const navigate = useNavigate()
+  void useNavigate() // keep router context; navigate reserved for future logout redirect
   const TEXT_VAR = useTransactionsPageText()
 
   // --- fetch state ---
   const [transactions, setTransactions] = useState<TransactionRow[]>([])
+  const [accountOptions, setAccountOptions] = useState<TransactionsFilterOption[]>([])
+  const [categoryOptions, setCategoryOptions] = useState<TransactionsFilterOption[]>(DEFAULT_CATEGORY_OPTIONS)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages]     = useState(1)
-  const [totalCount, setTotalCount]     = useState(0)
-  const [loading, setLoading]           = useState(false)
-  const [fetchError, setFetchError]     = useState<string | null>(null)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   // --- filter state ---
-  const [filters, setFilters]     = useState<FilterState>(EMPTY_FILTERS)
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [pendingFilters, setPendingFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [areFiltersOpen, setAreFiltersOpen] = useState(false)
 
@@ -661,12 +805,12 @@ function TransactionsPageContainer() {
   const [viewMode, setViewMode] = useState<TransactionsViewMode>('list')
 
   // --- modals ---
-  const [addModalOpen, setAddModalOpen]   = useState(false)
-  const [editTarget, setEditTarget]       = useState<(TransactionFormState & { id: string }) | null>(null)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<(TransactionFormState & { id: string }) | null>(null)
 
   // --- row action menu ---
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLTableDataCellElement>(null)
 
   // Close row-action menu when clicking outside
   useEffect(() => {
@@ -679,6 +823,28 @@ function TransactionsPageContainer() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const res = await api.get<ApiListResponse<ApiAccount> | ApiAccount[]>('/accounts')
+      const accounts = listFromResponse(res.data)
+      setAccountOptions(
+        accounts
+          .map((account) => {
+            const value = String(account.id ?? account.accountId ?? '')
+            const label = account.name ?? account.accountName ?? (value ? `Account ${value}` : '')
+            return { value, label }
+          })
+          .filter((option) => option.value && option.label),
+      )
+    } catch {
+      setAccountOptions([])
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAccounts()
+  }, [fetchAccounts])
+
   // ---------------------------------------------------------------------------
   // Fetch transactions
   // ---------------------------------------------------------------------------
@@ -688,23 +854,33 @@ function TransactionsPageContainer() {
     setFetchError(null)
     try {
       const params: Record<string, string | number> = { page, per_page: PAGE_SIZE }
-      if (applied.dateFrom)  params.date_from  = applied.dateFrom
-      if (applied.dateTo)    params.date_to    = applied.dateTo
-      if (applied.accountId) params.account_id = applied.accountId
-      if (applied.category)  params.category   = applied.category
-      if (applied.type)      params.type       = applied.type
+      if (applied.dateFrom) params.date_from = applied.dateFrom
+      if (applied.dateTo) params.date_to = applied.dateTo
+      if (applied.accountId) params.accountId = applied.accountId
+      if (applied.category) params.category = applied.category
+      if (applied.type) params.type = applied.type
 
-      const res = await api.get<ApiTransactionsResponse>('/transactions', { params })
+      const res = await api.get<ApiTransactionsResponse | ApiTransaction[]>('/transactions', { params })
       const body = res.data
+      const rawTransactions = listFromResponse(body)
 
-      setTransactions((body.data ?? []).map(mapApiTransaction))
+      setTransactions(rawTransactions.map(mapApiTransaction))
+      setCategoryOptions((current) =>
+        mergeOptions(
+          current,
+          rawTransactions.map((transaction) => {
+            const label = categoryLabel(transaction.category, transaction.categoryName)
+            return { value: label.toLowerCase(), label }
+          }),
+        ),
+      )
 
-      if (body.pagination) {
-        setTotalPages(body.pagination.total_pages ?? 1)
+      if (!Array.isArray(body) && body.pagination) {
+        setTotalPages(body.pagination.totalPages ?? body.pagination.total_pages ?? 1)
         setTotalCount(body.pagination.total ?? 0)
       } else {
         setTotalPages(1)
-        setTotalCount((body.data ?? []).length)
+        setTotalCount(rawTransactions.length)
       }
     } catch {
       setFetchError(TEXT_VAR.errorLoading)
@@ -732,11 +908,11 @@ function TransactionsPageContainer() {
     totalPages,
     summaryLabel: `${Math.min((currentPage - 1) * PAGE_SIZE + 1, totalCount)}–${Math.min(currentPage * PAGE_SIZE, totalCount)} of ${totalCount}`,
     canGoPrevious: currentPage > 1,
-    canGoNext:     currentPage < totalPages,
-    pages:         buildPages(currentPage, totalPages),
-    onPageChange:  handlePageChange,
-    onPrevious:    () => handlePageChange(currentPage - 1),
-    onNext:        () => handlePageChange(currentPage + 1),
+    canGoNext: currentPage < totalPages,
+    pages: buildPages(currentPage, totalPages),
+    onPageChange: handlePageChange,
+    onPrevious: () => handlePageChange(currentPage - 1),
+    onNext: () => handlePageChange(currentPage + 1),
   }
 
   // ---------------------------------------------------------------------------
@@ -833,13 +1009,14 @@ function TransactionsPageContainer() {
   const handleOpenEdit = (row: TransactionRow) => {
     // Reconstruct a form-compatible shape from the display row
     setEditTarget({
-      id:          row.id,
-      date:        new Date().toISOString().split('T')[0], // server's running_balance doesn't expose original ISO; we leave blank
-      account_id:  '',
-      type:        row.type,
-      category:    row.category.label,
+      id: row.id,
+      date: new Date().toISOString().split('T')[0], // server's running_balance doesn't expose original ISO; we leave blank
+      accountId: '',
+      toAccountId: '',
+      type: row.type,
+      category: row.category.label.toLowerCase(),
       description: row.description,
-      amount:      parseDecimal(row.amountLabel.replace(/[^0-9.]/g, '')),
+      amount: parseDecimal(row.amountLabel.replace(/[^0-9.]/g, '')),
     })
     setOpenMenuId(null)
   }
@@ -849,13 +1026,13 @@ function TransactionsPageContainer() {
   // ---------------------------------------------------------------------------
 
   const navItems: TransactionsNavItem[] = [
-    { id: 'dashboard',    label: 'Dashboard',    icon: 'dashboard',    href: '/dashboard' },
-    { id: 'accounts',     label: 'Accounts',     icon: 'accounts',     href: '/accounts' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
+    { id: 'accounts', label: 'Accounts', icon: 'accounts', href: '/accounts' },
     { id: 'transactions', label: 'Transactions', icon: 'transactions', href: '/transactions', isActive: true },
-    { id: 'recurring',    label: 'Recurring',    icon: 'recurring',    href: '/transactions/recurring' },
-    { id: 'budgets',      label: 'Budgets',      icon: 'budgets',      href: '/budgets' },
-    { id: 'reports',      label: 'Reports',      icon: 'reports',      href: '/reports' },
-    { id: 'settings',     label: 'Settings',     icon: 'settings',     href: '/profile-settings' },
+    { id: 'recurring', label: 'Recurring', icon: 'recurring', href: '/transactions/recurring' },
+    { id: 'budgets', label: 'Budgets', icon: 'budgets', href: '/budgets' },
+    { id: 'reports', label: 'Reports', icon: 'reports', href: '/reports' },
+    { id: 'settings', label: 'Settings', icon: 'settings', href: '/profile-settings' },
   ]
 
   // ---------------------------------------------------------------------------
@@ -868,6 +1045,8 @@ function TransactionsPageContainer() {
       {addModalOpen && (
         <TransactionModal
           mode="add"
+          accountOptions={accountOptions}
+          categoryOptions={categoryOptions}
           onClose={() => setAddModalOpen(false)}
           onSaved={() => fetchTransactions(currentPage, filters)}
         />
@@ -876,6 +1055,8 @@ function TransactionsPageContainer() {
         <TransactionModal
           mode="edit"
           initial={editTarget}
+          accountOptions={accountOptions}
+          categoryOptions={categoryOptions}
           onClose={() => setEditTarget(null)}
           onSaved={() => fetchTransactions(currentPage, filters)}
         />
@@ -905,9 +1086,8 @@ function TransactionsPageContainer() {
                   key={mode}
                   type="button"
                   onClick={() => setViewMode(mode)}
-                  className={`rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition ${
-                    viewMode === mode ? 'bg-white text-[#0b1c30] shadow-sm' : 'text-[#3e4947] hover:text-[#0b1c30]'
-                  }`}
+                  className={`rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wide transition ${viewMode === mode ? 'bg-white text-[#0b1c30] shadow-sm' : 'text-[#3e4947] hover:text-[#0b1c30]'
+                    }`}
                 >
                   {mode === 'list' ? TEXT_VAR.listView : TEXT_VAR.calendarView}
                 </button>
@@ -944,7 +1124,7 @@ function TransactionsPageContainer() {
           </button>
 
           {areFiltersOpen && (
-            <div className="grid grid-cols-1 gap-4 border-t border-[#bdc9c6] pt-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 border-t border-[#bdc9c6] pt-4 md:grid-cols-2 xl:grid-cols-5">
               {/* Date from */}
               <label className="flex flex-col gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.dateRangeLabel} (From)</span>
@@ -973,16 +1153,44 @@ function TransactionsPageContainer() {
                 </div>
               </label>
 
+              {/* Account */}
+              <label className="flex flex-col gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.accountLabel}</span>
+                <div className="relative">
+                  <select
+                    value={pendingFilters.accountId}
+                    onChange={(e) => setPendingFilters((f) => ({ ...f, accountId: e.target.value }))}
+                    className="w-full appearance-none rounded-lg border border-[#bdc9c6] bg-white px-3 py-3 pr-8 text-sm text-[#0b1c30] outline-none transition focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55]"
+                  >
+                    <option value="">{TEXT_VAR.allAccounts}</option>
+                    {accountOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+                </div>
+              </label>
+
               {/* Category */}
               <label className="flex flex-col gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.categoryLabel}</span>
-                <input
-                  type="text"
-                  value={pendingFilters.category}
-                  onChange={(e) => setPendingFilters((f) => ({ ...f, category: e.target.value }))}
-                  placeholder={TEXT_VAR.allCategories}
-                  className="w-full rounded-lg border border-[#bdc9c6] bg-white px-3 py-3 text-sm text-[#0b1c30] outline-none transition focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55]"
-                />
+                <div className="relative">
+                  <select
+                    value={pendingFilters.category}
+                    onChange={(e) => setPendingFilters((f) => ({ ...f, category: e.target.value }))}
+                    className="w-full appearance-none rounded-lg border border-[#bdc9c6] bg-white px-3 py-3 pr-8 text-sm text-[#0b1c30] outline-none transition focus:border-[#005c55] focus:ring-1 focus:ring-[#005c55]"
+                  >
+                    <option value="">{TEXT_VAR.allCategories}</option>
+                    {categoryOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3e4947]" />
+                </div>
               </label>
 
               {/* Type – income/expense only; transfer excluded from aggregates */}
@@ -990,19 +1198,18 @@ function TransactionsPageContainer() {
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#3e4947]">{TEXT_VAR.typeLabel}</span>
                 <div className="flex h-11 rounded-lg bg-[#e5eeff] p-1">
                   {([
-                    { value: '',        label: TEXT_VAR.allType      },
-                    { value: 'income',  label: TEXT_VAR.incomeType   },
-                    { value: 'expense', label: TEXT_VAR.expenseType  },
+                    { value: '', label: TEXT_VAR.allType },
+                    { value: 'income', label: TEXT_VAR.incomeType },
+                    { value: 'expense', label: TEXT_VAR.expenseType },
                   ] as { value: '' | TransactionType; label: string }[]).map(({ value, label }) => (
                     <button
                       key={value || 'all'}
                       type="button"
                       onClick={() => setPendingFilters((f) => ({ ...f, type: value }))}
-                      className={`flex-1 rounded-md text-xs font-semibold uppercase tracking-wide transition ${
-                        pendingFilters.type === value
-                          ? 'bg-white text-[#0b1c30] shadow-sm'
-                          : 'text-[#3e4947] hover:text-[#0b1c30]'
-                      }`}
+                      className={`flex-1 rounded-md text-xs font-semibold uppercase tracking-wide transition ${pendingFilters.type === value
+                        ? 'bg-white text-[#0b1c30] shadow-sm'
+                        : 'text-[#3e4947] hover:text-[#0b1c30]'
+                        }`}
                     >
                       {label}
                     </button>
@@ -1118,11 +1325,10 @@ function TransactionsPageContainer() {
                         <td className="whitespace-nowrap p-4">{row.dateLabel}</td>
                         <td className="p-4">
                           <span
-                            className={`inline-flex items-center rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-                              row.accountTone === 'primary'
-                                ? 'bg-[#0f766e]/20 text-[#005c55]'
-                                : 'bg-[#fea619]/20 text-[#855300]'
-                            }`}
+                            className={`inline-flex items-center rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${row.accountTone === 'primary'
+                              ? 'bg-[#0f766e]/20 text-[#005c55]'
+                              : 'bg-[#fea619]/20 text-[#855300]'
+                              }`}
                           >
                             {row.accountLabel}
                           </span>
@@ -1130,15 +1336,14 @@ function TransactionsPageContainer() {
                         <td className="p-4">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`flex h-6 w-6 items-center justify-center rounded-full ${
-                                row.category.tone === 'income'
-                                  ? 'bg-[#007952]/20 text-[#005e3f]'
-                                  : row.category.tone === 'primary'
+                              className={`flex h-6 w-6 items-center justify-center rounded-full ${row.category.tone === 'income'
+                                ? 'bg-[#007952]/20 text-[#005e3f]'
+                                : row.category.tone === 'primary'
                                   ? 'bg-[#0f766e]/20 text-[#005c55]'
                                   : row.category.tone === 'expense'
-                                  ? 'bg-[#ffdad6] text-[#ba1a1a]'
-                                  : 'bg-[#e5eeff] text-[#3e4947]'
-                              }`}
+                                    ? 'bg-[#ffdad6] text-[#ba1a1a]'
+                                    : 'bg-[#e5eeff] text-[#3e4947]'
+                                }`}
                             >
                               {(() => { const Icon = ICONS[row.category.icon]; return <Icon className="h-3.5 w-3.5" aria-hidden="true" /> })()}
                             </span>
@@ -1154,9 +1359,8 @@ function TransactionsPageContainer() {
                           </span>
                         </td>
                         <td
-                          className={`p-4 text-right font-semibold ${
-                            row.type === 'income' ? 'text-[#005e3f]' : row.type === 'expense' ? 'text-[#ba1a1a]' : 'text-[#3e4947]'
-                          }`}
+                          className={`p-4 text-right font-semibold ${row.type === 'income' ? 'text-[#005e3f]' : row.type === 'expense' ? 'text-[#ba1a1a]' : 'text-[#3e4947]'
+                            }`}
                         >
                           {row.amountLabel}
                         </td>
@@ -1253,11 +1457,10 @@ function TransactionsPageContainer() {
                             key={page}
                             type="button"
                             onClick={() => pagination.onPageChange?.(page)}
-                            className={`flex h-8 w-8 items-center justify-center rounded transition ${
-                              page === pagination.currentPage
-                                ? 'bg-[#0f766e] font-semibold text-[#a3faef]'
-                                : 'text-[#0b1c30] hover:bg-[#e5eeff]'
-                            }`}
+                            className={`flex h-8 w-8 items-center justify-center rounded transition ${page === pagination.currentPage
+                              ? 'bg-[#0f766e] font-semibold text-[#a3faef]'
+                              : 'text-[#0b1c30] hover:bg-[#e5eeff]'
+                              }`}
                           >
                             {page}
                           </button>
@@ -1282,8 +1485,6 @@ function TransactionsPageContainer() {
         )}
       </div>
 
-      {/* Suppress unused-var warnings for navigate (used by logout) */}
-      <style>{`/* navigate=${navigate ? 'ok' : ''} */`}</style>
     </>
   )
 }

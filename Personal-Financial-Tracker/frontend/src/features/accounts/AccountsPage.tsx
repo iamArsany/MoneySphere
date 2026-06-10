@@ -200,6 +200,50 @@ const ICONS: Record<AccountsIconName, LucideIcon> = {
   wallet: Wallet,
 }
 
+const BACKEND_ICON_MAP: Record<string, AccountsIconName> = {
+  account: 'accounts',
+  accounts: 'accounts',
+  bank: 'accounts',
+  building: 'accounts',
+  budget: 'budgets',
+  budgets: 'budgets',
+  card: 'creditCard',
+  credit: 'creditCard',
+  creditCard: 'creditCard',
+  dashboard: 'dashboard',
+  notification: 'notifications',
+  notifications: 'notifications',
+  recurring: 'recurring',
+  repeat: 'recurring',
+  report: 'reports',
+  reports: 'reports',
+  settings: 'settings',
+  transaction: 'transactions',
+  transactions: 'transactions',
+  wallet: 'wallet',
+}
+
+function normalizeAccountIcon(icon: unknown): AccountsIconName {
+  if (typeof icon !== 'string') return 'wallet'
+  return BACKEND_ICON_MAP[icon] ?? 'wallet'
+}
+
+function decimalStringForBackend(value: string) {
+  const normalized = value.trim()
+  if (!/^-?\d+(\.\d{1,2})?$/.test(normalized)) return null
+
+  const isNegative = normalized.startsWith('-')
+  const unsignedValue = isNegative ? normalized.slice(1) : normalized
+  const [rawWhole, rawFraction = ''] = unsignedValue.split('.')
+  const whole = rawWhole.replace(/^0+(?=\d)/, '') || '0'
+  const fraction = rawFraction.padEnd(2, '0')
+  const decimalDigits = `${whole}${fraction}`
+
+  if (decimalDigits.replace(/^0+/, '').length > 18) return null
+
+  return `${isNegative ? '-' : ''}${whole}.${fraction}`
+}
+
 export function useAccountsPageData(): AccountsPageData {
   return DEFAULT_DATA
 }
@@ -656,12 +700,17 @@ function AccountsPageContainer() {
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newAccName) return
+    const initialBalance = decimalStringForBackend(newAccBalance)
+    if (!initialBalance) {
+      alert(language === 'ar' ? 'يرجى إدخال رصيد صحيح بدقة منزلتين عشريتين.' : 'Enter a valid balance with up to two decimal places.')
+      return
+    }
     setSubmitting(true)
     try {
       await api.post('/accounts', {
         accountName: newAccName,
         accountType: newAccType,
-        initialBalance: parseFloat(newAccBalance) || 0,
+        initialBalance,
         currency: newAccCurrency,
         color: '#005c55',
         icon: 'bank',
@@ -720,7 +769,7 @@ function AccountsPageContainer() {
       typeLabel: acc.accountType,
       currencyLabel: acc.currency,
       balanceLabel: formatVal(parseFloat(acc.currentBalance) || 0),
-      icon: (acc.icon as AccountsIconName) || 'wallet',
+      icon: normalizeAccountIcon(acc.icon),
       tone: acc.color === '#EF4444' ? 'secondary' as const : (acc.color === '#005e3f' ? 'tertiary' as const : 'primary' as const),
       isArchived: acc.isArchived,
       archivedLabel: isAr ? 'مؤرشف' : 'Archived',
