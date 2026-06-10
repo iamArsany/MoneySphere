@@ -57,6 +57,7 @@ export interface TransactionsNavItem {
 export interface TransactionsFilterOption {
   value: string
   label: string
+  type?: TransactionType | 'system'
 }
 
 export interface TransactionsActiveFilter {
@@ -122,11 +123,27 @@ interface ApiTransaction {
   transactionDate?: string
   accountId?: string | number
   account_id?: string | number
+  accountID?: string | number
   account_name?: string
   accountName?: string
-  account?: { id?: string | number; name?: string }
-  category?: string | { id?: string | number; name?: string; label?: string }
+  account?: string | { id?: string | number; accountId?: string | number; account_id?: string | number; name?: string; accountName?: string; account_name?: string; title?: string }
+  category?: string | null | {
+    id?: string | number
+    categoryId?: string | number
+    category_id?: string | number
+    name?: string
+    nameEn?: string
+    nameAr?: string
+    categoryName?: string
+    category_name?: string
+    label?: string
+    title?: string
+  }
+  categoryId?: string | number
+  category_id?: string | number
   categoryName?: string
+  category_name?: string
+  transactionCategory?: string
   description?: string
   amount: string | number          // DECIMAL(18,2) arrives as string from most drivers
   running_balance?: string | number
@@ -153,8 +170,11 @@ interface ApiTransactionsResponse {
 interface ApiAccount {
   id?: string | number
   accountId?: string | number
+  account_id?: string | number
   name?: string
   accountName?: string
+  account_name?: string
+  title?: string
   type?: string
 }
 
@@ -168,7 +188,7 @@ interface CreateTransactionPayload {
   accountId: string
   toAccountId?: string
   type: TransactionType
-  category: string
+  categoryId: string
   description: string
   amount: string          // always sent as fixed-decimal string
   transactionDate: string            // ISO date string
@@ -177,7 +197,7 @@ interface CreateTransactionPayload {
 interface UpdateTransactionPayload {
   toAccountId?: string
   type?: TransactionType
-  category?: string
+  categoryId?: string
   description?: string
   amount?: string
   transactionDate?: string
@@ -229,9 +249,26 @@ function listFromResponse<T>(body: T[] | ApiListResponse<T>): T[] {
   return body.data ?? body.transactions ?? body.accounts ?? []
 }
 
+function optionLabel(options: TransactionsFilterOption[], value: string): string | undefined {
+  return options.find((option) => option.value === value)?.label
+}
+
 function categoryLabel(category: ApiTransaction['category'], fallback?: string): string {
   if (typeof category === 'string') return category
-  return category?.name ?? category?.label ?? fallback ?? 'Uncategorized'
+  return category?.nameEn
+    ?? category?.nameAr
+    ?? category?.name
+    ?? category?.categoryName
+    ?? category?.category_name
+    ?? category?.label
+    ?? category?.title
+    ?? fallback
+    ?? ''
+}
+
+function categoryId(transaction: ApiTransaction): string {
+  const category = transaction.category && typeof transaction.category === 'object' ? transaction.category : undefined
+  return String(transaction.categoryId ?? transaction.category_id ?? category?.categoryId ?? category?.category_id ?? category?.id ?? '')
 }
 
 // ---------------------------------------------------------------------------
@@ -250,11 +287,31 @@ const CATEGORY_META: Record<string, { icon: TransactionsIconName; tone: Transact
   analytics: { icon: 'analytics', tone: 'neutral' },
 }
 
-function mapApiTransaction(t: ApiTransaction): TransactionRow {
+function mapApiTransaction(
+  t: ApiTransaction,
+  accountOptions: TransactionsFilterOption[] = [],
+  categoryOptions: TransactionsFilterOption[] = DEFAULT_CATEGORY_OPTIONS,
+): TransactionRow {
   const type = t.type ?? t.transactionType ?? 'expense'
-  const category = categoryLabel(t.category, t.categoryName)
-  const accountId = t.accountId ?? t.account_id ?? t.account?.id ?? ''
-  const accountName = t.accountName ?? t.account_name ?? t.account?.name
+  const categoryIdValue = categoryId(t)
+  const categoryValue = categoryLabel(t.category, t.categoryName ?? t.category_name ?? t.transactionCategory)
+  const category = optionLabel(categoryOptions, categoryIdValue)
+    || optionLabel(categoryOptions, categoryValue)
+    || categoryValue
+    || optionLabel(DEFAULT_CATEGORY_OPTIONS, categoryIdValue)
+    || categoryIdValue
+    || 'Uncategorized'
+  const nestedAccount = typeof t.account === 'object' ? t.account : undefined
+  const accountFromString = typeof t.account === 'string' ? t.account : undefined
+  const accountId = String(t.accountId ?? t.account_id ?? t.accountID ?? nestedAccount?.accountId ?? nestedAccount?.account_id ?? nestedAccount?.id ?? accountFromString ?? '')
+  const accountName = t.accountName
+    ?? t.account_name
+    ?? nestedAccount?.accountName
+    ?? nestedAccount?.account_name
+    ?? nestedAccount?.name
+    ?? nestedAccount?.title
+    ?? optionLabel(accountOptions, accountId)
+    ?? accountFromString
   const date = t.transactionDate ?? t.date ?? ''
   const catKey = category.toLowerCase().trim()
   const meta = CATEGORY_META[catKey] ?? { icon: 'transactions' as TransactionsIconName, tone: 'neutral' as const }
@@ -492,13 +549,19 @@ const EMPTY_FORM: TransactionFormState = {
 }
 
 const DEFAULT_CATEGORY_OPTIONS: TransactionsFilterOption[] = [
-  { value: 'salary', label: 'Salary' },
-  { value: 'income', label: 'Income' },
-  { value: 'groceries', label: 'Groceries' },
-  { value: 'dining', label: 'Dining' },
-  { value: 'food', label: 'Food' },
-  { value: 'home', label: 'Home' },
-  { value: 'transfer', label: 'Transfer' },
+  { value: '9d5b0be7-26c7-4b7e-b4f0-2c7eb41f7890', label: 'Food', type: 'expense' },
+  { value: 'df9a270f-8b68-450f-819a-d39066e19e6f', label: 'Transport', type: 'expense' },
+  { value: '82a5d218-9025-438d-a40a-aeccc2f398b2', label: 'Bills', type: 'expense' },
+  { value: 'f47bdf3d-d098-412d-883d-a1f9a61e297e', label: 'Entertainment', type: 'expense' },
+  { value: 'de7d4807-14c0-4fa7-8fb0-5cbc44d19cfd', label: 'Health', type: 'expense' },
+  { value: '5bf70799-2fe8-49c1-a2cd-57ba795f84fd', label: 'Education', type: 'expense' },
+  { value: '0627e31c-94ca-4ded-a59e-914969601ac7', label: 'Housing', type: 'expense' },
+  { value: '7c331152-ad82-4001-a638-768a9ca7ea51', label: 'Clothing', type: 'expense' },
+  { value: 'bc19855d-fad8-4461-97d9-531ce76f00d3', label: 'Salary', type: 'income' },
+  { value: '44eb73f1-2dc0-40f3-9cf3-68d3dd2c1808', label: 'Freelance', type: 'income' },
+  { value: 'cbf808c4-3ba6-4a51-8961-85a0961a04fb', label: 'Investment', type: 'income' },
+  { value: '8130c334-8473-4eef-b2af-adadce3e499e', label: 'Other Income', type: 'income' },
+  { value: '230e5693-9bd6-43d1-9ba3-a1e932eb22dd', label: 'Transfer', type: 'system' },
 ]
 
 function mergeOptions(base: TransactionsFilterOption[], next: TransactionsFilterOption[]): TransactionsFilterOption[] {
@@ -508,6 +571,14 @@ function mergeOptions(base: TransactionsFilterOption[], next: TransactionsFilter
     byValue.set(option.value, option)
   }
   return Array.from(byValue.values()).sort((a, b) => a.label.localeCompare(b.label))
+}
+
+function categoriesForType(options: TransactionsFilterOption[], type: TransactionType): TransactionsFilterOption[] {
+  return options.filter((option) => {
+    if (!option.type) return true
+    if (type === 'transfer') return option.type === 'system'
+    return option.type === type
+  })
 }
 
 function TransactionModal({
@@ -529,6 +600,7 @@ function TransactionModal({
   const [form, setForm] = useState<TransactionFormState>({ ...EMPTY_FORM, ...initial })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const visibleCategoryOptions = categoriesForType(categoryOptions, form.type)
 
   const field = (key: keyof TransactionFormState) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -559,7 +631,7 @@ function TransactionModal({
           accountId: form.accountId.trim(),
           ...(form.type === 'transfer' ? { toAccountId: form.toAccountId.trim() } : {}),
           type: form.type,
-          category: form.category.trim(),
+          categoryId: form.category.trim(),
           description: form.description.trim(),
           amount: decimalAmount,
           transactionDate: form.date,
@@ -569,7 +641,7 @@ function TransactionModal({
         const payload: UpdateTransactionPayload = {
           ...(form.type === 'transfer' ? { toAccountId: form.toAccountId.trim() } : {}),
           type: form.type,
-          category: form.category.trim(),
+          categoryId: form.category.trim(),
           description: form.description.trim(),
           amount: decimalAmount,
           transactionDate: form.date,
@@ -653,7 +725,7 @@ function TransactionModal({
                     ...prev,
                     type,
                     toAccountId: '',
-                    category: type === 'transfer' && !prev.category ? 'transfer' : prev.category,
+                    category: type === 'transfer' ? '230e5693-9bd6-43d1-9ba3-a1e932eb22dd' : '',
                   }))
                 }}
                 required
@@ -708,7 +780,7 @@ function TransactionModal({
                 className={inputCls + ' appearance-none pr-8'}
               >
                 <option value="">Select category</option>
-                {categoryOptions.map((option) => (
+                {visibleCategoryOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -772,6 +844,14 @@ function TransactionModal({
   )
 }
 
+function TransactionsCalendarComingSoon() {
+  return (
+    <section className="min-h-[320px] rounded-xl border border-[#bdc9c6] bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-[#0b1c30]">Coming soon</h2>
+    </section>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Main container – all data-fetching & state lives here
 // ---------------------------------------------------------------------------
@@ -793,13 +873,16 @@ function TransactionsPageContainer() {
   const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
 
+  // Refs to avoid stale closures in callbacks
+  const categoryOptionsRef = useRef(categoryOptions)
+  categoryOptionsRef.current = categoryOptions
+  const accountOptionsRef = useRef(accountOptions)
+  accountOptionsRef.current = accountOptions
+
   // --- filter state ---
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [pendingFilters, setPendingFilters] = useState<FilterState>(EMPTY_FILTERS)
   const [areFiltersOpen, setAreFiltersOpen] = useState(false)
-
-  // --- selection ---
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // --- view mode ---
   const [viewMode, setViewMode] = useState<TransactionsViewMode>('list')
@@ -830,8 +913,8 @@ function TransactionsPageContainer() {
       setAccountOptions(
         accounts
           .map((account) => {
-            const value = String(account.id ?? account.accountId ?? '')
-            const label = account.name ?? account.accountName ?? (value ? `Account ${value}` : '')
+            const value = String(account.id ?? account.accountId ?? account.account_id ?? '')
+            const label = account.name ?? account.accountName ?? account.account_name ?? account.title ?? (value ? `Account ${value}` : '')
             return { value, label }
           })
           .filter((option) => option.value && option.label),
@@ -841,9 +924,26 @@ function TransactionsPageContainer() {
     }
   }, [])
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await api.get<{ categories: any[] }>('/categories')
+      const cats = res.data?.categories ?? []
+      setCategoryOptions(
+        cats.map((cat) => ({
+          value: cat.id,
+          label: cat.nameEn,
+          type: cat.type === 'system' ? ('system' as const) : (cat.type as TransactionType),
+        })),
+      )
+    } catch {
+      // keep existing options as fallback
+    }
+  }, [])
+
   useEffect(() => {
     fetchAccounts()
-  }, [fetchAccounts])
+    fetchCategories()
+  }, [fetchAccounts, fetchCategories])
 
   // ---------------------------------------------------------------------------
   // Fetch transactions
@@ -857,21 +957,16 @@ function TransactionsPageContainer() {
       if (applied.dateFrom) params.date_from = applied.dateFrom
       if (applied.dateTo) params.date_to = applied.dateTo
       if (applied.accountId) params.accountId = applied.accountId
-      if (applied.category) params.category = applied.category
+      if (applied.category) params.categoryId = applied.category
       if (applied.type) params.type = applied.type
 
       const res = await api.get<ApiTransactionsResponse | ApiTransaction[]>('/transactions', { params })
       const body = res.data
       const rawTransactions = listFromResponse(body)
 
-      setTransactions(rawTransactions.map(mapApiTransaction))
-      setCategoryOptions((current) =>
-        mergeOptions(
-          current,
-          rawTransactions.map((transaction) => {
-            const label = categoryLabel(transaction.category, transaction.categoryName)
-            return { value: label.toLowerCase(), label }
-          }),
+      setTransactions(
+        rawTransactions.map((transaction) =>
+          mapApiTransaction(transaction, accountOptionsRef.current, categoryOptionsRef.current),
         ),
       )
 
@@ -891,7 +986,6 @@ function TransactionsPageContainer() {
 
   useEffect(() => {
     fetchTransactions(currentPage, filters)
-    setSelectedIds(new Set())
   }, [currentPage, filters, fetchTransactions])
 
   // ---------------------------------------------------------------------------
@@ -942,7 +1036,7 @@ function TransactionsPageContainer() {
   if (filters.accountId) {
     activeFilterChips.push({
       id: 'account',
-      label: `Account: ${filters.accountId}`,
+      label: `Account: ${optionLabel(accountOptions, filters.accountId) ?? filters.accountId}`,
       onRemove: () => { setFilters((f) => ({ ...f, accountId: '' })); setCurrentPage(1) },
     })
   }
@@ -962,47 +1056,6 @@ function TransactionsPageContainer() {
   }
 
   // ---------------------------------------------------------------------------
-  // Selection helpers
-  // ---------------------------------------------------------------------------
-
-  const allSelected = transactions.length > 0 && selectedIds.size === transactions.length
-  const someSelected = selectedIds.size > 0
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(transactions.map((t) => t.id)))
-    }
-  }
-
-  const toggleSelectRow = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
-
-  // ---------------------------------------------------------------------------
-  // Bulk delete – DELETE /transactions/bulk (max 50 per call)
-  // ---------------------------------------------------------------------------
-
-  const handleDeleteSelected = async () => {
-    if (!someSelected) return
-    const ids = Array.from(selectedIds)
-    if (!window.confirm(TEXT_VAR.confirmDelete(ids.length))) return
-
-    // Chunk into batches of ≤ 50 (per API limit)
-    const BATCH = 50
-    for (let i = 0; i < ids.length; i += BATCH) {
-      await api.delete('/transactions/bulk', { data: { ids: ids.slice(i, i + BATCH) } })
-    }
-    setSelectedIds(new Set())
-    fetchTransactions(currentPage, filters)
-  }
-
-  // ---------------------------------------------------------------------------
   // Edit modal opener
   // ---------------------------------------------------------------------------
 
@@ -1014,7 +1067,7 @@ function TransactionsPageContainer() {
       accountId: '',
       toAccountId: '',
       type: row.type,
-      category: row.category.label.toLowerCase(),
+      category: categoryOptions.find((option) => option.label === row.category.label)?.value ?? '',
       description: row.description,
       amount: parseDecimal(row.amountLabel.replace(/[^0-9.]/g, '')),
     })
@@ -1279,22 +1332,17 @@ function TransactionsPageContainer() {
           </div>
         )}
 
+        {!loading && !fetchError && viewMode === 'calendar' && (
+          <TransactionsCalendarComingSoon />
+        )}
+
         {/* Transactions table */}
-        {!loading && !fetchError && (
+        {!loading && !fetchError && viewMode === 'list' && (
           <section className="flex flex-col overflow-hidden rounded-xl border border-[#bdc9c6] bg-white shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[840px] border-collapse text-left">
+              <table className="w-full min-w-[790px] border-collapse text-left">
                 <thead>
                   <tr className="border-b border-[#bdc9c6] bg-[#eff4ff] text-xs font-semibold uppercase tracking-wide text-[#3e4947]">
-                    <th className="w-12 p-4 text-center">
-                      <input
-                        type="checkbox"
-                        aria-label={TEXT_VAR.selectAllAriaLabel}
-                        checked={allSelected}
-                        onChange={toggleSelectAll}
-                        className="h-4 w-4 cursor-pointer rounded border-[#bdc9c6] text-[#005c55] focus:ring-[#005c55]"
-                      />
-                    </th>
                     <th className="p-4 font-semibold">
                       <button type="button" className="inline-flex items-center gap-1 hover:text-[#0b1c30]">
                         {TEXT_VAR.tableHeaders.date}
@@ -1313,15 +1361,6 @@ function TransactionsPageContainer() {
                   {transactions.length > 0 ? (
                     transactions.map((row) => (
                       <tr key={row.id} className="group transition hover:bg-[#eff4ff]">
-                        <td className="p-4 text-center">
-                          <input
-                            type="checkbox"
-                            aria-label={`${TEXT_VAR.selectRowAriaLabel} ${row.description}`}
-                            checked={selectedIds.has(row.id)}
-                            onChange={() => toggleSelectRow(row.id)}
-                            className="h-4 w-4 cursor-pointer rounded border-[#bdc9c6] text-[#005c55] focus:ring-[#005c55]"
-                          />
-                        </td>
                         <td className="whitespace-nowrap p-4">{row.dateLabel}</td>
                         <td className="p-4">
                           <span
@@ -1404,7 +1443,7 @@ function TransactionsPageContainer() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} className="p-8 text-center text-sm text-[#3e4947]">
+                      <td colSpan={7} className="p-8 text-center text-sm text-[#3e4947]">
                         {TEXT_VAR.emptyTransactions}
                       </td>
                     </tr>
@@ -1413,24 +1452,8 @@ function TransactionsPageContainer() {
               </table>
             </div>
 
-            {/* Table footer – bulk actions + pagination */}
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-[#bdc9c6] bg-white p-4 sm:flex-row">
-              <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-[#3e4947] sm:justify-start">
-                <span className="font-semibold text-[#005c55]">
-                  {selectedIds.size} {TEXT_VAR.selectedLabel}
-                </span>
-                <span className="text-[#bdc9c6]">|</span>
-                <button
-                  type="button"
-                  disabled={!someSelected}
-                  onClick={handleDeleteSelected}
-                  className="inline-flex items-center gap-1 text-[#ba1a1a] transition hover:text-[#93000a] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                  {TEXT_VAR.deleteSelected}
-                </button>
-              </div>
-
+            {/* Table footer – pagination */}
+            <div className="flex flex-col items-center justify-end gap-4 border-t border-[#bdc9c6] bg-white p-4 sm:flex-row">
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex flex-col items-center gap-3 text-sm sm:flex-row">

@@ -1,21 +1,22 @@
 {
   "project": "Personal Finance Tracker (PFT)",
   "parity_target": "100% Frontend-Backend Feature Parity",
-  "current_milestone": "2. Accounts Page Bugfix & Audit",
-  "status": "COMPLETED",
+  "current_milestone": "3. Recurring Transactions Integration",
+  "status": "INITIATING_SESSION",
   "completed_features": [
     "Auth (Register, Login, Refresh)",
     "Dashboard Aggregation",
-    "Transactions Feed & Management"
+    "Transactions Feed & Management",
+    "Accounts Overview & Details"
   ],
   "active_task": {
-    "target_page": "Personal-Financial-Tracker/frontend/src/features/accounts/AccountsPage.tsx",
+    "target_page": "Personal-Financial-Tracker/frontend/src/features/transactions/RecurringPage.tsx",
     "target_endpoints": [
-      "GET /accounts",
-      "POST /accounts",
-      "DELETE /accounts/:id",
-      "PATCH /accounts/:id"
-    ],
-    "runtime_issue": "Unexpected Application Error in AccountCard rendering. Element type is invalid: expected a string or class/function but got: undefined."
+      "GET /recurring",
+      "POST /recurring",
+      "PATCH /recurring/:id",
+      "DELETE /recurring/:id",
+      "POST /recurring/:id/skip"
+    ]
   }
 }
