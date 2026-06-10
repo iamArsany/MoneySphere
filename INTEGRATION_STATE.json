@@ -1,0 +1,32 @@
+{
+  "project": "Personal Finance Tracker (PFT)",
+  "parity_target": "100% Frontend-Backend Feature Parity",
+  "current_milestone": "2. Budgets & Recurring Transactions",
+  "status": "COMPLETED",
+  "completed_features": [
+    "Auth (Register, Login, Refresh)",
+    "Accounts Overview & Details",
+    "Dashboard Aggregation",
+    "Transactions Feed & Management"
+  ],
+  "active_task": {
+    "target_page": null,
+    "target_endpoints": []
+  },
+  "last_completed_task": {
+    "target_page": "TransactionsPage.tsx",
+    "target_endpoints": [
+      "GET /transactions",
+      "POST /transactions",
+      "DELETE /transactions/bulk",
+      "PATCH /transactions/:id"
+    ],
+    "notes": [
+      "All network requests routed through centralized api.ts Axios instance (interceptors: bearer token + silent refresh).",
+      "Amounts parsed through parseDecimal() → toFixed(2) before submission, guarding DECIMAL(18,2) DB precision.",
+      "Type filter exposes only income/expense; transfer rows are rendered but excluded from type-aggregate filter chips to prevent blending paired transfer flows into individual sums.",
+      "Bulk delete batches IDs in chunks of ≤50 per API constraint.",
+      "Pagination built server-side from GET /transactions response envelope."
+    ]
+  }
+}

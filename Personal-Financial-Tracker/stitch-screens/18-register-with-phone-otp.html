@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PFT - Register with Phone</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#00201d",
+                        "on-tertiary-container": "#99ffcd",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#ffddb8",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#005c55",
+                        "outline-variant": "#bdc9c6",
+                        "tertiary": "#005e3f",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "secondary-container": "#fea619",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#80d5cb",
+                        "inverse-primary": "#80d5cb",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-container": "#007952",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-container": "#a3faef",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "on-surface-variant": "#3e4947",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#684000",
+                        "surface-tint": "#006a63",
+                        "outline": "#6e7977",
+                        "on-secondary-fixed": "#2a1700",
+                        "inverse-surface": "#213145",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "secondary": "#855300",
+                        "on-primary-fixed-variant": "#00504a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-fixed": "#002113",
+                        "primary-fixed": "#9cf2e8",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "primary-container": "#0f766e",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "on-background": "#0b1c30"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "xs": "8px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.08), 0px 4px 6px -2px rgba(0,0,0,0.04);
+        }
+        
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .otp-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Ambient background subtle animation */
+        @keyframes subtle-drift {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        .ambient-bg {
+            background-image: radial-gradient(circle at 15% 50%, rgba(156, 242, 232, 0.15), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(254, 166, 25, 0.1), transparent 25%);
+            background-size: 200% 200%;
+            animation: subtle-drift 20s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-sans ambient-bg relative overflow-x-hidden">
+<!-- Top Navigation (Suppressed for transactional page, but keeping a minimal brand anchor) -->
+<header class="w-full flex justify-between items-center px-lg py-md absolute top-0 z-50">
+<div class="font-headline-md text-headline-md font-bold text-primary">
+            PFT
+        </div>
+<div class="font-label-md text-label-md text-primary cursor-pointer hover:opacity-80 transition-opacity">
+            EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ©
+        </div>
+</header>
+<!-- Main Content Container: Desktop + Mobile Preview Side-by-Side -->
+<main class="flex-grow flex items-center justify-center p-lg gap-xl max-w-[1800px] mx-auto w-full pt-24">
+<!-- DESKTOP VIEW (1440px context container) -->
+<div class="hidden lg:flex flex-1 justify-center items-center w-full max-w-[1000px] relative">
+<!-- Floating Decorative Elements -->
+<div class="absolute -top-12 -left-12 w-64 h-64 bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="absolute -bottom-12 -right-12 w-64 h-64 bg-secondary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+<div class="glass-panel rounded-xl w-full max-w-md p-xl relative z-10 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-md text-primary">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">phonelink_ring</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-center text-on-surface mb-xs">
+                    Verify your phone
+                </h1>
+<p class="font-body-base text-body-base text-on-surface-variant text-center mb-xl">
+                    We've sent a 6-digit code to <br/> <span class="font-bold text-on-surface">+20 100 123 4567</span>
+</p>
+<!-- Step 1: Phone Input (Hidden in this state, shown for context switch if needed) -->
+<div class="w-full hidden" id="desktop-phone-step">
+<div class="flex flex-col gap-sm mb-lg">
+<label class="font-label-md text-label-md text-on-surface-variant">Phone Number / Ø±ÙÙ Ø§ÙÙØ§ØªÙ</label>
+<div class="flex gap-xs">
+<div class="relative w-24">
+<select class="w-full h-12 bg-surface-container-lowest border border-outline-variant rounded-lg px-sm appearance-none font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
+<option value="+20">ðªð¬ +20</option>
+<option value="+1">ðºð¸ +1</option>
+<option value="+44">ð¬ð§ +44</option>
+<option value="+971">ð¦ðª +971</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+<input class="flex-1 h-12 bg-surface-container-lowest border border-outline-variant rounded-lg px-md font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-outline" placeholder="100 123 4567" type="tel"/>
+</div>
+</div>
+<button class="w-full h-12 bg-primary text-on-primary rounded-lg font-body-base text-body-base font-semibold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm active:scale-[0.98] transform" onclick="toggleDesktopStep()">
+                        Send Code
+                    </button>
+</div>
+<!-- Step 2: OTP Verification (Active State) -->
+<div class="w-full" id="desktop-otp-step">
+<div class="flex justify-between gap-xs mb-lg" dir="ltr">
+<input autofocus="" class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input w-12 h-14 bg-surface-container-lowest border border-outline-variant rounded-lg text-center font-title-lg text-title-lg text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+</div>
+<button class="w-full h-12 bg-primary text-on-primary rounded-lg font-body-base text-body-base font-semibold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm active:scale-[0.98] transform mb-md flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                        Verify / ØªØ­ÙÙ
+                    </button>
+<div class="flex flex-col items-center gap-xs">
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-xs">
+                            Didn't receive the code?
+                            <span class="font-bold text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">timer</span>
+                                0:45
+                            </span>
+</p>
+<button class="font-label-md text-label-md text-primary opacity-50 cursor-not-allowed hover:underline" disabled="">
+                            Resend Code / Ø¥Ø¹Ø§Ø¯Ø© Ø§ÙØ¥Ø±Ø³Ø§Ù
+                        </button>
+<button class="font-label-md text-label-md text-outline hover:text-primary mt-sm transition-colors" onclick="toggleDesktopStep()">
+                            Change Phone Number
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Divider for layout separation -->
+<div class="hidden xl:block w-px h-96 bg-gradient-to-b from-transparent via-outline-variant to-transparent opacity-50"></div>
+<!-- MOBILE PREVIEW (375px context container) -->
+<div class="w-[375px] h-[812px] bg-surface rounded-[40px] shadow-[0_0_0_12px_#213145,0_20px_40px_rgba(0,0,0,0.2)] relative overflow-hidden flex flex-col shrink-0">
+<!-- Mobile Status Bar Mock -->
+<div class="h-12 w-full flex justify-between items-center px-6 pt-2 text-[12px] font-medium text-on-surface z-50">
+<span>9:41</span>
+<div class="flex gap-1 items-center">
+<span class="material-symbols-outlined text-[16px]">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[16px]">wifi</span>
+<span class="material-symbols-outlined text-[16px]">battery_full</span>
+</div>
+</div>
+<!-- Mobile Content -->
+<div class="flex-1 flex flex-col px-md pt-lg pb-xl relative z-10 overflow-y-auto">
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant mb-xl active:bg-surface-variant transition-colors" onclick="toggleMobileStep()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<!-- Step 1: Phone Input (Active State in Mobile for variation) -->
+<div class="flex flex-col flex-1" id="mobile-phone-step">
+<div class="mb-xl">
+<h2 class="font-display-lg-mobile text-display-lg-mobile text-on-surface mb-xs">Get Started</h2>
+<p class="font-body-base text-body-base text-on-surface-variant">Enter your phone number to register or login securely.</p>
+</div>
+<div class="flex flex-col gap-sm mb-auto">
+<label class="font-label-md text-label-md text-on-surface-variant">Phone Number / Ø±ÙÙ Ø§ÙÙØ§ØªÙ</label>
+<div class="flex gap-xs">
+<div class="relative w-[88px] shrink-0">
+<select class="w-full h-14 bg-surface-container-lowest border border-outline-variant rounded-xl pl-xs pr-lg appearance-none font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
+<option value="+20">ðªð¬ +20</option>
+<option value="+1">ðºð¸ +1</option>
+<option value="+971">ð¦ðª +971</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+<input class="flex-1 h-14 bg-surface-container-lowest border border-outline-variant rounded-xl px-md font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder-outline shadow-sm" placeholder="100 123 4567" type="tel"/>
+</div>
+<p class="font-label-md text-label-md text-outline mt-xs flex items-start gap-1">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                            We never share your number with anyone.
+                        </p>
+</div>
+<button class="w-full h-14 mt-xl bg-primary text-on-primary rounded-xl font-body-base text-body-base font-semibold hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] transform flex justify-center items-center gap-sm" onclick="toggleMobileStep()">
+                        Continue
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Step 2: OTP (Hidden in Mobile initially) -->
+<div class="hidden flex-col flex-1" id="mobile-otp-step">
+<div class="mb-xl">
+<h2 class="font-display-lg-mobile text-display-lg-mobile text-on-surface mb-xs">Enter Code</h2>
+<p class="font-body-base text-body-base text-on-surface-variant">Sent to +20 100 123 4567</p>
+</div>
+<div class="flex justify-between gap-xs mb-xl" dir="ltr">
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+<input class="otp-input mobile-otp w-full aspect-square bg-surface-container-lowest border border-outline-variant rounded-xl text-center font-headline-md text-headline-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim transition-all shadow-sm" maxlength="1" type="number"/>
+</div>
+<div class="flex flex-col items-center gap-md mb-auto">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                            Resend code in <span class="font-bold text-secondary">0:45</span>
+</p>
+</div>
+<button class="w-full h-14 mt-xl bg-primary text-on-primary rounded-xl font-body-base text-body-base font-semibold hover:bg-primary-container transition-colors shadow-sm active:scale-[0.98] transform flex justify-center items-center">
+                        Verify
+                    </button>
+</div>
+</div>
+<!-- Mobile Home Indicator -->
+<div class="h-8 w-full flex justify-center items-center z-50 bg-surface/50 backdrop-blur-sm absolute bottom-0">
+<div class="w-32 h-1 bg-on-surface rounded-full opacity-80"></div>
+</div>
+</div>
+</main>
+<!-- Footer (Minimal for transactional context) -->
+<footer class="w-full mt-auto py-md px-lg flex justify-center border-t border-outline-variant/30">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Â© 2024 PFT Personal Finance Tracker. All rights reserved.
+        </p>
+</footer>
+<script>
+        // Simple logic to focus next OTP input
+        const setupOtpInputs = (selector) => {
+            const inputs = document.querySelectorAll(selector);
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length > 1) {
+                        e.target.value = e.target.value.slice(0, 1);
+                    }
+                    if (e.target.value !== '' && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+        };
+
+        setupOtpInputs('#desktop-otp-step .otp-input');
+        setupOtpInputs('.mobile-otp');
+
+        // Toggle logic for demo purposes
+        function toggleDesktopStep() {
+            const phoneStep = document.getElementById('desktop-phone-step');
+            const otpStep = document.getElementById('desktop-otp-step');
+            if(phoneStep.classList.contains('hidden')) {
+                phoneStep.classList.remove('hidden');
+                otpStep.classList.add('hidden');
+            } else {
+                phoneStep.classList.add('hidden');
+                otpStep.classList.remove('hidden');
+            }
+        }
+
+        function toggleMobileStep() {
+            const phoneStep = document.getElementById('mobile-phone-step');
+            const otpStep = document.getElementById('mobile-otp-step');
+            if(phoneStep.classList.contains('hidden')) {
+                phoneStep.classList.remove('hidden');
+                otpStep.classList.add('hidden');
+            } else {
+                phoneStep.classList.add('hidden');
+                otpStep.classList.remove('hidden');
+            }
+        }
+    </script>
+</body></html>

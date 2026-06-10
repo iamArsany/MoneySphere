@@ -1,0 +1,713 @@
+
+
+SOFTWARE REQUIREMENTS SPECIFICATION v2.0.0
+User Stories
+Personal Finance Tracker (PFT)
+Document: PFT-US-001  |  Version 1.0.0  |  June 9, 2026
+Standard: Agile User Story Format  |  Derived from PFT-SRS-001 v2.0.0
+Table of Contents
+Right-click the TOC and select "Update Field" to refresh page numbers
+
+Document Overview	3
+Guest User Stories	4
+Registered User Stories	5
+Authentication & Account Management	5
+Transaction Management	7
+Recurring Transactions	9
+Budget Management	10
+Dashboard & Analytics	11
+Reporting	12
+Notifications	13
+Administrator User Stories	14
+System & Non-Functional Stories	16
+Appendix: Priority Legend	17
+
+Document Overview
+This document presents the complete set of user stories for the Personal Finance Tracker (PFT) web application. All stories are derived from the Software Requirements Specification (PFT-SRS-001 v2.0.0) and organized by actor role. Each user story follows the standard agile format:
+As a [role], I want to [action], so that [benefit]
+Each story includes a unique identifier, priority level (Critical / High / Medium / Low), and detailed acceptance criteria written in Gherkin-style Given-When-Then format. These stories serve as the primary input for sprint planning, development, and QA testing.
+Priority Legend
+Priority	Meaning	Delivery
+Critical	MVP blocker — system cannot launch without this story	Sprint 1-2
+High	Important for launch quality and user satisfaction	Sprint 2-4
+Medium	Desirable feature that enhances the experience	Sprint 4-6
+Low	Future consideration — nice to have	Post-MVP
+Actor Roles
+Actor	Description
+Guest	Unauthenticated visitor with read-only demo dashboard access
+Registered User	Authenticated end-user with full CRUD access to personal financial data
+Administrator	Platform manager with elevated privileges; no access to individual financial data
+System	Automated services: notification scheduler, recurring transaction executor, PDF generator
+Guest User Stories
+Guest users are unauthenticated visitors who can explore the platform through a read-only demo experience before deciding to register.
+US-G-01  |  CRITICAL
+As a Guest, I want to view a pre-populated demo dashboard with sample financial data, so that I can evaluate the platform's value before registering.
+Acceptance Criteria
+Given the Guest has not registered,
+When they navigate to the landing page,
+Then they see a demo dashboard with static sample data including income, expenses, charts, and budget cards.
+Notes
+• Demo dashboard loads within 2 seconds on 4G connection.
+• All dashboard widgets display realistic sample data.
+• A prominent registration CTA banner is visible.
+
+US-G-02  |  CRITICAL
+As a Guest, I want to access the registration page from the demo dashboard, so that I can create an account after evaluating the platform.
+Acceptance Criteria
+Given the Guest is viewing the demo dashboard,
+When they click the registration CTA,
+Then they are navigated to the registration form.
+Notes
+• Registration link is accessible within one click from demo dashboard.
+
+US-G-03  |  HIGH
+As a Guest, I want to switch between English and Arabic on the landing page, so that I can experience the platform in my preferred language before registering.
+Acceptance Criteria
+Given the Guest is on the landing page,
+When they select Arabic from the language switcher,
+Then all text displays in Arabic with RTL layout immediately without page reload.
+Notes
+• Language switch takes effect without page reload.
+• RTL layout is correctly applied for Arabic.
+
+Registered User Stories
+Registered users are authenticated end-users who interact with the full feature set of the Personal Finance Tracker. These stories are organized by functional module.
+Authentication & Account Management
+US-R-01  |  CRITICAL
+As a Registered User, I want to register with my email address, full name, and a secure password, so that I can create a personal account on the platform.
+Acceptance Criteria
+Given the visitor has a unique email address,
+When they submit the registration form with full name, email, and password meeting strength requirements,
+Then a new account is created and a verification email is sent within 60 seconds.
+Notes
+• Password must be 8+ characters with at least one uppercase, one digit, and one special character.
+• Registration form validates input inline after field blur.
+• Email uniqueness is verified before account creation.
+
+US-R-02  |  HIGH
+As a Registered User, I want to register using my phone number with OTP verification, so that I can create an account without an email address.
+Acceptance Criteria
+Given the visitor has a valid phone number,
+When they submit the phone registration form and request OTP,
+Then an OTP is sent via SMS within 60 seconds, and account is verified upon correct OTP entry.
+Notes
+• OTP expires after a reasonable timeout period.
+• Fallback to email OTP is available if SMS fails.
+
+US-R-03  |  CRITICAL
+As a Registered User, I want to log in with my email and password, so that I can access my personal financial data.
+Acceptance Criteria
+Given the user has a verified account,
+When they submit valid email and password credentials,
+Then they receive a JWT access token (7-day expiry) and refresh token (30-day expiry) and are redirected to the dashboard.
+Notes
+• Login endpoint returns 401 for invalid credentials.
+• Unverified accounts cannot log in.
+
+US-R-04  |  HIGH
+As a Registered User, I want to reset my password via email, so that I can regain access if I forget my password.
+Acceptance Criteria
+Given the user has forgotten their password,
+When they submit their email on the forgot-password page,
+Then they receive a password reset link (expires in 1 hour) that allows them to set a new password.
+Notes
+• Reset link expires exactly after 1 hour.
+• Used reset links are immediately invalidated.
+
+US-R-05  |  HIGH
+As a Registered User, I want my account to be temporarily locked after multiple failed login attempts, so that my account is protected from brute-force attacks.
+Acceptance Criteria
+Given an attacker is attempting to guess the user's password,
+When 5 consecutive failed login attempts occur,
+Then the account is locked for 15 minutes and the user receives a notification email.
+Notes
+• Lockout timer is exactly 15 minutes.
+• Notification email is sent upon lockout trigger.
+
+US-R-06  |  HIGH
+As a Registered User, I want to update my profile information, so that my account details remain current.
+Acceptance Criteria
+Given the user is authenticated,
+When they navigate to Profile Settings and update their name, email, phone, preferred language, or avatar,
+Then the changes are saved and reflected across the application.
+Notes
+• Email uniqueness is validated on update.
+• Avatar upload supports common image formats with size limits.
+
+US-R-07  |  HIGH
+As a Registered User, I want to delete my account and all associated data, so that I can exercise my right to erasure under GDPR.
+Acceptance Criteria
+Given the user is authenticated,
+When they request account deletion from settings and confirm the action,
+Then all personal data, transactions, accounts, and budgets are permanently deleted within 30 days.
+Notes
+• A confirmation dialog clearly states the consequence of deletion.
+• Deletion follows GDPR-compliant erasure procedures.
+
+Account Management
+US-R-08  |  CRITICAL
+As a Registered User, I want to create multiple financial accounts (up to 10), so that I can track different financial instruments separately.
+Acceptance Criteria
+Given the user is authenticated,
+When they create a new account with name, type, initial balance, and currency,
+Then the account is saved and appears in their account list with the specified initial balance.
+Notes
+• Supported types: Cash, Bank Account, Credit Card, Savings, Investment, Custom.
+• Maximum of 10 accounts per user is enforced.
+• Initial balance is recorded as a special 'Initial Balance' transaction.
+
+US-R-09  |  CRITICAL
+As a Registered User, I want to see the current balance for each of my accounts, so that I know how much money I have in each financial instrument.
+Acceptance Criteria
+Given the user has created one or more accounts,
+When they view the accounts page or dashboard,
+Then each account displays its computed running balance based on all associated transactions.
+Notes
+• Balance updates automatically when transactions are added, edited, or deleted.
+• Balance uses decimal arithmetic (no floating-point).
+
+US-R-10  |  HIGH
+As a Registered User, I want to customize my account appearance with a color and icon, so that I can visually distinguish between accounts.
+Acceptance Criteria
+Given the user has created an account,
+When they edit the account's metadata (name, color, icon),
+Then the changes are saved and visually reflected across the UI.
+Notes
+• Account type cannot be changed after creation.
+• Color must be a valid hex color code.
+
+US-R-11  |  HIGH
+As a Registered User, I want to archive an account that I no longer actively use, so that it is hidden from active views without losing historical data.
+Acceptance Criteria
+Given the user has an active account,
+When they choose to archive it,
+Then the account is hidden from active views but all historical transactions remain accessible and included in reports.
+Notes
+• Archived accounts do not appear in default account lists.
+• Archived account transactions still appear in historical reports.
+
+US-R-12  |  HIGH
+As a Registered User, I want to transfer funds between my own accounts, so that I can record internal money movements accurately.
+Acceptance Criteria
+Given the user has at least two active accounts,
+When they initiate a transfer specifying source account, destination account, amount, and date,
+Then two atomically linked transactions are created (debit from source, credit to destination) and both balances update.
+Notes
+• Transfer creates paired debit/credit transactions linked via transfer_pair_id.
+• Atomic operation: both transactions succeed or both fail.
+• Transfer transactions are excluded from income/expense totals to prevent double-counting.
+
+Transaction Management
+US-R-13  |  CRITICAL
+As a Registered User, I want to add a new income or expense transaction, so that I can record my financial activities.
+Acceptance Criteria
+Given the user has at least one account,
+When they create a transaction with account, type (income/expense), amount, category, date, and optional description,
+Then the transaction is saved and the associated account balance is updated immediately.
+Notes
+• Amount must be greater than zero.
+• Expense transactions must belong to a category.
+• Account balance recalculates immediately upon transaction creation.
+
+US-R-14  |  CRITICAL
+As a Registered User, I want to view my complete transaction history with filtering and sorting, so that I can find and review specific transactions.
+Acceptance Criteria
+Given the user has recorded transactions,
+When they open the transactions page,
+Then they see a paginated list (default 20 per page) with options to filter by date range, account, category, type, amount range, and sort by date, amount, or category.
+Notes
+• Pagination supports up to 100 items per page.
+• All filter combinations work correctly.
+• Running balance column is displayed for each transaction.
+
+US-R-15  |  CRITICAL
+As a Registered User, I want to edit a transaction, so that I can correct mistakes or update details.
+Acceptance Criteria
+Given the user has an existing transaction,
+When they edit any field except the creation timestamp,
+Then the changes are saved and the account balance is recalculated to reflect the update.
+Notes
+• Balance recalculation is accurate after any field change.
+• Creation timestamp remains immutable.
+
+US-R-16  |  CRITICAL
+As a Registered User, I want to delete a transaction with a confirmation, so that I can remove incorrect entries.
+Acceptance Criteria
+Given the user has an existing transaction,
+When they delete it after confirming the action,
+Then the transaction is removed and the account balance is reversed by the transaction amount.
+Notes
+• Confirmation dialog prevents accidental deletion.
+• Balance reversal is accurate.
+• Bulk delete supports up to 50 transactions at once.
+
+US-R-17  |  MEDIUM
+As a Registered User, I want to attach a receipt image to a transaction, so that I have proof of purchase linked to my financial records.
+Acceptance Criteria
+Given the user is creating or editing a transaction,
+When they upload a receipt image (JPEG/PNG, max 5 MB),
+Then the image is stored in object storage and linked to the transaction.
+Notes
+• Only JPEG and PNG formats are accepted.
+• Maximum file size is 5 MB.
+• Invalid files are rejected with a clear error message.
+
+US-R-18  |  MEDIUM
+As a Registered User, I want to add optional notes to a transaction, so that I can include additional context or details.
+Acceptance Criteria
+Given the user is creating or editing a transaction,
+When they add a note (up to 1000 characters),
+Then the note is saved and displayed with the transaction.
+Notes
+• Note field accepts up to 1000 characters.
+• Notes are displayed in transaction detail views.
+
+Recurring Transactions
+US-R-19  |  HIGH
+As a Registered User, I want to set up a recurring transaction template, so that regular income and expenses are recorded automatically.
+Acceptance Criteria
+Given the user has an account,
+When they create a recurring template with account, type, amount, category, frequency, start date, and optional end date,
+Then the template is saved and will auto-generate transactions on the defined schedule.
+Notes
+• Supported frequencies: Daily, Weekly, Bi-Weekly, Monthly, Quarterly, Yearly.
+• Template status can be active, paused, or completed.
+
+US-R-20  |  HIGH
+As a Registered User, I want to receive a notification before a recurring transaction executes, so that I am aware of upcoming automatic entries.
+Acceptance Criteria
+Given an active recurring transaction template exists,
+When the scheduled date is 1 day away,
+Then the user receives an in-app notification and email reminder.
+Notes
+• Notification is sent exactly 1 day before execution.
+• Both in-app and email notifications are delivered.
+
+US-R-21  |  HIGH
+As a Registered User, I want to pause, resume, edit, or delete a recurring transaction template, so that I have full control over automated entries.
+Acceptance Criteria
+Given the user has an existing recurring template,
+When they pause, resume, edit, or delete the template,
+Then the action takes effect for all future occurrences; previously generated transactions remain unchanged.
+Notes
+• Editing template applies only to future occurrences.
+• Deleting template does not delete past generated transactions.
+
+US-R-22  |  MEDIUM
+As a Registered User, I want to skip a single occurrence of a recurring transaction, so that I can handle one-off exceptions without modifying the template.
+Acceptance Criteria
+Given an active recurring template with an upcoming occurrence,
+When the user skips the next occurrence,
+Then that specific instance is not generated, and the schedule continues normally afterward.
+Notes
+• Skipping does not modify the template.
+• Skipped occurrence is recorded for audit purposes.
+
+Budget Management
+US-R-23  |  CRITICAL
+As a Registered User, I want to create a monthly budget for an expense category, so that I can set spending limits and track my adherence.
+Acceptance Criteria
+Given the user wants to control spending in a category,
+When they create a budget with a positive limit amount for a specific category and month,
+Then the budget is saved and spending is tracked against it.
+Notes
+• Only one active budget per category per calendar month is permitted.
+• Budget limit must be a positive amount.
+
+US-R-24  |  CRITICAL
+As a Registered User, I want to see my budget utilization with a visual progress bar, so that I can quickly understand my spending status.
+Acceptance Criteria
+Given the user has an active budget,
+When they view the budget or dashboard,
+Then they see the limit amount, total spent, remaining amount, and a progress bar with status (On Track / Warning / Exceeded).
+Notes
+• Progress bar updates in real-time as transactions are added.
+• Status thresholds: On Track (<80%), Warning (80-99%), Exceeded (100%+).
+
+US-R-25  |  HIGH
+As a Registered User, I want to receive alerts when my spending reaches 80% of a budget limit, so that I can adjust my spending before exceeding the budget.
+Acceptance Criteria
+Given an active budget exists and spending reaches 80% of the limit,
+When the threshold is crossed,
+Then an in-app notification and email alert are sent (at most once per budget per month).
+Notes
+• 80% alert fires only once per budget per month.
+• Alert is delivered within 5 minutes of threshold crossing.
+
+US-R-26  |  HIGH
+As a Registered User, I want to receive alerts when my spending reaches or exceeds 100% of a budget limit, so that I am immediately aware that I have exceeded my budget.
+Acceptance Criteria
+Given an active budget exists and spending reaches 100% of the limit,
+When the threshold is crossed,
+Then an in-app notification and email alert are sent, and the budget status shows 'Exceeded'.
+Notes
+• 100% alert is resent every 3 days while the budget remains exceeded.
+• Budget status immediately updates to 'Exceeded'.
+
+US-R-27  |  HIGH
+As a Registered User, I want to view a Budget Overview screen, so that I can see all my current month's budgets and their statuses at a glance.
+Acceptance Criteria
+Given the user has created one or more budgets,
+When they navigate to the Budgets page,
+Then they see all current month's budgets with their limit, spent, remaining, and status indicators.
+Notes
+• Budgets are grouped by month.
+• Each budget shows a compact progress indicator.
+
+US-R-28  |  MEDIUM
+As a Registered User, I want to roll over a budget to the next month with one click, so that I can quickly replicate my budget plan.
+Acceptance Criteria
+Given the user has an existing budget,
+When they click the roll-over button,
+Then a new budget for the next month is created with the same category and limit amount.
+Notes
+• Roll-over respects the one-budget-per-category-per-month rule.
+• User can modify the limit before confirming roll-over.
+
+Dashboard & Analytics
+US-R-29  |  CRITICAL
+As a Registered User, I want to see a summary of my total income, total expenses, net balance, and savings rate on the dashboard, so that I have an immediate overview of my financial health.
+Acceptance Criteria
+Given the user has recorded transactions,
+When they open the dashboard,
+Then they see total income, total expenses, net balance, and savings rate for the selected period (default: current month).
+Notes
+• Savings Rate = ((Total Income - Total Expenses) / Total Income) x 100.
+• Displayed as 0% if Total Income is zero.
+• Transfer transactions are excluded from totals.
+
+US-R-30  |  HIGH
+As a Registered User, I want to see a chart comparing income vs. expenses over the last 6 months, so that I can identify trends in my financial activity.
+Acceptance Criteria
+Given the user has transactions across multiple months,
+When they view the dashboard,
+Then a Line/Bar chart displays monthly income and expense comparison for the last 6 months.
+Notes
+• Chart updates when dashboard period is changed.
+• Chart renders within 2 seconds on 4G connection.
+
+US-R-31  |  HIGH
+As a Registered User, I want to see a breakdown of expenses by category, so that I understand where my money is going.
+Acceptance Criteria
+Given the user has categorized expense transactions,
+When they view the dashboard,
+Then a Donut/Pie chart shows expense distribution by category for the selected period.
+Notes
+• Chart uses category colors for visual consistency.
+• Top 5 spending categories are highlighted.
+
+US-R-32  |  HIGH
+As a Registered User, I want to change the dashboard time period, so that I can analyze my finances over different timeframes.
+Acceptance Criteria
+Given the user is on the dashboard,
+When they select a different time period (Current Month, Last Month, Last 3/6 Months, This Year, Custom Range),
+Then all dashboard widgets update to reflect the selected period.
+Notes
+• All dashboard components refresh consistently.
+• Custom range supports date picker input.
+
+US-R-33  |  HIGH
+As a Registered User, I want to see my recent transactions and upcoming recurring transactions on the dashboard, so that I have quick access to time-sensitive financial information.
+Acceptance Criteria
+Given the user has transaction history and active recurring templates,
+When they view the dashboard,
+Then they see the top 5 recent transactions and upcoming recurring transactions for the next 7 days.
+Notes
+• Recent transactions show quick-view details.
+• Upcoming recurring items show date and amount.
+
+Reporting
+US-R-34  |  CRITICAL
+As a Registered User, I want to generate a Monthly Financial Report, so that I can review my financial performance for any given month.
+Acceptance Criteria
+Given the user has transaction data,
+When they select a month and generate a Monthly Report,
+Then the report includes total income, total expenses, net savings, savings rate, expense breakdown by category, top 5 expense categories, and a full transaction list.
+Notes
+• Report data is accurate and complete.
+• Charts are rendered as images in the report.
+
+US-R-35  |  CRITICAL
+As a Registered User, I want to generate an Annual Financial Report, so that I can review my yearly financial performance.
+Acceptance Criteria
+Given the user has transaction data spanning a year,
+When they select a year and generate an Annual Report,
+Then the report includes the same comprehensive data as the monthly report but aggregated for the full year.
+Notes
+• Annual report aggregates all 12 months correctly.
+• Category totals sum correctly across the year.
+
+US-R-36  |  HIGH
+As a Registered User, I want to export any report as a PDF, so that I can save, print, or share my financial reports.
+Acceptance Criteria
+Given the user has generated a report,
+When they click 'Export as PDF',
+Then a correctly formatted PDF is generated and downloaded within 10 seconds.
+Notes
+• PDF includes page header with user name and report period.
+• PDF includes page numbers and generation timestamp.
+• Charts are rendered as images in the PDF.
+
+US-R-37  |  HIGH
+As a Registered User, I want to filter reports by account, category, or transaction type, so that I can focus on specific areas of my finances.
+Acceptance Criteria
+Given the user is generating a report,
+When they apply filters (specific account, specific category, transaction type),
+Then the report only includes data matching the selected filters.
+Notes
+• All filter combinations produce accurate results.
+• Filters can be combined (e.g., Account A + Expense type).
+
+US-R-38  |  MEDIUM
+As a Registered User, I want to access previously generated reports, so that I can re-download them without regenerating.
+Acceptance Criteria
+Given the user has generated reports before,
+When they view the report history,
+Then they see the last 12 generated reports with download links.
+Notes
+• Only the last 12 reports are retained.
+• Download links provide direct PDF access.
+
+Notifications
+US-R-39  |  HIGH
+As a Registered User, I want to see a notification bell with an unread count, so that I am aware of new alerts and updates.
+Acceptance Criteria
+Given the user has unread notifications,
+When they view any page,
+Then the notification bell icon in the header displays the count of unread notifications.
+Notes
+• Unread count updates in real-time.
+• Bell icon is visible on all authenticated pages.
+
+US-R-40  |  HIGH
+As a Registered User, I want to view all my notifications with details, so that I can review past alerts and navigate to relevant sections.
+Acceptance Criteria
+Given the user clicks the notification bell,
+When the notification center opens,
+Then they see all notifications with icon, message, timestamp, and a link to the relevant section.
+Notes
+• Notifications are sorted by timestamp (newest first).
+• Notifications older than 90 days are archived.
+
+US-R-41  |  HIGH
+As a Registered User, I want to mark notifications as read, so that I can keep my notification center organized.
+Acceptance Criteria
+Given the user has unread notifications,
+When they mark individual notifications as read or click 'Mark All as Read',
+Then the notifications are marked as read and the unread count updates.
+Notes
+• Individual and bulk mark-as-read both work.
+• Unread count immediately reflects changes.
+
+US-R-42  |  HIGH
+As a Registered User, I want to receive a monthly summary email, so that I can review my financial performance for the previous month.
+Acceptance Criteria
+Given the user has recorded transactions in the previous month,
+When the 1st of the month arrives,
+Then they receive an email summarizing the previous month's income, expenses, net savings, and top expense category.
+Notes
+• Email is sent automatically on the 1st of each month.
+• Email includes an unsubscribe link per GDPR/CAN-SPAM.
+
+US-R-43  |  MEDIUM
+As a Registered User, I want to configure my notification preferences, so that I can control which alerts I receive and through which channels.
+Acceptance Criteria
+Given the user is in notification settings,
+When they enable/disable notification types or choose delivery channels (in-app, email, or both),
+Then their preferences are saved and applied to future notifications.
+Notes
+• Preferences persist across sessions.
+• Monthly summary email respects unsubscribe preferences.
+
+Administrator User Stories
+Administrators manage the platform itself with elevated privileges. They cannot view individual users' personal financial data to protect financial privacy.
+US-A-01  |  CRITICAL
+As an Administrator, I want to access the admin panel through a dedicated route with mandatory 2FA, so that the management interface is secure from unauthorized access.
+Acceptance Criteria
+Given an admin user is authenticated,
+When they navigate to /admin and complete TOTP verification,
+Then they gain access to the admin panel and its management features.
+Notes
+• Admin JWT expires in 1 hour.
+• TOTP challenge is mandatory and cannot be bypassed.
+• Non-admin users receive a 403 response.
+
+US-A-02  |  HIGH
+As an Administrator, I want to view platform overview metrics, so that I can monitor the health and growth of the platform.
+Acceptance Criteria
+Given the admin is in the admin panel,
+When they view the dashboard,
+Then they see total registered users, active users (last 30 days), total transactions recorded, and a new registrations chart (last 30 days).
+Notes
+• Metrics update in near real-time.
+• Charts display correctly with accurate data.
+
+US-A-03  |  HIGH
+As an Administrator, I want to view a list of all registered users, so that I can manage the user base effectively.
+Acceptance Criteria
+Given the admin is in the admin panel,
+When they navigate to User Management,
+Then they see a paginated list of all users with name, email, registration date, last login, and status.
+Notes
+• List supports pagination and basic search.
+• User financial data is NOT displayed.
+
+US-A-04  |  CRITICAL
+As an Administrator, I want to suspend or reactivate a user account, so that I can enforce platform policies and handle violations.
+Acceptance Criteria
+Given the admin is viewing a user's details,
+When they suspend or reactivate the account,
+Then the user's status is updated, a notification email is sent, and the action is logged in the audit log.
+Notes
+• Suspended users cannot log in.
+• Notification email is sent immediately.
+• Action is recorded in the immutable audit log.
+
+US-A-05  |  HIGH
+As an Administrator, I want to permanently delete a user account and all associated data, so that I can handle GDPR erasure requests.
+Acceptance Criteria
+Given the admin has verified the erasure request,
+When they delete the user account,
+Then all personal data is permanently removed following GDPR-compliant procedures and the action is logged.
+Notes
+• Deletion is irreversible.
+• GDPR erasure procedures are fully followed.
+
+US-A-06  |  HIGH
+As an Administrator, I want to create, edit, and deactivate global categories, so that I can maintain the category system for all users.
+Acceptance Criteria
+Given the admin is in Category Management,
+When they create, edit, or deactivate a category,
+Then the changes are applied globally and visible to all users immediately.
+Notes
+• System-reserved categories (Initial Balance, Transfer) cannot be edited or deleted.
+• Categories support English and Arabic names, icons, and colors.
+• Deactivated categories are hidden from the category picker for new transactions.
+
+US-A-07  |  HIGH
+As an Administrator, I want to view an immutable audit log of all admin actions, so that I can track administrative activities for compliance.
+Acceptance Criteria
+Given the admin is in the Audit Log section,
+When they view the log,
+Then they see all admin actions with timestamp, actor, action type, affected entity, and IP address.
+Notes
+• Audit log is immutable and cannot be modified.
+• Log supports filtering by date range and action type.
+
+US-A-08  |  HIGH
+As an Administrator, I want to view a chart of daily active users over the last 90 days, so that I can analyze user engagement trends.
+Acceptance Criteria
+Given the admin is in the Analytics section,
+When they view the DAU chart,
+Then a chart displays daily active users for the last 90 days.
+Notes
+• Chart renders accurately with correct data points.
+• Chart supports zooming or period selection.
+
+US-A-09  |  MEDIUM
+As an Administrator, I want to send a platform-wide broadcast notification, so that I can communicate important announcements to all users.
+Acceptance Criteria
+Given the admin is in the admin panel,
+When they compose and send a broadcast message,
+Then all registered users receive the notification in-app.
+Notes
+• Broadcast supports title and message body.
+• Delivery confirmation is shown to the admin.
+
+System & Non-Functional Stories
+These stories address cross-cutting concerns that apply to the entire system, including performance, security, accessibility, and localization.
+US-S-01  |  CRITICAL
+As a User, I want all my data to be transmitted over secure HTTPS connections, so that my financial information is protected in transit.
+Acceptance Criteria
+Given the user accesses any page,
+When data is transmitted between client and server,
+Then all communication uses TLS 1.2 or higher; HTTP connections redirect to HTTPS.
+Notes
+• SSL certificate is valid and trusted.
+• No sensitive data is transmitted over unencrypted channels.
+
+US-S-02  |  CRITICAL
+As a User, I want my password to be securely hashed, so that my credentials are protected even if the database is compromised.
+Acceptance Criteria
+Given the user creates or updates their password,
+When the password is stored,
+Then it is hashed using Argon2id (preferred) or BCrypt with cost factor >= 12; plaintext is never stored or logged.
+Notes
+• Password hashes cannot be reversed to plaintext.
+• No password appears in application logs.
+
+US-S-03  |  HIGH
+As a User, I want the application to be fully accessible, so that I can use it with assistive technologies or keyboard-only navigation.
+Acceptance Criteria
+Given the user relies on accessibility features,
+When they navigate the application,
+Then all interactive elements have visible focus indicators, ARIA labels, and the application meets WCAG 2.1 Level AA standards.
+Notes
+• All interactive elements are keyboard-navigable.
+• ARIA labels are applied to all interactive and informational UI elements.
+• Color contrast meets minimum 4.5:1 for normal text.
+
+US-S-04  |  HIGH
+As a User, I want the application to support both English and Arabic with RTL layout, so that I can use it in my preferred language.
+Acceptance Criteria
+Given the user has selected a language in settings,
+When they browse the application,
+Then all user-facing text displays in the selected language with correct layout direction (LTR for English, RTL for Arabic).
+Notes
+• Language switch takes effect immediately without page reload.
+• All user-facing strings are externalized to i18n files.
+• Date, time, and number formatting respect locale conventions.
+
+US-S-05  |  HIGH
+As a User, I want the dashboard to load quickly, so that I can access my financial data without waiting.
+Acceptance Criteria
+Given the user opens the dashboard,
+When the page loads,
+Then the initial page load (including chart rendering) completes within 2 seconds on a 4G connection.
+Notes
+• API response time for standard read queries < 200 ms at p95.
+• SPA bundle size (gzipped) <= 500 KB.
+
+US-S-06  |  HIGH
+As a User, I want my financial calculations to be precise, so that my balances and reports are always accurate.
+Acceptance Criteria
+Given any monetary calculation is performed,
+When the system processes the calculation,
+Then all monetary values use decimal arithmetic with exactly 2 decimal places (no floating-point).
+Notes
+• No floating-point representation is used for money.
+• Balance updates are atomic with transaction rollback on failure.
+
+US-S-07  |  MEDIUM
+As a User, I want the application to handle errors gracefully, so that I understand what went wrong and how to fix it.
+Acceptance Criteria
+Given an error occurs,
+When the error is displayed,
+Then the error message is written in plain, non-technical language, identifies the problem, and suggests a resolution.
+Notes
+• Error messages are localized to the user's selected language.
+• No sensitive information is exposed in error messages.
+
+US-S-08  |  MEDIUM
+As a User, I want the application to be available 99.9% of the time, so that I can access my finances whenever I need them.
+Acceptance Criteria
+Given the user attempts to access the application,
+When they make a request,
+Then the system responds successfully 99.9% of the time per calendar month (excluding scheduled maintenance).
+Notes
+• Scheduled maintenance does not exceed 2 hours per month.
+• Maintenance is announced 24 hours in advance.
+
+Appendix: Story Summary
+The following table provides a quick-reference summary of all user stories by actor and priority level.
+Actor	Critical	High	Medium	Low	Total
+Guest	2	1	0	0	3
+Registered User	9	23	9	0	41
+Administrator	2	6	1	0	9
+System / NFR	2	3	3	0	8
+TOTAL	15	33	13	0	61
+
+Personal Finance Tracker
+User Stories Document
+PFT-US-001 v1.0.0  |  June 9, 2026
+CONFIDENTIAL - FOR INTERNAL USE ONLY

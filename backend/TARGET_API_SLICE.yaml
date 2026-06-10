@@ -1,0 +1,16 @@
+paths:
+  /transactions:
+    get:
+      summary: "List transactions (filterable, paginated)"
+      operationId: get_transactions
+    post:
+      summary: Create transaction
+      operationId: post_transactions
+  /transactions/{id}:
+    patch:
+      summary: Update transaction
+      operationId: patch_transactions_id
+  /transactions/bulk:
+    delete:
+      summary: Bulk delete (up to 50)
+      operationId: delete_transactions_bulk

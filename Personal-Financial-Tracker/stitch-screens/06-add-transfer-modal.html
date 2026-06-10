@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PFT - Add Transaction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#99ffcd",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#fea619",
+                        "secondary-fixed": "#ffddb8",
+                        "primary-container": "#0f766e",
+                        "on-tertiary-fixed": "#002113",
+                        "tertiary-fixed": "#6ffbbe",
+                        "tertiary": "#005e3f",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "surface-dim": "#cbdbf5",
+                        "on-background": "#0b1c30",
+                        "tertiary-container": "#007952",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary": "#005c55",
+                        "outline-variant": "#bdc9c6",
+                        "on-surface": "#0b1c30",
+                        "secondary": "#855300",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#80d5cb",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#3e4947",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "outline": "#6e7977",
+                        "on-primary-container": "#a3faef",
+                        "on-primary-fixed-variant": "#00504a",
+                        "primary-fixed": "#9cf2e8",
+                        "on-secondary-container": "#684000",
+                        "on-primary-fixed": "#00201d",
+                        "surface": "#f8f9ff",
+                        "surface-tint": "#006a63",
+                        "on-secondary-fixed": "#2a1700",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-low": "#eff4ff",
+                        "surface-container": "#e5eeff",
+                        "inverse-surface": "#213145",
+                        "inverse-primary": "#80d5cb",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "container-max": "1280px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Blur effect for background */
+        .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Custom scrollbar for modal content if needed */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: theme('colors.outline-variant');
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base overflow-hidden">
+<!-- Background UI (Blurred) -->
+<div class="fixed inset-0 z-0 flex pointer-events-none filter blur-sm opacity-50">
+<!-- SideNav Simulation -->
+<div class="w-[240px] h-screen bg-surface border-r border-surface-variant flex flex-col p-md">
+<div class="mb-xl px-xs">
+<span class="font-title-lg text-title-lg font-black text-primary">PFT</span>
+</div>
+<div class="flex-1 space-y-2">
+<div class="bg-primary-container text-on-primary-container rounded-lg font-semibold flex items-center p-sm"><span class="material-symbols-outlined mr-sm">dashboard</span> Dashboard</div>
+<div class="text-on-surface-variant flex items-center p-sm"><span class="material-symbols-outlined mr-sm">account_balance</span> Accounts</div>
+<div class="text-on-surface-variant flex items-center p-sm"><span class="material-symbols-outlined mr-sm">receipt_long</span> Transactions</div>
+</div>
+</div>
+<!-- Main Content Area Simulation -->
+<div class="flex-1 flex flex-col">
+<div class="h-16 bg-surface shadow-sm flex items-center justify-between px-lg">
+<span class="font-title-lg text-title-lg">Dashboard</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant"></div>
+</div>
+<div class="p-lg grid grid-cols-3 gap-md">
+<div class="h-32 bg-surface-container-lowest rounded-xl shadow-sm"></div>
+<div class="h-32 bg-surface-container-lowest rounded-xl shadow-sm"></div>
+<div class="h-32 bg-surface-container-lowest rounded-xl shadow-sm"></div>
+<div class="col-span-2 h-64 bg-surface-container-lowest rounded-xl shadow-sm"></div>
+<div class="h-64 bg-surface-container-lowest rounded-xl shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm p-4">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest w-full max-w-[560px] rounded-xl shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.08),_0px_4px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col max-h-[921px] overflow-hidden">
+<!-- Modal Header / Tabs -->
+<div class="px-lg pt-lg pb-sm border-b border-surface-variant flex items-center justify-between">
+<div class="flex space-x-lg">
+<button class="font-title-lg text-title-lg text-primary font-bold border-b-2 border-primary pb-sm relative top-[1px]">
+                        Add Transaction
+                    </button>
+<button class="font-title-lg text-title-lg text-on-surface-variant hover:text-on-surface pb-sm transition-colors">
+                        Transfer Funds
+                    </button>
+</div>
+<button aria-label="Close modal" class="text-on-surface-variant hover:text-on-surface rounded-full p-1 hover:bg-surface-container transition-colors mb-sm">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-lg overflow-y-auto custom-scrollbar space-y-lg">
+<!-- Account & Type Row -->
+<div class="grid grid-cols-2 gap-md">
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Account</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-base text-body-base rounded-lg px-sm py-[10px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
+<option>Main Checking (...1234)</option>
+<option>Savings (...5678)</option>
+<option>Credit Card (...9012)</option>
+</select>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Type</label>
+<div class="flex bg-surface-container-low rounded-lg p-1 border border-outline-variant">
+<button class="flex-1 py-1 px-2 rounded font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container transition-colors">Income</button>
+<button class="flex-1 py-1 px-2 bg-surface-container-lowest rounded shadow-sm font-body-sm text-body-sm text-primary font-medium border border-outline-variant/50">Expense</button>
+</div>
+</div>
+</div>
+<!-- Amount -->
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Amount</label>
+<div class="relative">
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-headline-md text-headline-md text-on-surface-variant">$</span>
+<input class="w-full pl-xl pr-sm py-sm bg-surface-container-lowest border border-outline-variant text-on-surface font-headline-md text-headline-md rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="0.00" type="number"/>
+</div>
+</div>
+<!-- Category & Date Row -->
+<div class="grid grid-cols-2 gap-md">
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Category</label>
+<div class="relative">
+<div class="absolute left-sm top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-secondary text-[20px]">restaurant</span>
+</div>
+<select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-base text-body-base rounded-lg pl-xl pr-sm py-[10px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
+<option>Food &amp; Dining</option>
+<option>Groceries</option>
+<option>Transportation</option>
+<option>Utilities</option>
+<option>Entertainment</option>
+</select>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-body-base text-body-base rounded-lg px-sm py-[10px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" type="date" value="2023-10-24"/>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Description</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-body-base text-body-base rounded-lg px-sm py-[10px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g., Weekly groceries at Whole Foods" type="text"/>
+</div>
+<!-- Notes -->
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Notes (Optional)</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-body-base text-body-base rounded-lg px-sm py-[10px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none" placeholder="Add any extra details here..." rows="2"></textarea>
+</div>
+<!-- Receipt Upload -->
+<div class="flex flex-col space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Receipt</label>
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center text-center hover:bg-surface-container-low hover:border-primary transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant text-[32px] mb-2 group-hover:text-primary transition-colors">upload_file</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant"><span class="text-primary font-medium">Click to upload</span> or drag and drop</p>
+<p class="font-label-md text-label-md text-outline mt-1">SVG, PNG, JPG or PDF (max. 5MB)</p>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-lg border-t border-surface-variant bg-surface-bright flex justify-end space-x-sm">
+<button class="px-md py-2 rounded-lg font-body-base text-body-base font-medium text-primary border border-primary hover:bg-surface-container-low transition-colors">
+                    Cancel
+                </button>
+<button class="px-md py-2 rounded-lg font-body-base text-body-base font-medium bg-primary text-on-primary hover:bg-surface-tint transition-colors shadow-sm">
+                    Save Transaction
+                </button>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  guest
+  user
+  admin
+}
+
+enum UserStatus {
+  unverified
+  active
+  suspended
+}
+
+enum Language {
+  en
+  ar
+}
+
+enum AccountType {
+  cash
+  bank
+  credit
+  savings
+  investment
+  custom
+}
+
+enum CategoryType {
+  income
+  expense
+  system
+}
+
+enum TransactionType {
+  income
+  expense
+  transfer
+  initial_balance
+}
+
+enum RecurringFrequency {
+  daily
+  weekly
+  biweekly
+  monthly
+  quarterly
+  yearly
+}
+
+enum RecurringStatus {
+  active
+  paused
+  completed
+}
+
+model Role {
+  id    Int      @id @default(autoincrement())
+  name  RoleName @unique
+  users User[]
+
+  @@map("roles")
+}
+
+model User {
+  id                      String        @id @default(uuid()) @db.Uuid
+  fullName                String        @map("full_name") @db.VarChar(150)
+  email                   String        @unique @db.VarChar(255)
+  phone                   String?       @unique @db.VarChar(255)
+  passwordHash            String        @map("password_hash") @db.VarChar(255)
+  roleId                  Int           @map("role_id")
+  status                  UserStatus    @default(unverified)
+  preferredLanguage       Language      @default(en) @map("preferred_language")
+  preferredCurrency       String        @default("USD") @map("preferred_currency") @db.VarChar(3)
+  avatarUrl               String?       @map("avatar_url")
+  emailVerifiedAt         DateTime?     @map("email_verified_at")
+  twoFactorSecret         String?       @map("two_factor_secret")
+  notificationPreferences Json          @default("{\"budget80\":\"both\",\"budget100\":\"both\",\"monthlySummary\":\"email\",\"recurringReminder\":\"both\",\"broadcast\":\"in_app\"}") @map("notification_preferences")
+  failedLoginAttempts     Int           @default(0) @map("failed_login_attempts")
+  lockedUntil             DateTime?     @map("locked_until")
+  resetPasswordTokenHash  String?       @map("reset_password_token_hash")
+  resetPasswordExpiresAt  DateTime?     @map("reset_password_expires_at")
+  lastLoginAt             DateTime?     @map("last_login_at")
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
+  role                    Role          @relation(fields: [roleId], references: [id])
+  accounts                Account[]
+  transactions            Transaction[]
+  recurringTemplates      RecurringTemplate[]
+  budgets                 Budget[]
+  notifications           Notification[]
+  auditLogs               AuditLog[]
+  reports                 ReportHistory[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Account {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  accountName    String        @map("account_name") @db.VarChar(100)
+  accountType    AccountType   @map("account_type")
+  initialBalance Decimal       @map("initial_balance") @db.Decimal(18, 2)
+  currentBalance Decimal       @map("current_balance") @db.Decimal(18, 2)
+  currency       String        @db.VarChar(3)
+  color          String?       @db.VarChar(7)
+  icon           String?       @db.VarChar(50)
+  isArchived     Boolean       @default(false) @map("is_archived")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  recurring      RecurringTemplate[]
+
+  @@unique([userId, accountName])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Category {
+  id           String      @id @default(uuid()) @db.Uuid
+  nameEn       String      @unique @map("name_en") @db.VarChar(100)
+  nameAr       String      @map("name_ar") @db.VarChar(100)
+  type         CategoryType
+  icon         String?     @db.VarChar(50)
+  color        String?     @db.VarChar(7)
+  isSystem     Boolean     @default(false) @map("is_system")
+  isActive     Boolean     @default(true) @map("is_active")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  transactions Transaction[]
+  budgets      Budget[]
+  recurring    RecurringTemplate[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id              String           @id @default(uuid()) @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  accountId       String           @map("account_id") @db.Uuid
+  categoryId      String?          @map("category_id") @db.Uuid
+  type            TransactionType
+  amount          Decimal          @db.Decimal(18, 2)
+  note            String?
+  description     String?          @db.VarChar(200)
+  transactionDate DateTime         @map("transaction_date") @db.Date
+  receiptUrl      String?          @map("receipt_url")
+  isRecurring     Boolean          @default(false) @map("is_recurring")
+  recurringId     String?          @map("recurring_id") @db.Uuid
+  transferPairId  String?          @map("transfer_pair_id") @db.Uuid
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account          @relation(fields: [accountId], references: [id])
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  recurring       RecurringTemplate? @relation(fields: [recurringId], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([transactionDate])
+  @@map("transactions")
+}
+
+model RecurringTemplate {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @map("user_id") @db.Uuid
+  accountId    String              @map("account_id") @db.Uuid
+  type         TransactionType
+  amount       Decimal             @db.Decimal(18, 2)
+  categoryId   String              @map("category_id") @db.Uuid
+  description  String?             @db.VarChar(200)
+  frequency    RecurringFrequency
+  startDate    DateTime            @map("start_date") @db.Date
+  endDate      DateTime?           @map("end_date") @db.Date
+  nextRunDate  DateTime            @map("next_run_date") @db.Date
+  status       RecurringStatus     @default(active)
+  skippedDates DateTime[]          @default([]) @map("skipped_dates")
+  createdAt    DateTime            @default(now()) @map("created_at")
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account             @relation(fields: [accountId], references: [id])
+  category     Category            @relation(fields: [categoryId], references: [id])
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([nextRunDate])
+  @@map("recurring_transactions")
+}
+
+model Budget {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  categoryId   String   @map("category_id") @db.Uuid
+  amount       Decimal  @db.Decimal(18, 2)
+  month        Int
+  year         Int
+  alertSent80  Boolean  @default(false) @map("alert_sent_80")
+  alertSent100 Boolean  @default(false) @map("alert_sent_100")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId])
+  @@map("budgets")
+}
+
+model Notification {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  title      String    @db.VarChar(200)
+  message    String
+  readFlag   Boolean   @default(false) @map("read_flag")
+  type       String    @db.VarChar(50)
+  link       String?   @db.VarChar(500)
+  archivedAt DateTime? @map("archived_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  action     String   @db.VarChar(100)
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String?  @map("entity_id") @db.Uuid
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  timestamp  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model ReportHistory {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  reportType  String   @map("report_type") @db.VarChar(50)
+  period      String   @db.VarChar(50)
+  filters     Json?
+  pdfUrl      String   @map("pdf_url")
+  generatedAt DateTime @default(now()) @map("generated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("report_history")
+}
+
+model RevokedToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("revoked_tokens")
+}

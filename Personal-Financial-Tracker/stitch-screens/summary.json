@@ -1,0 +1,222 @@
+﻿[
+    {
+        "index":  1,
+        "title":  "Admin Panel Dashboard",
+        "screenId":  "4070af943c33417fa23b4e34b6d4a893",
+        "resource":  "projects/3758099328677461575/screens/4070af943c33417fa23b4e34b6d4a893",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\01-admin-panel-dashboard.html",
+        "htmlBytes":  22747,
+        "description":  "PFT Admin Dashboard lock Admin Verification Required Please enter the 6-digit code from your authenticator app to access the panel. Invalid code. Please try again. Verify phone_iphone Use Google Authenticator monitoring ..."
+    },
+    {
+        "index":  2,
+        "title":  "Transactions Full Page",
+        "screenId":  "3bbe12c183334c7bb6ce8f9a7db0618b",
+        "resource":  "projects/3758099328677461575/screens/3bbe12c183334c7bb6ce8f9a7db0618b",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\02-transactions-full-page.html",
+        "htmlBytes":  26216,
+        "description":  "Transactions - Personal Finance Tracker Personal Finance Tracker notifications PFT Admin Portfolio Manager dashboard Dashboard account_balance Accounts receipt_long Transactions account_balance_wallet Budgets event_repea..."
+    },
+    {
+        "index":  3,
+        "title":  "Budget Overview Page",
+        "screenId":  "819fbdc849df4773b60734a53aef70f2",
+        "resource":  "projects/3758099328677461575/screens/819fbdc849df4773b60734a53aef70f2",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\03-budget-overview-page.html",
+        "htmlBytes":  27677,
+        "description":  "PFT - Budgets PA PFT Admin Portfolio Manager dashboard Dashboard account_balance Accounts receipt_long Transactions account_balance_wallet Budgets event_repeat Recurring bar_chart Reports notifications Notifications sett..."
+    },
+    {
+        "index":  4,
+        "title":  "Notification Center",
+        "screenId":  "a752fd8ae6954f0dbe828aa605d3b16e",
+        "resource":  "projects/3758099328677461575/screens/a752fd8ae6954f0dbe828aa605d3b16e",
+        "dimensions":  "2560x2188",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\04-notification-center.html",
+        "htmlBytes":  16843,
+        "description":  "PFT - Notifications PFT Dashboard Transactions Budgets Reports EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© Login Notifications Stay updated on your financial activities. done_all Mark All as Read All Unread Budget Alerts Recurring Monthly Sum..."
+    },
+    {
+        "index":  5,
+        "title":  "Main Dashboard",
+        "screenId":  "57afacb3ffbe4ef4addbe0a2e817cb75",
+        "resource":  "projects/3758099328677461575/screens/57afacb3ffbe4ef4addbe0a2e817cb75",
+        "dimensions":  "2560x2578",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\05-main-dashboard.html",
+        "htmlBytes":  29494,
+        "description":  "PFT - Dashboard PFT Personal Finance Tracker dashboard Dashboard account_balance Accounts receipt_long Transactions savings Budgets event_repeat Recurring bar_chart Reports notifications Notifications settings Settings l..."
+    },
+    {
+        "index":  6,
+        "title":  "Add/Transfer Modal",
+        "screenId":  "73e0742d29f141a586cff7179d27ec97",
+        "resource":  "projects/3758099328677461575/screens/73e0742d29f141a586cff7179d27ec97",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\06-add-transfer-modal.html",
+        "htmlBytes":  14582,
+        "description":  "PFT - Add Transaction PFT dashboard Dashboard account_balance Accounts receipt_long Transactions Dashboard Add Transaction Transfer Funds close Account Main Checking (...1234) Savings (...5678) Credit Card (...9012) expa..."
+    },
+    {
+        "index":  7,
+        "title":  "Profile \u0026 Settings",
+        "screenId":  "8e35de9a7ef9457886ea6a9f2d8c7982",
+        "resource":  "projects/3758099328677461575/screens/8e35de9a7ef9457886ea6a9f2d8c7982",
+        "dimensions":  "2560x3036",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\07-profile-settings.html",
+        "htmlBytes":  24216,
+        "description":  "PFT - Profile and Settings PFT Dashboard Transactions Budgets Reports EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© Login person Profile security Security notifications Notifications settings Preferences warning Danger Zone Profile \u0026amp; Settin..."
+    },
+    {
+        "index":  8,
+        "title":  "Login with Error State",
+        "screenId":  "5a0af50901cb45e5b64d5d0bc2a4df3c",
+        "resource":  "projects/3758099328677461575/screens/5a0af50901cb45e5b64d5d0bc2a4df3c",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\08-login-with-error-state.html",
+        "htmlBytes":  16218,
+        "description":  "Login - PFT PFT Personal Finance Tracker Manage your wealth securely. Access your portfolio, track transactions, and generate institutional-grade reports with our bilingual platform. PFT EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© Welcome bac..."
+    },
+    {
+        "index":  9,
+        "title":  "Add/Edit Budget Modal",
+        "screenId":  "ad008be2befa4c97baf4cf825b312b74",
+        "resource":  "projects/3758099328677461575/screens/ad008be2befa4c97baf4cf825b312b74",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\09-add-edit-budget-modal.html",
+        "htmlBytes":  12528,
+        "description":  "Add/Edit Budget Modal - Personal Finance Tracker Add Budget close Category restaurant Food arrow_drop_down error You already have a budget for Food in June 2026 Month January February March April May June July August Sep..."
+    },
+    {
+        "index":  10,
+        "title":  "Account Detail Page",
+        "screenId":  "176f63e178fb45a9830060240bc43747",
+        "resource":  "projects/3758099328677461575/screens/176f63e178fb45a9830060240bc43747",
+        "dimensions":  "3040x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\10-account-detail-page.html",
+        "htmlBytes":  19352,
+        "description":  "PFT - Account Details PFT Personal Finance Tracker dashboard Dashboard account_balance Accounts receipt_long Transactions savings Budgets event_repeat Recurring bar_chart Reports notifications Notifications settings Sett..."
+    },
+    {
+        "index":  11,
+        "title":  "Register with Email",
+        "screenId":  "b4aa7d63cd8a4af88e3b16ed6fb8b1af",
+        "resource":  "projects/3758099328677461575/screens/b4aa7d63cd8a4af88e3b16ed6fb8b1af",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\11-register-with-email.html",
+        "htmlBytes":  13240,
+        "description":  "Register - PFT Create Account Join PFT to start tracking your finances. Ø§ÙØ¶Ù Ø¥ÙÙ PFT ÙØ¨Ø¯Ø¡ ØªØªØ¨Ø¹ Ø£Ù ÙØ§ÙÙ. Full Name / Ø§ÙØ§Ø³Ù Ø§ÙÙØ§Ù Ù person Email Address / Ø§ÙØ¨Ø±ÙØ¯ Ø§ÙØ¥ÙÙØªØ±ÙÙÙ mail ..."
+    },
+    {
+        "index":  12,
+        "title":  "Admin User Management \u0026 Audit Log",
+        "screenId":  "136b58a92f3b43d0875f76338ce0a1b5",
+        "resource":  "projects/3758099328677461575/screens/136b58a92f3b43d0875f76338ce0a1b5",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\12-admin-user-management-audit-log.html",
+        "htmlBytes":  21340,
+        "description":  "PFT - Admin Management \u0026amp; Audit Log admin_panel_settings PFT Admin dashboard Overview group Users \u0026amp; Audit settings System Settings logout Exit Admin admin_panel_settings PFT Admin menu User Management Manage platf..."
+    },
+    {
+        "index":  13,
+        "title":  "Landing \u0026 Demo Dashboard",
+        "screenId":  "4eae54325d7a4416b0cc6b66048f5b87",
+        "resource":  "projects/3758099328677461575/screens/4eae54325d7a4416b0cc6b66048f5b87",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\13-landing-demo-dashboard.html",
+        "htmlBytes":  15814,
+        "description":  "PFT - Personal Finance Tracker PFT Dashboard Transactions Budgets Reports EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© Login Get Started Take Control of Your Finances Experience institutional-grade tracking with our intuitive dashboard. Track ..."
+    },
+    {
+        "index":  14,
+        "title":  "Forgot Password Flow",
+        "screenId":  "d636c482f67649dca9a9de28a8c34c9b",
+        "resource":  "projects/3758099328677461575/screens/d636c482f67649dca9a9de28a8c34c9b",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\14-forgot-password-flow.html",
+        "htmlBytes":  12465,
+        "description":  "Forgot Password - PFT PFT EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© Login Forgot Password ÙØ³ÙØª ÙÙÙ Ø© Ø§ÙÙ Ø±ÙØ±Ø Ø£Ø¯Ø®Ù Ø¨Ø±ÙØ¯Ù Ø§ÙØ¥ÙÙØªØ±ÙÙÙ. Email Address / Ø§ÙØ¨Ø±ÙØ¯ Ø§ÙØ¥ÙÙØªØ±ÙÙÙ mail Send Reset Link / Ø¥..."
+    },
+    {
+        "index":  15,
+        "title":  "PFT Design System Artboard",
+        "screenId":  "393d4bad64044704b21d9241c357557a",
+        "resource":  "projects/3758099328677461575/screens/393d4bad64044704b21d9241c357557a",
+        "dimensions":  "2560x3214",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\15-pft-design-system-artboard.html",
+        "htmlBytes":  16675,
+        "description":  "PFT Design System Artboard account_balance PFT Design System EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© 1. Brand \u0026amp; Colors Primary Primary Container Secondary Sec. Container Success (Tertiary) Succ. Container Danger (Error) Err. Container..."
+    },
+    {
+        "index":  16,
+        "title":  "Fixed Report PDF Preview",
+        "screenId":  "bd32f5eaa7d04b04b9a9775e1cc73adf",
+        "resource":  "projects/3758099328677461575/screens/bd32f5eaa7d04b04b9a9775e1cc73adf",
+        "dimensions":  "2560x3370",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\16-fixed-report-pdf-preview.html",
+        "htmlBytes":  21055,
+        "description":  "Report PDF Preview - FinancePro account_balance_wallet FinancePro Institutional Grade dashboard Dashboard account_balance Accounts receipt_long Transactions account_balance_wallet Budgets event_repeat Recurring bar_chart..."
+    },
+    {
+        "index":  17,
+        "title":  "Accounts List",
+        "screenId":  "9c60c92e79a343f3afdc2d461840372b",
+        "resource":  "projects/3758099328677461575/screens/9c60c92e79a343f3afdc2d461840372b",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\17-accounts-list.html",
+        "htmlBytes":  20637,
+        "description":  "PFT - Accounts account_balance_wallet PFT Personal Finance Tracker dashboard Dashboard account_balance Accounts receipt_long Transactions savings Budgets event_repeat Recurring bar_chart Reports notifications Notificatio..."
+    },
+    {
+        "index":  18,
+        "title":  "Register with Phone / OTP",
+        "screenId":  "cfbc56c0af0f45a1ae139f31fe05bd7e",
+        "resource":  "projects/3758099328677461575/screens/cfbc56c0af0f45a1ae139f31fe05bd7e",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\18-register-with-phone-otp.html",
+        "htmlBytes":  22159,
+        "description":  "PFT - Register with Phone PFT EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ© phonelink_ring Verify your phone We\u0027ve sent a 6-digit code to +20 100 123 4567 Phone Number / Ø±ÙÙ Ø§ÙÙØ§ØªÙ ðªð¬ +20 ðºð¸ +1 ð¬ð§ +44 ð¦ðª +971 exp..."
+    },
+    {
+        "index":  19,
+        "title":  "Recurring Transactions Management",
+        "screenId":  "f8659187fafe4cf78efb9934a9dcc59c",
+        "resource":  "projects/3758099328677461575/screens/f8659187fafe4cf78efb9934a9dcc59c",
+        "dimensions":  "2560x2048",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\19-recurring-transactions-management.html",
+        "htmlBytes":  25115,
+        "description":  "Recurring Transactions - FinancePro FinancePro Institutional Grade dashboard Dashboard account_balance Accounts receipt_long Transactions account_balance_wallet Budgets event_repeat Recurring bar_chart Reports notificati..."
+    },
+    {
+        "index":  20,
+        "title":  "Financial Reports \u0026 Analytics",
+        "screenId":  "1874c6d3dfbe4f71bd666bfdb7c69338",
+        "resource":  "projects/3758099328677461575/screens/1874c6d3dfbe4f71bd666bfdb7c69338",
+        "dimensions":  "2560x3126",
+        "deviceType":  "DESKTOP",
+        "htmlFile":  "stitch-screens\\20-financial-reports-analytics.html",
+        "htmlBytes":  26423,
+        "description":  "Financial Reports - FinancePro FinancePro Institutional Grade dashboard Dashboard account_balance Accounts receipt_long Transactions account_balance_wallet Budgets event_repeat Recurring bar_chart Reports notifications N..."
+    }
+]

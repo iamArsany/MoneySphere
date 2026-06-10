@@ -1,0 +1,406 @@
+﻿<!DOCTYPE html>
+
+<html class="light" dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PFT - Profile and Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#dce9ff",
+                      "tertiary": "#005e3f",
+                      "secondary": "#855300",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary": "#ffffff",
+                      "inverse-primary": "#80d5cb",
+                      "on-secondary-container": "#684000",
+                      "error": "#ba1a1a",
+                      "primary-fixed": "#9cf2e8",
+                      "surface": "#f8f9ff",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#007952",
+                      "on-secondary-fixed-variant": "#653e00",
+                      "on-tertiary-fixed": "#002113",
+                      "primary-container": "#0f766e",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "on-background": "#0b1c30",
+                      "on-surface": "#0b1c30",
+                      "on-secondary-fixed": "#2a1700",
+                      "surface-container": "#e5eeff",
+                      "primary": "#005c55",
+                      "secondary-fixed-dim": "#ffb95f",
+                      "background": "#f8f9ff",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary-fixed-variant": "#00504a",
+                      "outline": "#6e7977",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#eff4ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-error": "#ffffff",
+                      "surface-tint": "#006a63",
+                      "on-primary-container": "#a3faef",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-container": "#fea619",
+                      "outline-variant": "#bdc9c6",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary-fixed": "#ffddb8",
+                      "primary-fixed-dim": "#80d5cb",
+                      "surface-dim": "#cbdbf5",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#6ffbbe",
+                      "on-tertiary-container": "#99ffcd",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#00201d",
+                      "on-surface-variant": "#3e4947",
+                      "inverse-surface": "#213145"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "12px",
+                      "base": "4px",
+                      "lg": "24px",
+                      "xs": "8px",
+                      "md": "16px",
+                      "container-max": "1280px",
+                      "xl": "32px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "36px",
+                              {
+                                      "lineHeight": "44px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #bdc9c6;
+            border-radius: 20px;
+        }
+      </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-base">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-on-primary-fixed shadow-sm w-full sticky top-0 z-50">
+<div class="flex justify-between items-center px-lg py-md w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                PFT
+            </div>
+<nav class="hidden md:flex gap-lg items-center">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-title-lg text-title-lg cursor-pointer transition-transform active:scale-95" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-title-lg text-title-lg cursor-pointer transition-transform active:scale-95" href="#">Transactions</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-title-lg text-title-lg cursor-pointer transition-transform active:scale-95" href="#">Budgets</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-title-lg text-title-lg cursor-pointer transition-transform active:scale-95" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="font-title-lg text-title-lg text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity">EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ©</button>
+<button class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors">Login</button>
+</div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-grow w-full max-w-container-max mx-auto flex flex-col md:flex-row py-xl px-lg gap-xl">
+<!-- Left Sidebar Navigation -->
+<aside class="w-full md:w-[240px] flex-shrink-0">
+<nav class="flex flex-col gap-sm sticky top-[100px]">
+<a class="flex items-center gap-sm px-md py-sm bg-surface-container-high rounded-lg text-primary font-title-lg text-title-lg" href="#profile">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                    Profile
+                </a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-title-lg text-title-lg" href="#security">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+                    Security
+                </a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-title-lg text-title-lg" href="#notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                    Notifications
+                </a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors font-title-lg text-title-lg" href="#preferences">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    Preferences
+                </a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-error hover:bg-error-container transition-colors font-title-lg text-title-lg mt-lg" href="#danger-zone">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+                    Danger Zone
+                </a>
+</nav>
+</aside>
+<!-- Right Content Area -->
+<section class="flex-grow flex flex-col gap-xl">
+<!-- Page Header -->
+<div>
+<h1 class="font-display-lg text-display-lg md:font-display-lg md:text-display-lg font-display-lg-mobile text-display-lg-mobile text-primary">Profile &amp; Settings</h1>
+<p class="font-body-base text-body-base text-on-surface-variant mt-base">Manage your personal information, preferences, and account security.</p>
+</div>
+<!-- Profile Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-lg border border-outline-variant/30 relative" id="profile">
+<h2 class="font-headline-md text-headline-md text-primary mb-md">Personal Information</h2>
+<div class="flex flex-col md:flex-row gap-xl items-start">
+<!-- Avatar Uploader -->
+<div class="flex flex-col items-center gap-sm">
+<div class="relative w-32 h-32 rounded-full overflow-hidden bg-surface-container border-2 border-outline-variant flex items-center justify-center group cursor-pointer">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a modern corporate executive, looking confident and approachable. The lighting is bright and high-key, creating a clean, crisp, and sophisticated light-mode aesthetic. Subtle teal accents hint at institutional stability. The background is a soft, out-of-focus modern office setting in predominantly white and slate tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5vOqCBOv-95MNw4qB11x4Gk6Pf6pUd08MoZ2G6NyHvbUjPxWSbvlmCWHCkNwdcJmOohCU4Sxq93CN7SQcgTOkfisiUOQGYrCO5QbJKiEVaqlIbUL4lxFTDgFouCn5taLcJw7-arrWBQ1mz6gDYlxQBCQ3n9ir6fUh_2nyOfd98L1Qbun06HufaBwjaHH9dAGaXGbN4NqGelaJPWqNz1Qw4l1RTs9CjfTiXchcnITzyAO5wkWrGM2EPLjsnwk46O6KHR27sV5cWNE"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="photo_camera">photo_camera</span>
+</div>
+</div>
+<button class="font-label-md text-label-md text-primary hover:underline">Change Photo</button>
+</div>
+<!-- Profile Form -->
+<div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-md w-full">
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-on-surface-variant">Full Name</label>
+<input class="px-sm py-xs border border-outline-variant rounded-md bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-base text-body-base text-on-surface" type="text" value="Ahmad Al-Fayed"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-on-surface-variant">Email Address</label>
+<input class="px-sm py-xs border border-outline-variant rounded-md bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-base text-body-base text-on-surface" type="email" value="ahmad.alfayed@example.com"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-on-surface-variant">Phone Number</label>
+<input class="px-sm py-xs border border-outline-variant rounded-md bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-base text-body-base text-on-surface" type="tel" value="+971 50 123 4567"/>
+</div>
+<!-- Language Preference inline -->
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-on-surface-variant">Preferred Interface Language</label>
+<div class="flex gap-md items-center h-full pt-1">
+<label class="flex items-center gap-xs cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary" name="language" type="radio" value="en"/>
+<span class="font-body-base text-body-base">English</span>
+</label>
+<label class="flex items-center gap-xs cursor-pointer">
+<input class="text-primary focus:ring-primary" name="language" type="radio" value="ar"/>
+<span class="font-body-base text-body-base">Ø§ÙØ¹Ø±Ø¨ÙØ© (Arabic)</span>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-on-surface-variant">Base Currency</label>
+<select class="px-sm py-xs border border-outline-variant rounded-md bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-base text-body-base text-on-surface">
+<option value="AED">AED - UAE Dirham</option>
+<option value="USD">USD - US Dollar</option>
+<option value="EUR">EUR - Euro</option>
+<option value="SAR">SAR - Saudi Riyal</option>
+</select>
+</div>
+</div>
+</div>
+<div class="mt-lg flex justify-end">
+<button class="bg-primary text-on-primary px-lg py-sm rounded-lg font-title-lg text-title-lg hover:bg-primary/90 transition-colors">Save Profile</button>
+</div>
+</div>
+<!-- Notification Preferences Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-lg border border-outline-variant/30" id="notifications">
+<h2 class="font-headline-md text-headline-md text-primary mb-sm">Notification Preferences</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg">Control how and when PFT communicates with you regarding your financial tracking.</p>
+<div class="flex flex-col gap-md">
+<!-- Toggle Row 1 -->
+<div class="flex items-center justify-between py-sm border-b border-outline-variant/20 last:border-0">
+<div class="flex flex-col">
+<span class="font-title-lg text-title-lg text-on-surface">Budget Alert (80%)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Notify me when any budget reaches 80% of its limit.</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">In-app</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Toggle Row 2 -->
+<div class="flex items-center justify-between py-sm border-b border-outline-variant/20 last:border-0">
+<div class="flex flex-col">
+<span class="font-title-lg text-title-lg text-on-surface">Budget Exceeded</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Critical alert when a budget is surpassed.</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">In-app</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center gap-xs border-l border-outline-variant/30 pl-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Email</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Toggle Row 3 -->
+<div class="flex items-center justify-between py-sm border-b border-outline-variant/20 last:border-0">
+<div class="flex flex-col">
+<span class="font-title-lg text-title-lg text-on-surface">Recurring Reminder</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Reminders for upcoming recurring transactions.</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">In-app</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center gap-xs border-l border-outline-variant/30 pl-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Email</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Toggle Row 4 -->
+<div class="flex items-center justify-between py-sm border-b border-outline-variant/20 last:border-0">
+<div class="flex flex-col">
+<span class="font-title-lg text-title-lg text-on-surface">Monthly Summary</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">A comprehensive overview of your monthly financial activity.</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Email Only</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Danger Zone -->
+<div class="bg-error-container/20 border border-error/30 rounded-xl p-lg relative overflow-hidden" id="danger-zone">
+<!-- Decorative red accent -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<h2 class="font-headline-md text-headline-md text-error mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+                    Danger Zone
+                </h2>
+<p class="font-body-base text-body-base text-on-surface mb-lg">Irreversible actions regarding your PFT account and financial data.</p>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-lowest/50 p-md rounded-lg border border-error/10">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Delete Account</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 max-w-xl">Permanently remove your account and all associated data. This action cannot be undone, and all transaction history, budgets, and reports will be lost.</p>
+</div>
+<button class="bg-error text-on-error px-lg py-sm rounded-lg font-title-lg text-title-lg hover:bg-error/90 transition-colors whitespace-nowrap shadow-sm flex-shrink-0">
+                        Delete Account
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-on-primary-fixed mt-auto border-t border-outline-variant dark:border-on-primary-fixed-variant w-full">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg py-xl w-full max-w-container-max mx-auto gap-md">
+<div class="font-title-lg text-title-lg font-bold text-primary dark:text-primary-fixed">
+                PFT
+            </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+                Â© 2024 PFT Personal Finance Tracker. All rights reserved.
+            </div>
+<div class="flex gap-md">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Contact Us</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Register Now</a>
+</div>
+</div>
+</footer>
+</body></html>

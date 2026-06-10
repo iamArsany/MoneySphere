@@ -1,0 +1,759 @@
+openapi: 3.0.3
+info:
+  title: Personal Finance Tracker API
+  description: REST API for the Personal Finance Tracker (PFT). Generated from SRS section 6.3.2 API Endpoints.
+  version: 2.0.0
+servers:
+- url: https://api.pft.example.com/v1
+paths:
+  /auth/register:
+    post:
+      summary: Register new user
+      description: Register new user
+      operationId: post_auth_register
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /auth/login:
+    post:
+      summary: Authenticate and receive tokens
+      description: Authenticate and receive tokens
+      operationId: post_auth_login
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /auth/logout:
+    post:
+      summary: Invalidate session
+      description: Invalidate session
+      operationId: post_auth_logout
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Refresh access token
+      operationId: post_auth_refresh
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /auth/forgot-password:
+    post:
+      summary: Request password reset email
+      description: Request password reset email
+      operationId: post_auth_forgot_password
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /auth/reset-password:
+    post:
+      summary: Set new password via reset token
+      description: Set new password via reset token
+      operationId: post_auth_reset_password
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /users/me:
+    get:
+      summary: Get current user profile
+      description: Get current user profile
+      operationId: get_users_me
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    delete:
+      summary: Delete account (GDPR erasure)
+      description: Delete account (GDPR erasure)
+      operationId: delete_users_me
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update profile
+      description: Update profile
+      operationId: patch_users_me
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /accounts:
+    get:
+      summary: List all accounts
+      description: List all accounts
+      operationId: get_accounts
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    post:
+      summary: Create account
+      description: Create account
+      operationId: post_accounts
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /accounts/{id}:
+    get:
+      summary: Get account detail
+      description: Get account detail
+      operationId: get_accounts_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    delete:
+      summary: Delete or archive account
+      description: Delete or archive account
+      operationId: delete_accounts_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update account metadata
+      description: Update account metadata
+      operationId: patch_accounts_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /accounts/transfer:
+    post:
+      summary: Transfer between accounts
+      description: Transfer between accounts
+      operationId: post_accounts_transfer
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /transactions:
+    get:
+      summary: "List transactions (filterable, paginated)"
+      description: "List transactions (filterable, paginated)"
+      operationId: get_transactions
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    post:
+      summary: Create transaction
+      description: Create transaction
+      operationId: post_transactions
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /transactions/{id}:
+    get:
+      summary: Get transaction detail
+      description: Get transaction detail
+      operationId: get_transactions_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    delete:
+      summary: Delete transaction
+      description: Delete transaction
+      operationId: delete_transactions_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update transaction
+      description: Update transaction
+      operationId: patch_transactions_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /transactions/bulk:
+    delete:
+      summary: Bulk delete (up to 50)
+      description: Bulk delete (up to 50)
+      operationId: delete_transactions_bulk
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /recurring:
+    get:
+      summary: List recurring templates
+      description: List recurring templates
+      operationId: get_recurring
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    post:
+      summary: Create recurring template --- Page 18 --- PFT-SRS-001 | Personal Finance Tracker — Software Requirements Specification |
+      description: Create recurring template --- Page 18 --- PFT-SRS-001 | Personal Finance Tracker — Software Requirements Specification | v2.0.0 CONFIDENTIAL — FOR INTERNAL USE ONLY Page 18 Method Endpoint Description
+      operationId: post_recurring
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /recurring/{id}:
+    delete:
+      summary: Delete template
+      description: Delete template
+      operationId: delete_recurring_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update template
+      description: Update template
+      operationId: patch_recurring_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /recurring/{id}/skip:
+    post:
+      summary: Skip next occurrence
+      description: Skip next occurrence
+      operationId: post_recurring_id_skip
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /budgets:
+    get:
+      summary: List budgets
+      description: List budgets
+      operationId: get_budgets
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    post:
+      summary: Create budget
+      description: Create budget
+      operationId: post_budgets
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /budgets/{id}:
+    delete:
+      summary: Delete budget
+      description: Delete budget
+      operationId: delete_budgets_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update budget
+      description: Update budget
+      operationId: patch_budgets_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /categories:
+    get:
+      summary: List all active categories
+      description: List all active categories
+      operationId: get_categories
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /reports/generate:
+    post:
+      summary: Generate report (returns structured data)
+      description: Generate report (returns structured data)
+      operationId: post_reports_generate
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /reports/export/pdf:
+    post:
+      summary: Generate and export PDF
+      description: Generate and export PDF
+      operationId: post_reports_export_pdf
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /reports/history:
+    get:
+      summary: List previously generated reports
+      description: List previously generated reports
+      operationId: get_reports_history
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /notifications:
+    get:
+      summary: List notifications
+      description: List notifications
+      operationId: get_notifications
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /notifications/{id}/read:
+    patch:
+      summary: Mark notification as read
+      description: Mark notification as read
+      operationId: patch_notifications_id_read
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /notifications/read-all:
+    patch:
+      summary: Mark all as read
+      description: Mark all as read
+      operationId: patch_notifications_read_all
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /notifications/preferences:
+    get:
+      summary: Get notification preferences
+      description: Get notification preferences
+      operationId: get_notifications_preferences
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      summary: Update notification preferences
+      description: Update notification preferences
+      operationId: patch_notifications_preferences
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/users:
+    get:
+      summary: List all users (admin only)
+      description: List all users (admin only)
+      operationId: get_admin_users
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/users/{id}/status:
+    patch:
+      summary: Suspend or reactivate user
+      description: Suspend or reactivate user
+      operationId: patch_admin_users_id_status
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/users/{id}:
+    delete:
+      summary: Delete user (GDPR — admin)
+      description: Delete user (GDPR — admin)
+      operationId: delete_admin_users_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/analytics:
+    get:
+      summary: Platform analytics
+      description: Platform analytics
+      operationId: get_admin_analytics
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/audit:
+    get:
+      summary: Admin audit log
+      description: Admin audit log
+      operationId: get_admin_audit
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/categories:
+    post:
+      summary: Create category
+      description: Create category
+      operationId: post_admin_categories
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/categories/{id}:
+    patch:
+      summary: Update category
+      description: Update category
+      operationId: patch_admin_categories_id
+      parameters:
+      - name: id
+        in: path
+        description: Resource identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+  /admin/broadcast:
+    post:
+      summary: Send broadcast notification
+      description: Send broadcast notification
+      operationId: post_admin_broadcast
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+components: {}

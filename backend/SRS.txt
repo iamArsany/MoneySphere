@@ -1,0 +1,811 @@
+
+SOFTWARE REQUIREMENTS SPECIFICATION
+Personal Finance Tracker (PFT)
+
+Document Number	PFT-SRS-001
+Version	2.0.0
+Status	FINAL CONSOLIDATED DRAFT
+Date	June 9, 2026
+Standard	IEEE 830 / ISO/IEC/IEEE 29148:2018
+Prepared By	Business Analyst / System Architect
+Audience	Stakeholders, Architects, Developers, QA
+
+CONFIDENTIAL — FOR INTERNAL USE ONLY
+
+Document Revision History
+Version	Date	Author	Description
+1.0	June 2025	System Architect	Initial SRS draft (PFT_SRS_v1_0)
+1.1	June 2025	Business Analyst	Supplementary SRS (ChatGPT variant)
+1.2	June 2025	Senior Developer	Requirement specification baseline
+1.3	June 2026	Claude (Organizer)	Reorganized / cleaned version
+2.0.0	June 9, 2026	Consolidated Author	Master consolidated SRS — best content merged from all four source documents
+
+NOTE: Version 2.0.0 is the authoritative consolidated document. It supersedes all prior versions. Content was selected section-by-section from the four source documents based on completeness, clarity, IEEE compliance, and alignment with software engineering best practices.
+
+1. Introduction
+1.1 Purpose
+This Software Requirements Specification (SRS) defines the complete functional and non-functional requirements for the Personal Finance Tracker (PFT), a responsive, multi-lingual web application that helps individuals manage personal finances through income and expense tracking, budget planning, and financial analytics.
+This document is the authoritative reference for all project stakeholders — business analysts, software architects, developers, QA engineers, project managers, and support teams — throughout the entire software development lifecycle. It provides sufficient detail for a development team to begin implementation without ambiguity.
+1.2 Scope
+The Personal Finance Tracker is a standalone, browser-based web application with no direct banking API integration in version 1.0. It provides:
+    • User registration, authentication, and role-based access control
+    • Multi-account financial management (cash, bank, credit card, digital wallet, savings, investment)
+    • Full income and expense transaction tracking with categorization
+    • Monthly budget planning with automated threshold alerts
+    • Recurring transaction management with configurable frequencies
+    • Financial analytics dashboard with charts and summaries
+    • Monthly and yearly report generation with PDF export
+    • In-app and email notification system
+    • Administrative platform management interface
+    • Full Arabic (RTL) and English (LTR) localization
+
+The system is intended for individuals seeking better financial management and spending control. It is explicitly NOT in scope for version 1.0 to provide bank integrations, investment tracking, multi-currency conversion within an account, native mobile applications, or AI-driven financial advice.
+1.3 Definitions, Acronyms, and Abbreviations
+Term / Acronym	Definition
+PFT	Personal Finance Tracker — the system described in this document
+SRS	Software Requirements Specification
+RBAC	Role-Based Access Control
+CRUD	Create, Read, Update, Delete
+JWT	JSON Web Token — used for stateless authentication
+OTP	One-Time Password — used for phone-based authentication
+2FA	Two-Factor Authentication
+REST	Representational State Transfer — architectural style for APIs
+API	Application Programming Interface
+RTL	Right-to-Left — text direction used in Arabic
+LTR	Left-to-Right — text direction used in English
+SPA	Single-Page Application
+PDF	Portable Document Format
+WCAG	Web Content Accessibility Guidelines
+BCrypt	Cryptographic hashing function used for password storage
+Argon2id	Modern, memory-hard password hashing algorithm (preferred over BCrypt)
+i18n	Internationalization — designing software for multiple languages
+l10n	Localization — adapting software to a specific locale
+SUS	System Usability Scale — standardized usability measurement
+MVP	Minimum Viable Product
+TOTP	Time-based One-Time Password — used for admin 2FA
+Account	A financial instrument owned by a user (cash, bank, credit card, etc.)
+Transaction	A single financial event (income or expense)
+Budget	A monthly spending limit set per expense category
+Category	A label assigned to transactions (e.g., Food, Transport, Bills)
+Recurring Tx	A transaction automatically repeated on a defined schedule
+Dashboard	The main UI screen showing financial summary and charts
+Net Balance	Total Income minus Total Expenses
+Savings Rate	((Total Income − Total Expenses) / Total Income) × 100
+1.4 References
+    • IEEE Std 830-1998 — Recommended Practice for Software Requirements Specifications
+    • ISO/IEC/IEEE 29148:2018 — Systems and Software Engineering: Requirements Engineering
+    • OWASP Top 10 (2021) — Web Application Security Risks
+    • WCAG 2.1 Level AA — Web Content Accessibility Guidelines
+    • RFC 7519 — JSON Web Token (JWT)
+    • GDPR — General Data Protection Regulation
+    • CAN-SPAM Act — Email marketing compliance
+1.5 Document Overview
+This SRS is organized into ten sections:
+    • Section 1 — Introduction: purpose, scope, definitions, and references
+    • Section 2 — Overall Description: product perspective, user classes, operating environment, constraints
+    • Section 3 — Stakeholders and Actors
+    • Section 4 — System Features: detailed functional requirements per module
+    • Section 5 — Business Rules
+    • Section 6 — External Interface Requirements: UI screens, API endpoints, and software interfaces
+    • Section 7 — Non-Functional Requirements: performance, security, usability, reliability, maintainability
+    • Section 8 — Data Requirements: entities, schema, and relationships
+    • Section 9 — System Architecture
+    • Section 10 — Acceptance Criteria, MVP Scope, and Future Enhancements
+
+2. Overall Description
+2.1 Product Perspective
+The PFT is a standalone, browser-based web application. In version 1.0 it operates independently from any third-party banking APIs, payment gateways, or external financial data services. All data is self-reported by users. The system consists of three primary components:
+    • React-based Single-Page Application (SPA) frontend
+    • Node.js / Express RESTful API backend
+    • PostgreSQL relational database
+
+External services are limited to an SMTP email provider, an optional SMS gateway for OTP, a PDF generation engine, and object storage for receipt images. The product is designed to evolve in future versions to support open-banking APIs, native mobile apps, and AI-powered financial insights.
+2.2 Product Functions Summary
+#	Function	Description
+F-01	Authentication & RBAC	Secure registration, login, and role-based access control
+F-02	Multi-Account Management	Create and manage multiple financial accounts per user
+F-03	Transaction Management	Full CRUD for income and expense transactions with rich categorization
+F-04	Budget Planning	Set monthly spending limits per category; track actual vs. limit
+F-05	Recurring Transactions	Define transactions that repeat on daily, weekly, bi-weekly, monthly, quarterly, or yearly schedules
+F-06	Dashboard & Analytics	Visual overview of income, expenses, net balance, and spending trends
+F-07	Reports & PDF Export	Monthly and yearly financial reports, downloadable as PDF
+F-08	Notification System	Budget alerts (80%, 100%) and monthly summary notifications
+F-09	Admin Management	Manage users, categories, and platform-wide analytics
+F-10	Guest Demo Mode	Unauthenticated access to a read-only demo dashboard
+F-11	Localization	Full Arabic (RTL) and English (LTR) support with dynamic switching
+2.3 User Classes and Characteristics
+2.3.1 Guest (Unauthenticated Visitor)
+Guests are visitors who have not registered. They have access only to a pre-populated demo dashboard with static sample data. The purpose of the guest experience is to demonstrate the platform's value and encourage registration.
+Attribute	Value
+Authentication Required	No
+Data Access	Read-only sample data; no personal data
+Permissions	View demo dashboard; access registration and login pages
+Session Persistence	None (stateless)
+Technical Proficiency	Any — general internet users
+
+2.3.2 Registered User (Authenticated End-User)
+Registered users are the primary audience. They interact with the full feature set after completing registration and email or phone verification.
+Attribute	Value
+Authentication Required	Yes (email + password or phone + OTP)
+Data Access	Own data only — isolated by userId
+Permissions	All end-user features (CRUD transactions, budgets, reports, etc.)
+Session Persistence	JWT with 7-day expiry; 30-day refresh token
+Technical Proficiency	Basic to intermediate; comfortable with financial concepts
+
+2.3.3 Administrator
+Administrators manage the platform itself. They cannot see individual users' personal financial data (transactions, balances) to protect financial privacy, but can manage user accounts, categories, and view aggregate platform analytics.
+Attribute	Value
+Authentication Required	Yes (elevated role with mandatory 2FA / TOTP)
+Data Access	Platform-level: user accounts (non-financial), categories, aggregate stats
+Permissions	All registered user permissions + admin panel access
+Session Persistence	JWT with 1-hour expiry; mandatory TOTP challenge
+Technical Proficiency	Advanced; familiar with platform administration
+2.4 Operating Environment
+    • Web browsers: Chrome 110+, Firefox 110+, Safari 15+, Edge 110+
+    • Minimum screen resolution: 320 px wide (mobile-first responsive design)
+    • Internet connection: Required for all features (no offline mode in v1.0)
+    • Server OS: Linux (Ubuntu 22.04 LTS recommended)
+    • Runtime: Node.js 18 LTS
+    • Database: PostgreSQL 15+
+    • Cache: Redis 7+
+    • Containerization: Docker + Docker Compose
+    • Hosting: Cloud platform (AWS, GCP, or Azure) behind NGINX reverse proxy
+2.5 Design and Implementation Constraints
+    • All user-facing text must support Arabic (RTL) and English (LTR) with dynamic locale switching without page reload.
+    • All financial data is stored and transmitted in the user's preferred currency (selected at account level in MVP).
+    • The application must use HTTPS exclusively; HTTP connections shall be redirected.
+    • Passwords must be hashed using Argon2id (preferred) or BCrypt with a minimum cost factor of 12. Plaintext passwords must never be stored or logged.
+    • No payment processing or real banking API integration is in scope for version 1.0.
+    • PDF export must be generated server-side to ensure consistent formatting.
+    • All API endpoints must follow RESTful conventions and return JSON.
+    • The system must comply with GDPR principles: data minimization, right to erasure, and consent logging.
+    • The system must use decimal arithmetic exclusively for all monetary calculations (no floating-point).
+2.6 Assumptions and Dependencies
+    • Users have a reliable internet connection with minimum 1 Mbps bandwidth.
+    • Email delivery depends on a third-party SMTP provider (e.g., SendGrid, Mailgun). Outages may delay notifications but shall not affect core functionality.
+    • SMS delivery for OTP depends on a third-party SMS gateway (e.g., Twilio). Fallback to email OTP must be implemented.
+    • The PDF export engine (WeasyPrint or Puppeteer) must be self-hosted or appropriately licensed.
+    • Exchange rate data (if multi-currency display is added in a future version) will require a third-party rates API.
+    • All monetary values are stored in a single currency per user account in MVP (Assumption A2).
+    • Monthly summaries are generated automatically on a scheduled basis (Assumption A4).
+
+3. Stakeholders and Actors
+3.1 Stakeholders
+Stakeholder	Role / Interest
+Guest Users	Evaluate platform before registration
+Registered Users	Track personal finances — primary end users
+Administrators	Manage platform operations and user base
+Product Owner / Business Owner	Drive business success, monitor growth and usage metrics
+Development Team	Design and implement the system
+QA Team	Validate product quality and requirements compliance
+Support Team	Assist users with issues and onboarding
+3.2 System Actors
+Actor	Type	Description
+Guest	Human	Unregistered visitor with read-only demo access
+Registered User	Human	Authenticated individual managing personal finances
+Administrator	Human	Platform administrator with elevated privileges
+Notification Service	System	Automated service that sends budget alerts and summaries
+Scheduler Service	System	Cron-based service that executes recurring transactions
+PDF Engine	System	Server-side service that generates PDF report files
+Email / SMS Provider	External	Third-party service for transactional email and OTP delivery
+
+4. Functional Requirements
+4.1 Authentication & Role-Based Access Control
+
+NOTE: Priority levels: C = Critical (MVP blocker), H = High (important for launch quality), M = Medium (desirable but deferrable), L = Low (future consideration).
+
+ID	Priority	Requirement
+FR-AUTH-01	C	The system shall allow a visitor to register with a unique email address, full name, and a password meeting minimum strength requirements.
+FR-AUTH-02	H	The system shall allow a visitor to register using a valid phone number, verified via OTP sent within 60 seconds.
+FR-AUTH-03	C	The system shall validate that passwords meet minimum strength: 8+ characters, at least one uppercase letter, one digit, and one special character.
+FR-AUTH-04	C	The system shall send a verification email or OTP within 60 seconds of registration and reject login for unverified accounts.
+FR-AUTH-05	C	The system shall authenticate users using email + password or phone + OTP, issuing a JWT access token (7-day) and refresh token (30-day) on success.
+FR-AUTH-06	H	The system shall provide a 'Forgot Password' flow: user submits email → receives reset link (expires in 1 hour) → sets new password.
+FR-AUTH-07	H	The system shall lock an account for 15 minutes after 5 consecutive failed login attempts and notify the user.
+FR-AUTH-08	C	The system shall enforce route-level RBAC: all protected endpoints shall verify the JWT and the user's role before granting access.
+FR-AUTH-09	H	The system shall allow users to update their profile (name, email, phone, preferred language, avatar).
+FR-AUTH-10	H	The system shall allow users to delete their account and all associated data (GDPR right to erasure).
+FR-AUTH-11	C	Admin accounts shall require mandatory 2FA (TOTP via authenticator app) as a second factor after password verification.
+FR-AUTH-12	H	The system shall terminate active sessions on explicit logout, invalidating the JWT token.
+4.2 Account Management
+ID	Priority	Requirement
+FR-ACC-01	C	The system shall allow a registered user to create up to 10 financial accounts of types: Cash, Bank Account, Credit Card, Savings, Investment, and Custom.
+FR-ACC-02	C	The system shall maintain a computed running balance for each account based on all associated transactions.
+FR-ACC-03	C	The system shall display current balance, total income, and total expenses per account.
+FR-ACC-04	H	The system shall allow the user to assign a name, type, initial balance, currency, color label, and icon to each account.
+FR-ACC-05	H	The system shall allow the user to edit an account's metadata (name, color, icon) but not its type after creation.
+FR-ACC-06	H	The system shall allow the user to archive an account (hide from active view without deleting historical data).
+FR-ACC-07	M	The system shall allow the user to delete an account only if it has no associated transactions; otherwise archiving is required.
+FR-ACC-08	H	The system shall allow the user to transfer funds between two of their own accounts, atomically recording a paired debit/credit transaction.
+FR-ACC-09	H	The system shall display an aggregate total balance across all active accounts on the dashboard.
+4.3 Transaction Management
+ID	Priority	Requirement
+FR-TXN-01	C	The system shall allow a registered user to create a transaction with: account, type (income/expense), amount (>0), category, date, and optional description/note.
+FR-TXN-02	C	The system shall automatically update the associated account's running balance upon transaction creation, edit, or deletion.
+FR-TXN-03	C	The system shall allow users to view, filter (date range, account, category, type, amount range), and sort (date, amount, category) their transaction history.
+FR-TXN-04	C	The system shall allow users to edit any field of a transaction except its creation timestamp.
+FR-TXN-05	C	The system shall allow users to delete a transaction with a confirmation dialog; deletion shall reverse the balance impact.
+FR-TXN-06	H	The system shall support weekly and monthly recurring transactions via a recurring template mechanism.
+FR-TXN-07	M	The system shall allow optional notes and a single receipt image attachment (JPEG/PNG, max 5 MB) per transaction.
+FR-TXN-08	M	The system shall support pagination of transaction lists (default: 20 per page, max: 100) and bulk-delete of up to 50 transactions.
+FR-TXN-09	H	The system shall display a running balance column in the transaction list, calculated as of each transaction date.
+FR-TXN-10	M	The system shall allow users to assign transactions to expense or income categories; expense transactions must belong to a category.
+4.4 Recurring Transactions
+ID	Priority	Requirement
+FR-REC-01	H	The system shall allow a registered user to create a recurring transaction template with: account, type, amount, category, description, frequency, start date, and optional end date.
+FR-REC-02	H	The system shall support the following recurrence frequencies: Daily, Weekly, Bi-Weekly, Monthly, Quarterly, and Yearly.
+FR-REC-03	H	The system shall automatically generate a real transaction entry on the defined date, applying it to the account balance.
+FR-REC-04	H	The system shall notify the user (in-app and email) 1 day before a recurring transaction is scheduled to execute.
+FR-REC-05	H	The system shall allow the user to pause, resume, edit, or delete a recurring transaction template.
+FR-REC-06	M	The system shall allow the user to skip a single occurrence of a recurring transaction without modifying the template.
+FR-REC-07	M	The system shall visually distinguish automatically-generated recurring transactions in the transaction list (e.g., with a recurring icon).
+FR-REC-08	L	The system shall display a calendar view showing upcoming recurring transactions for the next 90 days.
+4.5 Budget Management
+ID	Priority	Requirement
+FR-BDG-01	C	The system shall allow a registered user to create a monthly budget for any expense category with a positive limit amount.
+FR-BDG-02	C	The system shall enforce only one active budget per category per calendar month per user.
+FR-BDG-03	C	The system shall display for each budget: limit amount, total spent, remaining amount, and a visual progress bar with status (On Track / Warning / Exceeded).
+FR-BDG-04	H	The system shall send an in-app notification and email alert when spending reaches 80% of the budget limit (once per threshold per month).
+FR-BDG-05	H	The system shall send an in-app notification and email alert when spending reaches or exceeds 100% of the budget limit.
+FR-BDG-06	H	The system shall allow a user to edit or delete a budget at any time. Historical budget data is retained for reporting.
+FR-BDG-07	H	The system shall display a 'Budget Overview' screen showing all current month's budgets with their status.
+FR-BDG-08	M	The system shall allow users to roll over a budget to the next month with one click.
+FR-BDG-09	M	The system shall display a budget utilization trend chart (last 6 months) per category.
+4.6 Category Management
+ID	Priority	Requirement
+FR-CAT-01	C	The system shall include default expense categories: Food, Transport, Bills, Entertainment, Health, Education, Housing, and Clothing.
+FR-CAT-02	C	The system shall include default income categories: Salary, Freelance, Investment, and Other Income.
+FR-CAT-03	H	Administrators shall create, update, and deactivate global categories. System-reserved categories (Initial Balance, Transfer) cannot be edited or deleted.
+FR-CAT-04	M	A category in use by any transaction cannot be deleted; it must be deactivated, hiding it from the category picker for new transactions.
+FR-CAT-05	M	Each category shall support a name in English, a name in Arabic, an icon identifier, a color, and a type (income/expense/system).
+4.7 Dashboard & Analytics
+ID	Priority	Requirement
+FR-DSH-01	C	The dashboard shall display: total income, total expenses, net balance, and savings rate for the selected period (default: current month).
+FR-DSH-02	C	The dashboard shall display account balance cards for all active accounts.
+FR-DSH-03	H	The dashboard shall include a Line/Bar chart showing income vs. expenses over the last 6 months.
+FR-DSH-04	H	The dashboard shall include a Donut/Pie chart showing expense breakdown by category for the selected period.
+FR-DSH-05	H	The dashboard shall display the top 5 recent transactions with quick-view details.
+FR-DSH-06	H	The dashboard shall display active budget status cards (category, percentage used, amount remaining).
+FR-DSH-07	H	The dashboard shall display upcoming recurring transactions for the next 7 days.
+FR-DSH-08	H	The user shall be able to switch the dashboard time period: Current Month, Last Month, Last 3 Months, Last 6 Months, This Year, or Custom Range.
+FR-DSH-09	H	All dashboard data shall refresh automatically when a new transaction is added or edited.
+FR-DSH-10	M	The guest demo dashboard shall display static sample data with a banner prompting the visitor to register.
+FR-DSH-11	H	The dashboard shall display top 5 spending categories by amount for the selected period.
+4.8 Reporting Module
+ID	Priority	Requirement
+FR-RPT-01	C	The system shall allow users to generate a Monthly Financial Report for any past or current month.
+FR-RPT-02	C	The system shall allow users to generate an Annual Financial Report for any past or current year.
+FR-RPT-03	C	Each report shall include: total income, total expenses, net savings, savings rate, expense breakdown by category (table and chart), top 5 expense categories, and a full transaction list.
+FR-RPT-04	H	The system shall allow users to export any report as a PDF with a single click.
+FR-RPT-05	H	PDF exports shall include: page header with user name and report period, all report data, charts rendered as images, page numbers, and a generation timestamp.
+FR-RPT-06	H	Reports shall support filtering by: specific account, specific category, and transaction type.
+FR-RPT-07	H	The system shall generate a Category Analysis Report showing category-level spending breakdown.
+FR-RPT-08	M	The system shall store a history of the last 12 generated PDF reports per user for re-download.
+FR-RPT-09	M	Reports for future dates shall show actual data up to today and projected data from recurring transactions for the remainder of the period.
+4.9 Notification Module
+ID	Priority	Requirement
+FR-NTF-01	H	The system shall display a notification bell icon in the header showing the count of unread notifications.
+FR-NTF-02	H	The notification center shall list all notifications with: icon, message, timestamp, and a link to the relevant section.
+FR-NTF-03	H	The system shall generate an in-app notification and email alert when a budget reaches 80% of its limit.
+FR-NTF-04	H	The system shall generate an in-app notification and email alert when a budget reaches or exceeds 100% of its limit.
+FR-NTF-05	H	The system shall send a monthly summary email on the 1st of each month covering the previous month's income, expenses, net savings, and top expense category.
+FR-NTF-06	H	The system shall notify the user 1 day before a recurring transaction is due (in-app and email).
+FR-NTF-07	H	The system shall allow users to mark notifications as read individually or all at once.
+FR-NTF-08	M	The system shall allow users to configure notification preferences: enable/disable per type, choose delivery channel (in-app, email, or both).
+FR-NTF-09	M	Notifications older than 90 days shall be automatically archived (accessible via archive but hidden from the main list).
+4.10 Admin Management System
+ID	Priority	Requirement
+FR-ADM-01	C	The admin panel shall be accessible via a dedicated route (e.g., /admin) and require an Admin-role JWT with verified 2FA.
+FR-ADM-02	H	The admin panel shall display platform overview metrics: total registered users, active users (last 30 days), total transactions recorded, and new registrations chart (last 30 days).
+FR-ADM-03	H	The admin shall view a paginated list of all registered users with: name, email, registration date, last login, and status.
+FR-ADM-04	C	The admin shall suspend or reactivate a user account. A suspended user receives a notification email and cannot log in.
+FR-ADM-05	H	The admin shall permanently delete a user account and all associated data following GDPR erasure procedures.
+FR-ADM-06	H	The admin shall create, edit, and deactivate global expense/income categories. System categories cannot be deleted.
+FR-ADM-07	H	The admin shall view a log of all admin actions with timestamp, actor, and action details (immutable audit log).
+FR-ADM-08	H	The admin panel shall display a chart of daily active users over the last 90 days.
+FR-ADM-09	M	The admin shall send a platform-wide broadcast notification to all users (e.g., maintenance announcements).
+FR-ADM-10	C	Admins shall not be able to view individual users' transaction data or account balances (financial privacy enforcement).
+
+5. Business Rules
+ID	Rule
+BR-001	Every transaction must belong to exactly one account.
+BR-002	Expense transactions must belong to a category. Income transactions may optionally be categorized.
+BR-003	Budgets are category-specific and scoped to a single calendar month.
+BR-004	Only one active budget is permitted per user per category per month.
+BR-005	Fund transfers create two atomically linked transaction records (one debit, one credit). If either fails, both are rolled back.
+BR-006	Users may only access their own financial data; cross-user data access is strictly forbidden.
+BR-007	Budget alerts trigger at 80% (warning) and 100% (exceeded). The 80% alert is sent at most once per budget per month. The 100% alert is resent every 3 days while the budget remains exceeded.
+BR-008	Recurring transactions are executed by a scheduled job at 00:01 server time daily. If a recurring transaction fails, the user is notified and it is marked as 'Failed'.
+BR-009	Editing a recurring transaction template applies only to future occurrences; past generated transactions remain unchanged.
+BR-010	Deleting a recurring template does not delete previously generated transaction instances.
+BR-011	The initial balance of an account is recorded as a special 'Initial Balance' income transaction and cannot be directly edited.
+BR-012	Account type cannot be changed after creation.
+BR-013	Deleting an account with associated transactions is forbidden; archiving is required instead.
+BR-014	Transfer transactions cannot be independently edited; they must be modified via the transfer flow.
+BR-015	All monetary values must be stored with exactly 2 decimal places using decimal arithmetic (not floating-point).
+BR-016	Dashboard income and expense totals exclude transfer transactions to prevent double-counting.
+BR-017	Savings Rate is calculated as: ((Total Income − Total Expenses) / Total Income) × 100. Displayed as 0% if Total Income is zero.
+BR-018	Admin role cannot be self-assigned; it must be granted by an existing Administrator.
+BR-019	There must always be at least one active Administrator account on the platform.
+BR-020	Monthly summary emails are sent on the 1st of each month regardless of individual notification preferences; users may unsubscribe via email link per GDPR/CAN-SPAM requirements.
+BR-021	Transaction dates may be in the past or future, but may not precede the associated account's creation date.
+BR-022	Budget calculations include all expense transactions of the matching category within the calendar month, regardless of when the budget record was created.
+
+6. External Interface Requirements
+6.1 User Interface Standards
+    • Mobile-first responsive design using a 12-column grid system.
+    • Breakpoints: Mobile (<768 px), Tablet (768–1024 px), Desktop (>1024 px).
+    • Supports both LTR (English) and RTL (Arabic) layouts, switching dynamically on language change.
+    • Minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text (WCAG 2.1 Level AA).
+    • All interactive elements have visible focus indicators for keyboard navigation.
+    • Form fields display inline validation errors immediately after losing focus.
+    • Loading states indicated by skeleton screens or spinners; never blank content areas.
+    • Destructive actions (delete, archive) require a confirmation dialog before execution.
+    • Touch-friendly controls with minimum 44×44 px touch targets on mobile.
+    • Follows Material Design 3 component guidelines.
+6.2 Screen Inventory
+Screen	Route	Access Level
+Landing / Demo Dashboard	/	Guest + Registered User
+Register	/register	Guest only
+Login	/login	Guest only
+Forgot Password	/forgot-password	Guest only
+Email Verification	/verify/:token	Guest (post-registration redirect)
+Dashboard (Main)	/dashboard	Registered User
+Accounts	/accounts	Registered User
+Account Detail	/accounts/:id	Registered User
+Transactions	/transactions	Registered User
+Add / Edit Transaction	/transactions/new, /transactions/:id/edit	Registered User
+Budgets	/budgets	Registered User
+Recurring Transactions	/recurring	Registered User
+Reports	/reports	Registered User
+Notifications	/notifications	Registered User
+Profile & Settings	/settings	Registered User
+Admin Panel	/admin	Administrator
+Admin: User Management	/admin/users	Administrator
+Admin: Category Management	/admin/categories	Administrator
+Admin: Analytics	/admin/analytics	Administrator
+Admin: Audit Log	/admin/audit	Administrator
+6.3 API Design
+6.3.1 Conventions
+    • Base URL: https://api.pft.example.com/v1
+    • All requests and responses use JSON (Content-Type: application/json).
+    • Authentication via Bearer token in Authorization header.
+    • Standard HTTP status codes: 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Unprocessable Entity, 429 Too Many Requests, 500 Internal Server Error.
+    • All list endpoints support ?page=, ?limit=, ?sort=, ?order= query parameters.
+    • All error responses follow the structure: { error: { code, message, details } }.
+6.3.2 API Endpoints
+Method	Endpoint	Description
+POST	/auth/register	Register new user
+POST	/auth/login	Authenticate and receive tokens
+POST	/auth/logout	Invalidate session
+POST	/auth/refresh	Refresh access token
+POST	/auth/forgot-password	Request password reset email
+POST	/auth/reset-password	Set new password via reset token
+GET	/users/me	Get current user profile
+PATCH	/users/me	Update profile
+DELETE	/users/me	Delete account (GDPR erasure)
+GET	/accounts	List all accounts
+POST	/accounts	Create account
+GET	/accounts/:id	Get account detail
+PATCH	/accounts/:id	Update account metadata
+DELETE	/accounts/:id	Delete or archive account
+POST	/accounts/transfer	Transfer between accounts
+GET	/transactions	List transactions (filterable, paginated)
+POST	/transactions	Create transaction
+GET	/transactions/:id	Get transaction detail
+PATCH	/transactions/:id	Update transaction
+DELETE	/transactions/:id	Delete transaction
+DELETE	/transactions/bulk	Bulk delete (up to 50)
+GET	/recurring	List recurring templates
+POST	/recurring	Create recurring template
+PATCH	/recurring/:id	Update template
+DELETE	/recurring/:id	Delete template
+POST	/recurring/:id/skip	Skip next occurrence
+GET	/budgets	List budgets
+POST	/budgets	Create budget
+PATCH	/budgets/:id	Update budget
+DELETE	/budgets/:id	Delete budget
+GET	/categories	List all active categories
+POST	/reports/generate	Generate report (returns structured data)
+POST	/reports/export/pdf	Generate and export PDF
+GET	/reports/history	List previously generated reports
+GET	/notifications	List notifications
+PATCH	/notifications/:id/read	Mark notification as read
+PATCH	/notifications/read-all	Mark all as read
+GET	/notifications/preferences	Get notification preferences
+PATCH	/notifications/preferences	Update notification preferences
+GET	/admin/users	List all users (admin only)
+PATCH	/admin/users/:id/status	Suspend or reactivate user
+DELETE	/admin/users/:id	Delete user (GDPR — admin)
+GET	/admin/analytics	Platform analytics
+GET	/admin/audit	Admin audit log
+POST	/admin/categories	Create category
+PATCH	/admin/categories/:id	Update category
+POST	/admin/broadcast	Send broadcast notification
+6.4 Software and External Service Interfaces
+Service	Purpose	Interface Type	Notes
+SMTP Provider (SendGrid / Mailgun)	Transactional email delivery	REST API / SMTP	Email verification, alerts, monthly summaries
+SMS Gateway (Twilio)	OTP delivery for phone registration	REST API	Fallback to email OTP if unavailable
+PDF Engine (WeasyPrint / Puppeteer)	Server-side PDF rendering	Node.js library / Docker sidecar	Self-hosted; no third-party API call
+Object Storage (AWS S3 / compatible)	Receipt image storage	REST API (SDK)	Presigned URLs; max 5 MB per file; CDN-served
+TOTP Library (otplib)	Admin 2FA generation and validation	Node.js library	Compatible with Google Authenticator
+Charting Library (Recharts / Chart.js)	Dashboard and report charts	JS library (frontend)	Charts rendered client-side; PNG for PDF export
+Redis 7+	Session cache and rate limiting	In-memory data store	Required for JWT blacklist and API rate limiter
+
+7. Non-Functional Requirements
+7.1 Performance
+ID	Requirement	Target Metric
+NFR-PRF-01	API response time for standard read queries (single user data)	< 200 ms at p95
+NFR-PRF-02	API response time for write operations (create/update transaction)	< 500 ms at p95
+NFR-PRF-03	Dashboard initial page load (including chart rendering)	< 2 seconds on 4G connection
+NFR-PRF-04	PDF generation time (up to 12 months of data)	< 10 seconds
+NFR-PRF-05	Concurrent active users without performance degradation	10,000+ concurrent sessions
+NFR-PRF-06	Frontend SPA bundle size (gzipped)	≤ 500 KB
+NFR-PRF-07	Database queries must use appropriate indexes; no full table scans on production queries	EXPLAIN plan review required pre-launch
+NFR-PRF-08	Image assets served with cache headers via CDN	Cache-Control: max-age 1 year
+7.2 Security
+ID	Requirement
+NFR-SEC-01	All data in transit must use TLS 1.2 or higher. HTTP connections must redirect to HTTPS.
+NFR-SEC-02	Passwords must be hashed using Argon2id (preferred) or BCrypt with cost factor ≥ 12. Plaintext passwords must never be stored or logged.
+NFR-SEC-03	JWT access tokens expire in 7 days; refresh tokens in 30 days. Tokens must be invalidated on logout via a server-side blacklist or short TTL strategy.
+NFR-SEC-04	All API endpoints must validate and sanitize input to prevent SQL injection, NoSQL injection, and XSS attacks.
+NFR-SEC-05	CSRF protection must be implemented for all state-mutating operations.
+NFR-SEC-06	Rate limiting: max 10 login attempts per minute per IP; max 100 API requests per minute per authenticated user.
+NFR-SEC-07	Admin 2FA (TOTP) is mandatory; bypass mechanisms are not permitted under any circumstances.
+NFR-SEC-08	File uploads must be validated for MIME type and extension; only JPEG and PNG are accepted for receipt images.
+NFR-SEC-09	All security-relevant events (login, logout, failed login, password change, account suspension) must be logged with timestamp, user ID, and IP address.
+NFR-SEC-10	Sensitive fields at rest (e.g., phone numbers) must use field-level encryption in the database.
+NFR-SEC-11	The OWASP Top 10 (2021) vulnerabilities must be addressed and verified prior to production deployment.
+NFR-SEC-12	Dependency vulnerability scanning (e.g., npm audit) must be integrated into the CI/CD pipeline.
+NFR-SEC-13	Tokens must be stored in HttpOnly cookies to mitigate XSS-based token theft. Strict Content-Security-Policy headers must be applied.
+7.3 Usability
+ID	Requirement
+NFR-USA-01	The application shall achieve a System Usability Scale (SUS) score of ≥ 80 in user testing.
+NFR-USA-02	A new user shall be able to add their first transaction within 3 minutes of completing registration, without external documentation.
+NFR-USA-03	Key tasks (adding a transaction, creating a budget) shall be completable in ≤ 3 clicks from the dashboard.
+NFR-USA-04	All error messages shall be written in plain language (non-technical), identifying the problem and suggesting a resolution.
+NFR-USA-05	The application shall meet WCAG 2.1 Level AA accessibility standards, including keyboard-only navigation and screen reader compatibility (ARIA labels).
+NFR-USA-06	Language switching (Arabic/English) must take effect immediately without a page reload.
+NFR-USA-07	Localized error messages must be displayed in the user's selected language.
+NFR-USA-08	Critical action confirmation dialogs shall clearly state the consequence and be reversible wherever possible.
+7.4 Reliability and Availability
+ID	Requirement
+NFR-REL-01	The system shall maintain 99.9% uptime per calendar month (excluding scheduled maintenance windows).
+NFR-REL-02	Scheduled maintenance windows shall not exceed 2 hours per month and must be announced to users 24 hours in advance.
+NFR-REL-03	Automated health checks must be implemented; any service outage must trigger an alert to the operations team within 5 minutes.
+NFR-REL-04	The database shall be backed up daily with point-in-time recovery capability for the last 7 days.
+NFR-REL-05	The system shall handle third-party service failures (email, SMS) gracefully with retry mechanisms and appropriate user feedback.
+NFR-REL-06	The recurring transaction scheduler shall include a dead-letter queue for failed executions, with admin visibility into failures.
+NFR-REL-07	A disaster recovery mechanism shall be documented and tested quarterly.
+7.5 Maintainability
+ID	Requirement
+NFR-MNT-01	Backend code shall achieve a minimum of 80% unit test coverage, measured by a CI tool.
+NFR-MNT-02	All API endpoints shall be documented using OpenAPI 3.0 (Swagger) specification.
+NFR-MNT-03	The codebase shall follow a defined style guide (ESLint + Prettier for JavaScript/TypeScript; Ruff for Python if applicable).
+NFR-MNT-04	The application shall be fully containerized (Docker) to ensure environment consistency across development, staging, and production.
+NFR-MNT-05	Database migrations shall be managed via a versioned migration tool (e.g., Flyway, Liquibase, or migrate-mongo).
+NFR-MNT-06	Application errors shall be logged to a centralized logging service (e.g., ELK Stack or Sentry) with stack traces and request context.
+NFR-MNT-07	The architecture shall follow a modular, extensible design allowing individual services (notification, PDF, scheduler) to be extracted as microservices in future versions.
+NFR-MNT-08	Both English and Arabic README files shall be maintained with setup and deployment instructions.
+7.6 Localization
+ID	Requirement
+NFR-LOC-01	The application shall fully support Arabic (ar-EG) and English (en-US) locales.
+NFR-LOC-02	All user-facing strings shall be externalized to i18n resource files (en.json, ar.json); no hardcoded text in components.
+NFR-LOC-03	Date, time, and number formatting shall respect locale conventions (e.g., Hijri calendar option for Arabic, comma vs. period as decimal separator).
+NFR-LOC-04	Currency display shall follow locale conventions (e.g., EGP for Egyptian users).
+NFR-LOC-05	RTL layout shall be applied automatically when Arabic locale is active; all flexbox/grid layouts must be verified in both text directions.
+7.7 Financial Data Integrity
+ID	Requirement
+NFR-FIN-01	All monetary calculations must use decimal arithmetic only — no floating-point representation.
+NFR-FIN-02	Account balance updates must be atomic; partial updates are not permitted. MongoDB/PostgreSQL transactions must be used for all balance-affecting writes.
+NFR-FIN-03	Exchange rates, if used in future versions, must be timestamped.
+NFR-FIN-04	The system must enforce the accounting identity: Assets = Liabilities + Net Worth in balance calculations.
+7.8 Compliance and Accessibility
+    • GDPR-like user rights: data portability (export), right to erasure, and consent logging.
+    • WCAG 2.1 Level AA compliance across all screens.
+    • CAN-SPAM / GDPR: Email unsubscribe must be honored within 10 business days.
+    • Keyboard navigation must be fully functional across all screens.
+    • ARIA labels must be applied to all interactive and informational UI elements.
+
+8. Data Requirements
+8.1 High-Level Data Entities
+Entity	Description
+User	Registered platform user with authentication credentials and profile data
+Account	Financial account owned by a user (cash, bank, credit card, etc.)
+Transaction	A single financial event (income or expense) associated with an account and category
+Category	A label for classifying transactions (Food, Transport, Salary, etc.)
+Budget	A monthly spending limit for a specific expense category per user
+RecurringTemplate	Template defining a transaction that repeats on a configurable schedule
+Notification	System-generated alert or message delivered to a user
+AuditLog	Immutable log of admin actions for compliance and security auditing
+ReportHistory	Record of previously generated reports and their PDF download URLs
+Role	User role (Guest, Registered User, Administrator) governing access permissions
+8.2 Database Schema
+8.2.1 users
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key, auto-generated
+full_name	VARCHAR(150)	Required
+email	VARCHAR(255)	Required, unique, indexed, lowercase
+phone	VARCHAR(20) — encrypted	Optional, unique if present
+password_hash	VARCHAR(255)	Argon2id hash; never returned in API responses
+role_id	FK → roles.id	Default: 'user' role
+status	ENUM: unverified | active | suspended	Default: 'unverified'
+preferred_language	ENUM: en | ar	Default: 'en'
+preferred_currency	VARCHAR(3) ISO 4217	Default: 'USD'
+avatar_url	TEXT	Optional
+email_verified_at	DATETIME	Null until email verified
+two_factor_secret	TEXT — encrypted	Null unless Admin; TOTP secret
+notification_preferences	JSONB	Embedded notification settings
+last_login_at	DATETIME	Updated on each successful login
+created_at	DATETIME	Auto-generated timestamp
+updated_at	DATETIME	Auto-updated on any change
+
+8.2.2 roles
+Column	Type	Constraints / Notes
+id	INT (PK)	Primary key
+name	VARCHAR(50)	Unique; values: guest, user, admin
+
+8.2.3 accounts
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Indexed
+account_name	VARCHAR(100)	Required; unique per user (case-insensitive)
+account_type	ENUM: cash | bank | credit | savings | investment | custom	Required; immutable after creation
+initial_balance	DECIMAL(18,2)	Required; ≥ 0
+current_balance	DECIMAL(18,2)	Computed; kept in sync via transactions
+currency	VARCHAR(3) ISO 4217	Required
+color	VARCHAR(7) hex	Optional; for UI display
+icon	VARCHAR(50)	Optional; icon identifier
+is_archived	BOOLEAN	Default: false
+created_at	DATETIME	Auto-generated
+updated_at	DATETIME	Auto-updated
+
+8.2.4 categories
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+name_en	VARCHAR(100)	Required; unique globally
+name_ar	VARCHAR(100)	Required; Arabic translation
+type	ENUM: income | expense | system	Required
+icon	VARCHAR(50)	Icon identifier
+color	VARCHAR(7) hex	Color for UI display
+is_system	BOOLEAN	System categories cannot be deleted
+is_active	BOOLEAN	Default: true; deactivated categories hidden from picker
+created_at	DATETIME	Auto-generated
+
+8.2.5 transactions
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Indexed
+account_id	FK → accounts.id	Indexed
+category_id	FK → categories.id	Required for expense; optional for income; null for transfers
+type	ENUM: income | expense | transfer | initial_balance	Required
+amount	DECIMAL(18,2)	Required; > 0
+note	TEXT	Optional; max 1000 chars
+description	VARCHAR(200)	Optional
+transaction_date	DATE	Required; indexed
+receipt_url	TEXT	Optional; object storage URL
+is_recurring	BOOLEAN	Default: false
+recurring_id	FK → recurring_transactions.id	Null if not recurring
+transfer_pair_id	UUID	Links paired debit/credit for transfers
+created_at	DATETIME	Auto-generated
+updated_at	DATETIME	Auto-updated
+
+8.2.6 recurring_transactions
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Indexed
+account_id	FK → accounts.id	Required
+type	ENUM: income | expense	Required
+amount	DECIMAL(18,2)	Required; > 0
+category_id	FK → categories.id	Required
+description	VARCHAR(200)	Optional
+frequency	ENUM: daily | weekly | biweekly | monthly | quarterly | yearly	Required
+start_date	DATE	Required
+end_date	DATE	Optional; null = indefinite
+next_run_date	DATE	Computed; indexed for scheduler queries
+status	ENUM: active | paused | completed	Default: 'active'
+created_at	DATETIME	Auto-generated
+
+8.2.7 budgets
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Indexed
+category_id	FK → categories.id	Composite unique index with user_id + month + year
+amount	DECIMAL(18,2)	Required; > 0
+month	INT (1–12)	Required
+year	INT	Required (e.g., 2026)
+alert_sent_80	BOOLEAN	Default: false; set true when 80% alert is dispatched
+alert_sent_100	BOOLEAN	Default: false; set true when 100% alert is dispatched
+created_at	DATETIME	Auto-generated
+updated_at	DATETIME	Auto-updated
+
+8.2.8 notifications
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Indexed
+title	VARCHAR(200)	Required
+message	TEXT	Required
+read_flag	BOOLEAN	Default: false
+type	VARCHAR(50)	e.g., BUDGET_80, BUDGET_100, MONTHLY_SUMMARY, RECURRING_REMINDER
+link	VARCHAR(500)	Optional deep-link to relevant screen
+archived_at	DATETIME	Null until archived (after 90 days)
+created_at	DATETIME	Auto-generated
+
+8.2.9 audit_logs
+Column	Type	Constraints / Notes
+id	UUID (PK)	Primary key
+user_id	FK → users.id	Admin user who performed the action
+action	VARCHAR(100)	e.g., SUSPEND_USER, DELETE_USER, CREATE_CATEGORY
+entity_type	VARCHAR(50)	e.g., User, Category
+entity_id	UUID	ID of the affected entity
+ip_address	VARCHAR(45)	IP of the admin performing the action
+timestamp	DATETIME	Immutable; auto-generated
+8.3 Entity Relationships
+Relationship	Cardinality	Notes
+User → Accounts	1 : Many (max 10)	A user owns multiple accounts
+User → Transactions	1 : Many	All transactions belong to a user
+User → Budgets	1 : Many	A user can have multiple budgets (one per category/month)
+User → RecurringTemplates	1 : Many	A user can have multiple recurring templates
+User → Notifications	1 : Many	Each notification belongs to one user
+Account → Transactions	1 : Many	Each transaction belongs to one account
+Category → Transactions	1 : Many	Each expense transaction has one category
+Category → Budgets	1 : Many	Each budget maps to one category
+RecurringTemplate → Transactions	1 : Many	Generated transactions reference their template
+Transaction ↔ Transaction (transfer)	1 : 1 (paired)	Debit linked to credit via transfer_pair_id
+
+9. System Architecture
+9.1 Suggested Technology Stack
+Layer	Technology	Rationale
+Frontend	React 18 + Vite + TypeScript	Component-based SPA, fast build tooling, strong typing
+State Management	Redux Toolkit + React Query	Global state + server-state caching with cache invalidation
+UI Components	Material Design 3 / Tailwind CSS + Shadcn/ui	Accessible, consistent component library; utility-first styling
+Charting	Recharts	React-native chart library; responsive; accessible
+Localization (i18n)	react-i18next	Industry-standard React localization with RTL support
+Backend	Node.js 18 LTS + Express.js	Non-blocking I/O, large ecosystem, strong community
+API Validation	Zod	TypeScript-first schema-based request validation
+Authentication	jsonwebtoken + Argon2	JWT tokens + modern secure password hashing
+Database	PostgreSQL 15+	ACID-compliant, relational; optimal for financial data integrity
+Cache / Session	Redis 7+	JWT blacklist, rate limiting, session cache
+ORM	Prisma / TypeORM	Type-safe DB access; migration management
+Task Scheduler	node-cron	Recurring transaction and notification cron jobs
+PDF Generator	WeasyPrint or Puppeteer	Server-side PDF rendering with consistent formatting
+File Storage	AWS S3 (or compatible)	Scalable object storage for receipt images; CDN delivery
+Email	Nodemailer + SendGrid	Transactional email delivery with templates
+SMS / OTP	Twilio	Phone number verification and OTP delivery
+Reverse Proxy	NGINX	SSL termination, static asset serving, rate limiting
+Containerization	Docker + Docker Compose	Consistent environments across dev / staging / prod
+CI/CD	GitHub Actions	Automated testing, build, and deployment pipelines
+Monitoring	Sentry + Prometheus + Grafana	Error tracking, performance metrics, and dashboards
+API Documentation	OpenAPI 3.0 / Swagger	Auto-generated, interactive API documentation
+9.2 High-Level Architecture
+Version 1.0 shall be implemented as a modular monolith with clear internal service boundaries. This provides simpler deployment, faster development velocity, and a clear migration path to microservices when scale demands it.
+Layer	Components
+Frontend (React SPA)	Pages, Components, Custom Hooks, Redux Slices, API Service Layer (Axios), i18n resources
+NGINX Reverse Proxy	SSL termination · Static asset serving · Rate limiting · /api/* routing
+REST API Layer (Express)	Route Modules per resource (auth, accounts, transactions, budgets, reports, notifications, admin)
+Business Services Layer	Auth Service · Account Service · Transaction Service · Budget Service · Reporting Service · Notification Service · Recurring Transaction Service
+Data Access Layer (ORM)	Repository pattern wrapping database models; handles queries, aggregations, migrations
+PostgreSQL Database	Primary relational store for all application data
+Redis Cache	JWT blacklist · Rate limiter state · Short-lived session data
+Scheduler (node-cron)	recurringTransactionJob (daily 00:01) · monthlyEmailJob (1st of month) · budgetCheckJob (post-expense)
+PDF Generation Service	Puppeteer / WeasyPrint sidecar; accepts report payload, returns PDF buffer
+Email Service (SendGrid)	Transactional emails: verification, alerts, summaries, password reset
+Object Storage (S3)	Receipt image storage; presigned upload URLs; CDN-served download
+9.3 Deployment Architecture
+    • All components are containerized via Docker.
+    • NGINX acts as the entry point: routes /api/* to the Node.js API container and serves the React SPA static files.
+    • PostgreSQL hosted on a managed cloud service (e.g., AWS RDS) for reliability, automated backups, and point-in-time recovery.
+    • Redis hosted on a managed service (e.g., AWS ElastiCache) or self-managed container.
+    • AWS S3 stores receipt images; CloudFront CDN serves images with long-lived cache headers.
+    • CI/CD pipeline (GitHub Actions): on push to main — run tests, build Docker image, push to registry, deploy to production.
+    • Staging environment is mandatory before any production deployment.
+9.4 Evolution Path to Microservices (v2.0+)
+The Notification Service, PDF Export Service, and Recurring Transaction Scheduler are already isolated as internal modules and are the recommended candidates for extraction as independent microservices when traffic and scale require it.
+
+10. Acceptance Criteria, MVP Scope, and Future Enhancements
+10.1 Acceptance Criteria
+ID	Scenario	Given	When	Then
+AC-001	User Registration	Valid registration data submitted	User submits the registration form	Account is created and verification email is sent within 60 seconds
+AC-002	Add Transaction	Authenticated user with at least one account	An expense is added	Account balance updates immediately and reflects the new transaction
+AC-003	Budget Alert (80%)	An active budget exists and spending reaches 80%	The 80% threshold is crossed	In-app notification and email alert are generated within 5 minutes
+AC-004	Budget Alert (100%)	An active budget exists and spending reaches 100%	The 100% threshold is crossed	In-app notification and email alert are generated; status shows 'Exceeded'
+AC-005	Fund Transfer	Two valid, active accounts exist	A transfer is initiated	Both account balances update correctly and two linked transactions are created
+AC-006	PDF Export	A report has been generated	User clicks 'Export as PDF'	A correctly formatted PDF file is downloaded within 10 seconds
+AC-007	Arabic Localization	Arabic language is selected in settings	Any page is loaded or language is switched	All UI text displays in Arabic with correct RTL layout, immediately without page reload
+AC-008	RBAC Enforcement	A regular user attempts to access /admin	The admin route is requested	Access is denied with a 403 response; user is redirected to dashboard
+AC-009	Recurring Execution	An active recurring transaction template exists	The scheduled date arrives	A transaction is auto-generated and account balance updates; user is notified
+AC-010	Account Deletion Blocked	An account has associated transactions	User attempts to delete the account	System prevents deletion and prompts the user to archive instead
+10.2 Use Case Summary
+Use Case	Actor	Summary
+UC-01: Register User	Guest	Visitor registers with email/phone, verifies account, becomes a Registered User
+UC-02: Login	Registered User / Admin	User authenticates with credentials; Admin completes additional TOTP challenge
+UC-03: Add Transaction	Registered User	User records income or expense; balance updates; budget thresholds checked; notifications triggered if applicable
+UC-04: Set Monthly Budget	Registered User	User defines spending limit per category; utilization calculated from existing transactions
+UC-05: Transfer Funds	Registered User	User transfers between own accounts; paired debit/credit transactions created atomically
+UC-06: Generate & Export Report	Registered User	User selects period and report type; data aggregated; report rendered; optional PDF downloaded
+UC-07: Admin Manage Categories	Administrator	Admin creates/edits/deactivates global categories; changes visible to all users immediately
+UC-08: Admin Suspend User	Administrator	Admin suspends a user account; user notified via email; login prevented; action logged in audit log
+10.3 MVP Scope
+10.3.1 Included in MVP (v1.0)
+    • User registration, email/phone verification, login, logout, password reset
+    • RBAC (Guest, Registered User, Admin)
+    • Multi-account management (up to 10 accounts; Cash, Bank, Credit Card, Savings, Investment, Custom)
+    • Full transaction CRUD with categorization, notes, and optional receipt image
+    • Weekly and monthly recurring transactions
+    • Monthly budget creation, tracking, and 80%/100% alerts
+    • Analytics dashboard with income/expense charts, category breakdown, spending trends
+    • Monthly and yearly financial reports
+    • PDF report export
+    • In-app and email notification system
+    • Admin dashboard: user management, category management, platform analytics, audit log
+    • Full Arabic (RTL) and English (LTR) localization with dynamic switching
+10.3.2 Explicitly Excluded from MVP (v1.0)
+    • Bank account API integration (Open Banking / Plaid / Yodlee)
+    • AI-powered financial recommendations or spending predictions
+    • Native mobile applications (iOS / Android)
+    • Multi-currency conversion within a single account
+    • Investment portfolio tracking with real-time market prices
+    • Multi-user household budgets (shared accounts between users)
+    • Tax reporting or VAT calculations
+    • Bill payment functionality
+    • Third-party accounting software integrations (QuickBooks, Xero)
+    • Offline mode
+10.4 Future Enhancements (v2.0+)
+Priority	Feature
+High	Open Banking / Plaid integration for automatic transaction import
+High	Native mobile applications (iOS / Android)
+High	Multi-currency support with real-time exchange rates
+Medium	AI spending insights and smart budget recommendations
+Medium	Financial goal tracking (savings goals, debt payoff)
+Medium	OCR receipt scanning for automatic transaction data extraction
+Medium	Predictive cash flow forecasting
+Low	Investment portfolio management with market price feeds
+Low	Voice expense entry
+Low	Multi-user household budgets and shared accounts
+Low	Third-party accounting software integrations
+10.5 Complexity and Effort Estimate
+Module / Area	Complexity	Key Risk
+Authentication & RBAC	Medium	Token lifecycle management, 2FA for admin
+Account Management	Medium	Balance atomicity on transfers and deletes
+Transaction Management	Medium	Balance recalculation consistency across all CRUD operations
+Budgeting	Medium	Real-time threshold checking on each expense write
+Recurring Transactions	Medium-High	Scheduler reliability; idempotency on cron misfire
+Reporting & Analytics	High	Aggregation query performance; chart rendering in PDF
+PDF Export	Medium	Server-side rendering consistency; Puppeteer memory management
+Notification System	Medium	Third-party email/SMS dependency; retry logic
+Localization (RTL)	Medium	RTL layout correctness across all screens and components
+Admin Dashboard	Medium	Audit log immutability; GDPR erasure procedures
+
+Team Size	Estimated Duration
+1 Full-Stack Developer	14–18 weeks
+2 Developers	8–12 weeks
+4 Developers	5–7 weeks
+
+Overall Project Complexity: Medium–High
+Estimated deliverables: ~38 Functional Requirements · 10+ Database Tables · 45+ API Endpoints · 20 UI Screens · 8 Core Modules
+
+11. Constraints and Risks
+11.1 Technical Constraints
+ID	Constraint	Impact
+TC-01	No real-time banking API integration in v1.0	All data is manually entered; no automatic transaction import
+TC-02	Single currency per account in MVP	Users with multi-currency needs must manage separate accounts
+TC-03	Server-side PDF generation requires Puppeteer (headless Chrome) or WeasyPrint	Increased server memory consumption; requires appropriate Docker resource allocation
+TC-04	No offline mode	Application is unusable without internet connectivity
+TC-05	Image-only receipt attachments (JPEG/PNG)	Users with PDF receipts must convert them before uploading in v1.0
+11.2 Technical Risks
+ID	Risk	Likelihood	Impact	Mitigation
+TR-01	Account balance inconsistency if a transaction write fails partway	Low	High	Use PostgreSQL transactions for all balance-affecting writes; enforce atomicity at the ORM layer
+TR-02	Recurring transaction cron job misfire (duplicate or missed execution)	Medium	Medium	Implement idempotency keys on the scheduler; log all job executions; alert on anomalies
+TR-03	PDF generation memory leak or timeout under high load	Medium	High	Run PDF engine in isolated container; implement request queue and timeout limits; auto-restart policy
+TR-04	JWT token theft via XSS	Medium	High	Store tokens in HttpOnly cookies; implement strict Content-Security-Policy headers
+TR-05	Third-party email/SMS provider outage	Low	Medium	Implement retry queues; provide fallback channel (email ↔ SMS); surface degraded-service banner to users
+TR-06	PostgreSQL performance degradation under high write volume	Medium	High	Ensure proper indexing on all query-heavy columns; load test before production; use connection pooling
+11.3 Business Risks
+ID	Risk	Likelihood	Impact	Mitigation
+BR-01	Low user adoption due to manual data entry friction	High	High	Optimize onboarding (< 3 min to first transaction); plan transaction import features for v2.0
+BR-02	User trust issues regarding financial data security	Medium	High	Publish transparent privacy policy; obtain security certifications; display trust signals
+BR-03	GDPR / local data protection regulation non-compliance	Low	Very High	Implement GDPR features from day one: right to erasure, data export, consent logging, unsubscribe links
+BR-04	Competitors offering bank-linked features in the same market	High	Medium	Prioritize UX quality and Arabic localization as key differentiators; plan Open Banking for v2.0
+
+— END OF DOCUMENT —
+Personal Finance Tracker SRS | Version 2.0.0 | June 9, 2026 | IEEE 830 / ISO/IEC/IEEE 29148:2018

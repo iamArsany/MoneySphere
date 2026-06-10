@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add/Edit Budget Modal - Personal Finance Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#4edea3",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "surface-dim": "#cbdbf5",
+                      "on-tertiary-fixed": "#002113",
+                      "on-surface-variant": "#3e4947",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-container-high": "#dce9ff",
+                      "surface-container": "#e5eeff",
+                      "background": "#f8f9ff",
+                      "surface-container-low": "#eff4ff",
+                      "on-tertiary-container": "#99ffcd",
+                      "on-secondary-fixed-variant": "#653e00",
+                      "on-primary-fixed-variant": "#00504a",
+                      "primary-container": "#0f766e",
+                      "tertiary-container": "#007952",
+                      "surface-tint": "#006a63",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-surface": "#0b1c30",
+                      "tertiary": "#005e3f",
+                      "outline-variant": "#bdc9c6",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed": "#2a1700",
+                      "secondary-fixed": "#ffddb8",
+                      "on-secondary": "#ffffff",
+                      "outline": "#6e7977",
+                      "inverse-surface": "#213145",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed": "#00201d",
+                      "secondary-container": "#fea619",
+                      "primary-fixed": "#9cf2e8",
+                      "secondary": "#855300",
+                      "inverse-primary": "#80d5cb",
+                      "surface-variant": "#d3e4fe",
+                      "surface": "#f8f9ff",
+                      "secondary-fixed-dim": "#ffb95f",
+                      "primary-fixed-dim": "#80d5cb",
+                      "surface-bright": "#f8f9ff",
+                      "primary": "#005c55",
+                      "on-primary-container": "#a3faef",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#6ffbbe",
+                      "on-background": "#0b1c30",
+                      "on-secondary-container": "#684000"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1280px",
+                      "gutter": "24px",
+                      "lg": "24px",
+                      "xs": "8px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "sm": "12px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "36px",
+                              {
+                                      "lineHeight": "44px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen relative font-body-base">
+<!-- Dimmed Overlay -->
+<div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 flex items-center justify-center p-md">
+<!-- Modal Container (480px max width) -->
+<div class="bg-surface-container-lowest rounded-[12px] w-full max-w-[480px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.08),_0px_4px_6px_-2px_rgba(0,0,0,0.04)] flex flex-col overflow-hidden">
+<!-- Header -->
+<div class="flex items-center justify-between p-lg border-b border-outline-variant/30">
+<h2 class="font-title-lg text-title-lg text-on-surface">Add Budget</h2>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-base rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+</div>
+<!-- Body -->
+<div class="p-lg flex flex-col gap-lg overflow-y-auto max-h-[716px]">
+<!-- Category Selector -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Category</label>
+<!-- Error State Trigger Example - We are showing the error state as requested -->
+<div class="relative">
+<button class="w-full flex items-center justify-between p-md bg-surface border-2 border-error rounded-lg focus:outline-none focus:ring-2 focus:ring-error focus:ring-opacity-50 text-left transition-all">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</div>
+<span class="font-body-base text-body-base text-on-surface">Food</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_drop_down</span>
+</button>
+</div>
+<!-- Validation Error Message -->
+<p class="font-body-sm text-body-sm text-error flex items-start gap-base mt-1">
+<span class="material-symbols-outlined text-[16px]">error</span>
+                        You already have a budget for Food in June 2026
+                    </p>
+</div>
+<!-- Month & Year Row -->
+<div class="flex gap-md">
+<!-- Month -->
+<div class="flex flex-col gap-xs flex-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Month</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface border border-outline-variant text-on-surface rounded-lg p-md pr-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-base text-body-base cursor-pointer">
+<option>January</option>
+<option>February</option>
+<option>March</option>
+<option>April</option>
+<option>May</option>
+<option selected="">June</option>
+<option>July</option>
+<option>August</option>
+<option>September</option>
+<option>October</option>
+<option>November</option>
+<option>December</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Year -->
+<div class="flex flex-col gap-xs flex-1">
+<label class="font-label-md text-label-md text-on-surface-variant">Year</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface border border-outline-variant text-on-surface rounded-lg p-md pr-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-base text-body-base cursor-pointer">
+<option>2024</option>
+<option>2025</option>
+<option selected="">2026</option>
+<option>2027</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+</div>
+<!-- Budget Limit -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Budget Limit</label>
+<div class="relative flex items-center">
+<div class="absolute left-md text-on-surface-variant font-body-base text-body-base select-none">
+                            EGP
+                        </div>
+<input class="w-full bg-surface border border-outline-variant text-on-surface rounded-lg py-md pl-[56px] pr-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-base text-body-base" placeholder="0.00" type="number" value="1500"/>
+</div>
+</div>
+<!-- Preview Section / Historical Spending -->
+<div class="bg-surface-container-low rounded-lg p-md border border-outline-variant/50 flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary-container mt-[2px]">insights</span>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Historical Insight</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">
+                            Based on last month, you spent <strong class="text-on-surface font-semibold">EGP 650</strong> in this category.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-lg border-t border-outline-variant/30 bg-surface-container-lowest flex justify-end gap-md">
+<button class="px-md py-sm rounded-lg font-label-md text-label-md border border-primary text-primary hover:bg-primary/5 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors bg-transparent">
+                    Cancel
+                </button>
+<button class="px-md py-sm rounded-lg font-label-md text-label-md bg-primary text-on-primary hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors opacity-50 cursor-not-allowed">
+                    Save
+                </button>
+</div>
+</div>
+</div>
+</body></html>

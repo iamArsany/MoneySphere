@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PFT - Personal Finance Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#00201d",
+                        "on-tertiary-container": "#99ffcd",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#ffddb8",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "primary": "#005c55",
+                        "outline-variant": "#bdc9c6",
+                        "tertiary": "#005e3f",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "surface": "#f8f9ff",
+                        "secondary-container": "#fea619",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-fixed-dim": "#80d5cb",
+                        "inverse-primary": "#80d5cb",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-container": "#007952",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-container": "#a3faef",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "on-surface-variant": "#3e4947",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#684000",
+                        "surface-tint": "#006a63",
+                        "outline": "#6e7977",
+                        "on-secondary-fixed": "#2a1700",
+                        "inverse-surface": "#213145",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "secondary": "#855300",
+                        "on-primary-fixed-variant": "#00504a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-fixed": "#002113",
+                        "primary-fixed": "#9cf2e8",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "primary-container": "#0f766e",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "on-background": "#0b1c30"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "xs": "8px",
+                        "gutter": "24px",
+                        "base": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-base": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+    </style>
+</head>
+<body class="text-on-background bg-background min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-on-primary-fixed shadow-sm w-full sticky top-0 z-50">
+<div class="flex justify-between items-center px-lg py-md w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">PFT</div>
+<nav class="hidden md:flex gap-lg">
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 cursor-pointer transition-transform active:scale-95 font-title-lg text-title-lg" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer transition-transform active:scale-95 font-title-lg text-title-lg" href="#">Transactions</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer transition-transform active:scale-95 font-title-lg text-title-lg" href="#">Budgets</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer transition-transform active:scale-95 font-title-lg text-title-lg" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-md">
+<span class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md cursor-pointer">EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ©</span>
+<button class="px-md py-xs border border-primary text-primary rounded-lg font-label-md text-label-md hover:bg-surface-container-low transition-colors">Login</button>
+<button class="px-md py-xs bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity hidden md:block">Get Started</button>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-md md:px-lg py-xl">
+<!-- Hero Section -->
+<section class="mb-xl text-center md:text-left bg-gradient-to-r from-primary to-tertiary text-on-primary rounded-xl p-xl shadow-lg relative overflow-hidden">
+<div class="relative z-10 max-w-2xl">
+<h1 class="font-display-lg text-display-lg mb-md">Take Control of Your Finances</h1>
+<p class="font-body-base text-body-base mb-lg opacity-90">Experience institutional-grade tracking with our intuitive dashboard. Track expenses, monitor savings, and achieve your financial goals with precision.</p>
+<button class="px-lg py-sm bg-secondary-container text-on-secondary-container rounded-lg font-title-lg text-title-lg hover:opacity-90 transition-opacity">Register Now</button>
+</div>
+<div class="absolute top-0 right-0 h-full w-1/3 opacity-20 pointer-events-none hidden md:block">
+<svg class="w-full h-full fill-current" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<path d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.3,-46.3C90.8,-33.5,96.9,-18,97.1,-2.4C97.3,13.2,91.6,29.1,82.2,42.5C72.8,55.9,59.7,66.8,45.4,74.6C31.1,82.4,15.5,87.1,0.5,86.2C-14.5,85.3,-29.1,78.8,-42.6,70.5C-56.1,62.2,-68.5,52.1,-77.6,39.6C-86.7,27.1,-92.5,12.2,-92.3,-2.6C-92.1,-17.4,-85.9,-32,-76.4,-43.8C-66.9,-55.6,-54.1,-64.6,-40.5,-72C-26.9,-79.4,-13.4,-85.2,1.3,-87.5C16,-89.8,30.5,-83.6,44.7,-76.4Z" transform="translate(100 100)"></path>
+</svg>
+</div>
+</section>
+<!-- Demo Dashboard Section -->
+<section class="relative">
+<!-- Overlay -->
+<div class="absolute inset-0 bg-surface/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center rounded-xl border border-outline-variant/30">
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-lg text-center max-w-md border border-outline-variant/50">
+<span class="material-symbols-outlined text-display-lg text-primary mb-sm block" style="font-variation-settings: 'FILL' 1;">lock</span>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-sm">Demo Dashboard</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg">This is demo data â Register to connect your accounts and see your real finances.</p>
+<button class="w-full px-md py-sm bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity">Create Free Account</button>
+</div>
+</div>
+<!-- Content (Behind Overlay) -->
+<div class="opacity-40 pointer-events-none space-y-lg">
+<!-- Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20">
+<div class="flex justify-between items-center mb-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Income</h3>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">arrow_upward</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">$12,450.00</div>
+<div class="font-body-sm text-body-sm text-tertiary-container mt-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +8% from last month
+                        </div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20">
+<div class="flex justify-between items-center mb-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Expenses</h3>
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 0;">arrow_downward</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">$8,230.50</div>
+<div class="font-body-sm text-body-sm text-error mt-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_down</span> -2% from last month
+                        </div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20">
+<div class="flex justify-between items-center mb-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Net Balance</h3>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">account_balance</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">$4,219.50</div>
+<div class="font-body-sm text-body-sm text-tertiary-container mt-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +15% from last month
+                        </div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20">
+<div class="flex justify-between items-center mb-sm">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Savings Rate</h3>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">savings</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface">33.8%</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> On track for goal
+                        </div>
+</div>
+</div>
+<!-- Charts Area (Faked with CSS) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Bar Chart Area -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-lg rounded-xl shadow-sm border border-outline-variant/20 h-64 flex flex-col">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-md">Cash Flow Overview</h3>
+<div class="flex-grow flex items-end gap-sm px-sm pb-sm border-b border-outline-variant/30">
+<!-- Fake Bars -->
+<div class="w-1/6 bg-primary/20 rounded-t-sm h-[40%]"></div>
+<div class="w-1/6 bg-primary/40 rounded-t-sm h-[60%]"></div>
+<div class="w-1/6 bg-primary/60 rounded-t-sm h-[85%]"></div>
+<div class="w-1/6 bg-primary/80 rounded-t-sm h-[70%]"></div>
+<div class="w-1/6 bg-primary rounded-t-sm h-[95%]"></div>
+<div class="w-1/6 bg-tertiary rounded-t-sm h-[50%]"></div>
+</div>
+<div class="flex justify-between px-sm pt-xs text-on-surface-variant font-label-md text-label-md">
+<span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+</div>
+</div>
+<!-- Donut Chart Area -->
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-sm border border-outline-variant/20 h-64 flex flex-col items-center justify-center">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-md w-full text-left">Expense Breakdown</h3>
+<div class="relative w-32 h-32 rounded-full border-8 border-primary border-t-secondary-container border-r-error border-b-tertiary shadow-inner">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-title-lg text-title-lg text-on-surface">Total</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-on-primary-fixed border-t border-outline-variant dark:border-on-primary-fixed-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg py-xl w-full max-w-container-max mx-auto">
+<div class="font-title-lg text-title-lg font-bold text-primary dark:text-primary-fixed mb-sm md:mb-0">PFT</div>
+<nav class="flex flex-wrap justify-center gap-md mb-md md:mb-0">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Contact Us</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors inline-block transition-opacity hover:opacity-80 font-body-sm text-body-sm" href="#">Register Now</a>
+</nav>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant text-center md:text-right">
+                Â© 2024 PFT Personal Finance Tracker. All rights reserved.
+            </div>
+</div>
+</footer>
+</body></html>

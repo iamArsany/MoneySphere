@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PFT Design System Artboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#80d5cb",
+                        "primary": "#005c55",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#006a63",
+                        "outline": "#6e7977",
+                        "on-primary-fixed-variant": "#00504a",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-container": "#684000",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#9cf2e8",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#f8f9ff",
+                        "secondary-container": "#fea619",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface": "#f8f9ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-container": "#a3faef",
+                        "secondary": "#855300",
+                        "on-tertiary-fixed": "#002113",
+                        "inverse-surface": "#213145",
+                        "surface-container": "#e5eeff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-surface": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#ffddb8",
+                        "tertiary": "#005e3f",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "on-background": "#0b1c30",
+                        "on-surface-variant": "#3e4947",
+                        "on-tertiary-container": "#99ffcd",
+                        "on-primary-fixed": "#00201d",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "primary-fixed-dim": "#80d5cb",
+                        "outline-variant": "#bdc9c6",
+                        "on-secondary-fixed": "#2a1700",
+                        "tertiary-container": "#007952",
+                        "primary-container": "#0f766e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "xs": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "container-max": "1280px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "title-lg": ["Inter", "IBM Plex Sans Arabic"],
+                        "display-lg": ["Inter", "IBM Plex Sans Arabic"],
+                        "headline-md": ["Inter", "IBM Plex Sans Arabic"],
+                        "body-sm": ["Inter", "IBM Plex Sans Arabic"],
+                        "display-lg-mobile": ["Inter", "IBM Plex Sans Arabic"],
+                        "label-md": ["Inter", "IBM Plex Sans Arabic"],
+                        "body-base": ["Inter", "IBM Plex Sans Arabic"]
+                    },
+                    "fontSize": {
+                        "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        .rtl { direction: rtl; }
+        .ltr { direction: ltr; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base min-h-screen pb-24">
+<!-- Header -->
+<header class="bg-surface-container-lowest shadow-sm sticky top-0 z-50">
+<div class="max-w-container-max mx-auto px-lg h-16 flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-3xl">account_balance</span>
+<span class="font-headline-md text-headline-md text-primary tracking-tight">PFT Design System</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-base">
+                    EN / Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ©
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-lg py-xl space-y-xl">
+<!-- 1. Brand & Colors -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+<h2 class="font-title-lg text-title-lg mb-lg border-b border-outline-variant pb-xs">1. Brand &amp; Colors</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md">
+<!-- Primary Palette -->
+<div class="space-y-sm">
+<div class="h-20 bg-primary rounded-lg shadow-sm flex items-end p-xs text-on-primary font-label-md text-label-md">Primary</div>
+<div class="h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container font-label-md text-label-md">Primary Container</div>
+</div>
+<!-- Secondary Palette -->
+<div class="space-y-sm">
+<div class="h-20 bg-secondary rounded-lg shadow-sm flex items-end p-xs text-on-secondary font-label-md text-label-md">Secondary</div>
+<div class="h-10 bg-secondary-container rounded-lg flex items-center justify-center text-on-secondary-container font-label-md text-label-md">Sec. Container</div>
+</div>
+<!-- Tertiary/Success -->
+<div class="space-y-sm">
+<div class="h-20 bg-tertiary rounded-lg shadow-sm flex items-end p-xs text-on-tertiary font-label-md text-label-md">Success (Tertiary)</div>
+<div class="h-10 bg-tertiary-container rounded-lg flex items-center justify-center text-on-tertiary-container font-label-md text-label-md">Succ. Container</div>
+</div>
+<!-- Error/Danger -->
+<div class="space-y-sm">
+<div class="h-20 bg-error rounded-lg shadow-sm flex items-end p-xs text-on-error font-label-md text-label-md">Danger (Error)</div>
+<div class="h-10 bg-error-container rounded-lg flex items-center justify-center text-on-error-container font-label-md text-label-md">Err. Container</div>
+</div>
+<!-- Surface -->
+<div class="space-y-sm">
+<div class="h-20 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm flex items-end p-xs text-on-surface font-label-md text-label-md">Surface Lowest</div>
+<div class="h-10 bg-surface-container border border-outline-variant rounded-lg flex items-center justify-center text-on-surface font-label-md text-label-md">Surface Cont.</div>
+</div>
+</div>
+</section>
+<!-- 2. Typography -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+<h2 class="font-title-lg text-title-lg mb-lg border-b border-outline-variant pb-xs">2. Typography</h2>
+<div class="grid md:grid-cols-2 gap-xl">
+<!-- English LTR -->
+<div class="ltr space-y-md">
+<div class="text-on-surface-variant font-label-md text-label-md uppercase mb-sm">English (Inter)</div>
+<div>
+<span class="font-display-lg text-display-lg block">Display Large</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">48px / 700 / -2% tracking</span>
+</div>
+<div>
+<span class="font-headline-md text-headline-md block">Headline Medium</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">24px / 600</span>
+</div>
+<div>
+<span class="font-title-lg text-title-lg block">Title Large</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">20px / 600</span>
+</div>
+<div>
+<span class="font-body-base text-body-base block">Body Base - The quick brown fox jumps over the lazy dog.</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">16px / 400</span>
+</div>
+<div>
+<span class="font-label-md text-label-md block">LABEL MEDIUM</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">12px / 500 / 5% tracking</span>
+</div>
+</div>
+<!-- Arabic RTL -->
+<div class="rtl space-y-md text-right">
+<div class="text-on-surface-variant font-label-md text-label-md uppercase mb-sm">Arabic (IBM Plex Sans)</div>
+<div>
+<span class="font-display-lg text-display-lg block">Ø¹Ø±Ø¶ ÙØ¨ÙØ±</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">48px / 700</span>
+</div>
+<div>
+<span class="font-headline-md text-headline-md block">Ø¹ÙÙØ§Ù ÙØªÙØ³Ø·</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">24px / 600</span>
+</div>
+<div>
+<span class="font-title-lg text-title-lg block">Ø¹ÙÙØ§Ù ÙØ¨ÙØ±</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">20px / 600</span>
+</div>
+<div>
+<span class="font-body-base text-body-base block">Ø§ÙÙØµ Ø§ÙØ£Ø³Ø§Ø³Ù - Ø§ÙØ«Ø¹ÙØ¨ Ø§ÙØ¨ÙÙ Ø§ÙØ³Ø±ÙØ¹ ÙÙÙØ² ÙÙÙ Ø§ÙÙÙØ¨ Ø§ÙÙØ³ÙÙ.</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">16px / 400</span>
+</div>
+<div>
+<span class="font-label-md text-label-md block">ØªØ³ÙÙØ© ÙØªÙØ³Ø·Ø©</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm block mt-1">12px / 500</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Buttons -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+<h2 class="font-title-lg text-title-lg mb-lg border-b border-outline-variant pb-xs">3. Buttons</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left min-w-[800px]">
+<thead>
+<tr class="text-on-surface-variant font-label-md text-label-md uppercase border-b border-outline-variant">
+<th class="pb-sm font-normal">Type</th>
+<th class="pb-sm font-normal">Normal (EN / AR)</th>
+<th class="pb-sm font-normal">Hover</th>
+<th class="pb-sm font-normal">Disabled</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Primary -->
+<tr>
+<td class="py-md font-label-md text-label-md text-on-surface-variant">Primary</td>
+<td class="py-md space-x-sm">
+<button class="bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Submit</button>
+<button class="rtl bg-primary text-on-primary px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Ø¥Ø±Ø³Ø§Ù</button>
+</td>
+<td class="py-md">
+<button class="bg-primary/90 text-on-primary px-md py-sm rounded-lg font-label-md text-label-md">Submit</button>
+</td>
+<td class="py-md">
+<button class="bg-surface-variant text-on-surface-variant/50 px-md py-sm rounded-lg font-label-md text-label-md cursor-not-allowed">Submit</button>
+</td>
+</tr>
+<!-- Secondary -->
+<tr>
+<td class="py-md font-label-md text-label-md text-on-surface-variant">Secondary</td>
+<td class="py-md space-x-sm">
+<button class="bg-secondary-container text-on-secondary-container px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Add Category</button>
+<button class="rtl bg-secondary-container text-on-secondary-container px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Ø¥Ø¶Ø§ÙØ© ÙØ¦Ø©</button>
+</td>
+<td class="py-md">
+<button class="bg-secondary-container/80 text-on-secondary-container px-md py-sm rounded-lg font-label-md text-label-md">Add Category</button>
+</td>
+<td class="py-md">
+<button class="bg-surface-variant text-on-surface-variant/50 px-md py-sm rounded-lg font-label-md text-label-md cursor-not-allowed">Add Category</button>
+</td>
+</tr>
+<!-- Ghost -->
+<tr>
+<td class="py-md font-label-md text-label-md text-on-surface-variant">Ghost</td>
+<td class="py-md space-x-sm">
+<button class="border border-primary text-primary px-md py-sm rounded-lg font-label-md text-label-md hover:bg-primary-container/20 transition-colors">Cancel</button>
+<button class="rtl border border-primary text-primary px-md py-sm rounded-lg font-label-md text-label-md hover:bg-primary-container/20 transition-colors">Ø¥ÙØºØ§Ø¡</button>
+</td>
+<td class="py-md">
+<button class="border border-primary text-primary bg-primary-container/20 px-md py-sm rounded-lg font-label-md text-label-md">Cancel</button>
+</td>
+<td class="py-md">
+<button class="border border-outline-variant text-on-surface-variant/50 px-md py-sm rounded-lg font-label-md text-label-md cursor-not-allowed">Cancel</button>
+</td>
+</tr>
+<!-- Danger -->
+<tr>
+<td class="py-md font-label-md text-label-md text-on-surface-variant">Danger</td>
+<td class="py-md space-x-sm">
+<button class="bg-error text-on-error px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Delete Account</button>
+<button class="rtl bg-error text-on-error px-md py-sm rounded-lg font-label-md text-label-md transition-colors">Ø­Ø°Ù Ø§ÙØ­Ø³Ø§Ø¨</button>
+</td>
+<td class="py-md">
+<button class="bg-error/90 text-on-error px-md py-sm rounded-lg font-label-md text-label-md">Delete Account</button>
+</td>
+<td class="py-md">
+<button class="bg-surface-variant text-on-surface-variant/50 px-md py-sm rounded-lg font-label-md text-label-md cursor-not-allowed">Delete Account</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 5. Badges & Chips -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm p-lg">
+<h2 class="font-title-lg text-title-lg mb-lg border-b border-outline-variant pb-xs">5. Badges &amp; Chips</h2>
+<div class="flex flex-wrap gap-md">
+<span class="inline-flex items-center gap-base bg-tertiary-container/30 text-tertiary px-sm py-1 rounded-full font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span> On Track
+                </span>
+<span class="inline-flex items-center gap-base bg-secondary-container/30 text-secondary px-sm py-1 rounded-full font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Warning
+                </span>
+<span class="inline-flex items-center gap-base bg-error-container/50 text-error px-sm py-1 rounded-full font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-error"></span> Exceeded
+                </span>
+<span class="inline-flex items-center gap-base bg-primary-container/30 text-primary px-sm py-1 rounded-full font-label-md text-label-md">
+                    Active
+                </span>
+<span class="inline-flex items-center gap-base bg-surface-variant text-on-surface-variant px-sm py-1 rounded-full font-label-md text-label-md">
+                    Paused
+                </span>
+</div>
+</section>
+</main>
+</body></html>

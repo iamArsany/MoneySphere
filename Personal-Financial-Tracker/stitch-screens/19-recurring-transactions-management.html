@@ -1,0 +1,457 @@
+﻿<!DOCTYPE html>
+
+<html class="light" dir="ltr" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recurring Transactions - FinancePro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#6ffbbe",
+                      "inverse-on-surface": "#eaf1ff",
+                      "secondary-fixed-dim": "#ffb95f",
+                      "on-tertiary-fixed": "#002113",
+                      "surface-tint": "#006a63",
+                      "secondary-fixed": "#ffddb8",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "tertiary-container": "#007952",
+                      "tertiary": "#005e3f",
+                      "on-surface": "#0b1c30",
+                      "on-secondary-fixed": "#2a1700",
+                      "on-surface-variant": "#3e4947",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-fixed-variant": "#00504a",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#855300",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "primary-container": "#0f766e",
+                      "background": "#f8f9ff",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-dim": "#cbdbf5",
+                      "surface": "#f8f9ff",
+                      "on-secondary-fixed-variant": "#653e00",
+                      "on-tertiary-container": "#99ffcd",
+                      "inverse-surface": "#213145",
+                      "primary-fixed-dim": "#80d5cb",
+                      "on-primary-fixed": "#00201d",
+                      "on-secondary-container": "#684000",
+                      "surface-variant": "#d3e4fe",
+                      "primary": "#005c55",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "surface-container-low": "#eff4ff",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#fea619",
+                      "outline": "#6e7977",
+                      "on-tertiary": "#ffffff",
+                      "on-background": "#0b1c30",
+                      "primary-fixed": "#9cf2e8",
+                      "inverse-primary": "#80d5cb",
+                      "outline-variant": "#bdc9c6",
+                      "on-primary-container": "#a3faef",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#e5eeff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "container-max": "1280px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "gutter": "24px",
+                      "md": "16px",
+                      "xs": "8px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "title-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-base": ["Inter"],
+                      "label-md": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "title-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                      "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex font-body-base text-body-base">
+<!-- SideNavBar -->
+<nav class="w-[240px] h-screen fixed left-0 top-0 bg-surface shadow-sm flex flex-col py-lg px-md hidden md:flex z-40">
+<div class="mb-xl px-xs">
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">FinancePro</h1>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1">Institutional Grade</p>
+</div>
+<ul class="flex flex-col gap-xs flex-1">
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span>Accounts</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Transactions</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span>Budgets</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-primary font-bold border-r-4 border-primary bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined icon-fill">event_repeat</span>
+<span>Recurring</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span>Reports</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span>Notifications</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto pt-lg border-t border-surface-variant">
+<a class="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-[240px] flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface shadow-sm h-16 flex justify-between items-center px-lg sticky top-0 z-30">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Button (Visible only on mobile) -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-title-lg text-title-lg text-on-surface hidden md:block">Dashboard</h2>
+</div>
+<div class="flex items-center gap-lg">
+<div class="hidden sm:flex bg-surface-container-lowest rounded-full p-1 border border-outline-variant">
+<button class="px-sm py-1 rounded-full text-label-md font-label-md bg-surface-container text-on-surface">EN</button>
+<button class="px-sm py-1 rounded-full text-label-md font-label-md text-on-surface-variant hover:text-on-surface">Ø¨Ø§ÙØ¹Ø±Ø¨ÙØ©</button>
+</div>
+<button class="relative text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-secondary-container rounded-full border border-surface"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant cursor-pointer">
+<img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaRkS-UIV9B8snJs6a03sEEeNr9MGJkwvAz9ec-d7oGHVEWZY8ZcDvpAn8jiR53T-tsOkboJpco1KSnUo6kjwIzw3tAAzCIKhtQnppAw6ptX9dL8ZWq45DAzsrV975Matd5pzgkTTD6AH5KkuirhOpW6u4e9ckolbJutv7HNRPptfO2bZAOi6oNqlnpGTirPQYJbMtQxzaDzunfGryVsybHMeH_6j_Uxz3By4W8bVG-ZzeZArFzCcWXC2G8hVRKJHlx4-buYg_BcE"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="flex-1 p-md md:p-lg lg:p-xl max-w-container-max mx-auto w-full">
+<!-- Page Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-md mb-lg">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Recurring Transactions</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Manage your subscriptions, bills, and automated transfers.</p>
+</div>
+<button class="flex items-center justify-center gap-xs bg-primary text-on-primary px-lg py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm self-start sm:self-auto active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="font-label-md text-label-md">New Template</span>
+</button>
+</div>
+<!-- Filters -->
+<div class="flex items-center gap-sm mb-lg border-b border-surface-variant pb-xs overflow-x-auto no-scrollbar">
+<button class="px-md py-xs font-label-md text-label-md text-primary border-b-2 border-primary whitespace-nowrap">All</button>
+<button class="px-md py-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Active</button>
+<button class="px-md py-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Paused</button>
+<button class="px-md py-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Completed</button>
+</div>
+<!-- Templates List -->
+<div class="flex flex-col gap-sm">
+<!-- Active Template 1 (Rent) -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm border border-surface-variant flex flex-col md:flex-row md:items-center justify-between gap-md hover:shadow-md transition-shadow group relative z-10">
+<!-- Left: Identity -->
+<div class="flex items-center gap-md md:w-1/3">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined icon-fill">home</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-[24px] font-semibold text-on-surface">Monthly Rent</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-xs mt-0.5">
+<span class="material-symbols-outlined text-[14px]">account_balance</span>
+                                Main Checking
+                            </p>
+</div>
+</div>
+<!-- Middle: Data -->
+<div class="flex flex-row md:flex-col lg:flex-row items-center justify-between md:justify-center lg:justify-between gap-md md:gap-xs lg:gap-xl md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-surface-container text-on-surface-variant rounded-md inline-block self-start">Monthly</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Next: Oct 1, 2023</span>
+</div>
+<div class="text-right md:text-center lg:text-right">
+<span class="font-title-lg text-title-lg text-error block">-$1,800.00</span>
+</div>
+</div>
+<!-- Right: Actions & Status -->
+<div class="flex items-center justify-between md:justify-end gap-lg md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex items-center gap-xs px-sm py-1 bg-[#e8f5e9] text-[#2e7d32] rounded-full">
+<span class="w-2 h-2 rounded-full bg-[#2e7d32]"></span>
+<span class="font-label-md text-label-md">Active</span>
+</div>
+<div class="flex items-center gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+<!-- Skip Button with Tooltip Trigger -->
+<div class="relative inline-block">
+<button class="p-xs text-on-surface-variant hover:text-secondary-container hover:bg-surface-container rounded-full transition-colors tooltip-trigger" title="Skip Next Occurrence">
+<span class="material-symbols-outlined text-[20px]">next_plan</span>
+</button>
+<!-- Tooltip Content (Example shown on this card) -->
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-inverse-surface text-inverse-on-surface rounded-lg shadow-lg p-sm z-50 hidden tooltip-content">
+<p class="font-body-sm text-body-sm mb-xs text-center">Skip Oct 1 occurrence?</p>
+<div class="flex gap-xs justify-center">
+<button class="px-xs py-1 rounded bg-surface-variant text-on-surface-variant font-label-md text-[10px]">Cancel</button>
+<button class="px-xs py-1 rounded bg-secondary-container text-on-secondary-container font-label-md text-[10px]">Confirm</button>
+</div>
+<!-- Arrow -->
+<div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-inverse-surface"></div>
+</div>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Active Template 2 (Spotify) -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm border border-surface-variant flex flex-col md:flex-row md:items-center justify-between gap-md hover:shadow-md transition-shadow group relative z-0">
+<!-- Left -->
+<div class="flex items-center gap-md md:w-1/3">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined icon-fill">headphones</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-[24px] font-semibold text-on-surface">Spotify Premium</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-xs mt-0.5">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+                                Rewards Visa
+                            </p>
+</div>
+</div>
+<!-- Middle -->
+<div class="flex flex-row md:flex-col lg:flex-row items-center justify-between md:justify-center lg:justify-between gap-md md:gap-xs lg:gap-xl md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-surface-container text-on-surface-variant rounded-md inline-block self-start">Monthly</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Next: Oct 15, 2023</span>
+</div>
+<div class="text-right md:text-center lg:text-right">
+<span class="font-title-lg text-title-lg text-error block">-$12.99</span>
+</div>
+</div>
+<!-- Right -->
+<div class="flex items-center justify-between md:justify-end gap-lg md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex items-center gap-xs px-sm py-1 bg-[#e8f5e9] text-[#2e7d32] rounded-full">
+<span class="w-2 h-2 rounded-full bg-[#2e7d32]"></span>
+<span class="font-label-md text-label-md">Active</span>
+</div>
+<div class="flex items-center gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-xs text-on-surface-variant hover:text-secondary-container hover:bg-surface-container rounded-full transition-colors" title="Skip Next Occurrence">
+<span class="material-symbols-outlined text-[20px]">next_plan</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Paused Template (Gym) -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm border border-surface-variant flex flex-col md:flex-row md:items-center justify-between gap-md hover:shadow-md transition-shadow group opacity-80">
+<!-- Left -->
+<div class="flex items-center gap-md md:w-1/3">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-[24px] font-semibold text-on-surface">Gym Membership</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-xs mt-0.5">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+                                Rewards Visa
+                            </p>
+</div>
+</div>
+<!-- Middle -->
+<div class="flex flex-row md:flex-col lg:flex-row items-center justify-between md:justify-center lg:justify-between gap-md md:gap-xs lg:gap-xl md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-surface-variant text-on-surface-variant rounded-md inline-block self-start">Monthly</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Paused until Nov 1</span>
+</div>
+<div class="text-right md:text-center lg:text-right">
+<span class="font-title-lg text-title-lg text-on-surface-variant block">-$45.00</span>
+</div>
+</div>
+<!-- Right -->
+<div class="flex items-center justify-between md:justify-end gap-lg md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex items-center gap-xs px-sm py-1 bg-surface-variant text-on-surface-variant rounded-full">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-label-md text-label-md">Paused</span>
+</div>
+<div class="flex items-center gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors" title="Resume">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Completed Template (Car Loan) -->
+<div class="bg-surface-container-low rounded-xl p-md border border-surface-variant border-dashed flex flex-col md:flex-row md:items-center justify-between gap-md opacity-60 grayscale-[50%]">
+<!-- Left -->
+<div class="flex items-center gap-md md:w-1/3">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-outline shrink-0">
+<span class="material-symbols-outlined">directions_car</span>
+</div>
+<div>
+<h3 class="font-title-lg text-[16px] leading-[24px] font-semibold text-outline line-through">Car Loan</h3>
+<p class="font-body-sm text-body-sm text-outline flex items-center gap-xs mt-0.5">
+<span class="material-symbols-outlined text-[14px]">account_balance</span>
+                                Main Checking
+                            </p>
+</div>
+</div>
+<!-- Middle -->
+<div class="flex flex-row md:flex-col lg:flex-row items-center justify-between md:justify-center lg:justify-between gap-md md:gap-xs lg:gap-xl md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-surface text-outline rounded-md inline-block self-start border border-outline-variant">Monthly</span>
+<span class="font-body-sm text-body-sm text-outline">Ended: Aug 2023</span>
+</div>
+<div class="text-right md:text-center lg:text-right">
+<span class="font-title-lg text-title-lg text-outline block line-through">-$350.00</span>
+</div>
+</div>
+<!-- Right -->
+<div class="flex items-center justify-between md:justify-end gap-lg md:w-1/3 w-full border-t border-surface-variant md:border-t-0 pt-md md:pt-0">
+<div class="flex items-center gap-xs px-sm py-1 bg-surface text-outline rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-label-md text-label-md">Completed</span>
+</div>
+<div class="flex items-center gap-xs">
+<button class="p-xs text-outline hover:text-on-surface hover:bg-surface-container rounded-full transition-colors" title="Delete History">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State Variant (for reference/demonstration) -->
+<div class="mt-xl p-xl bg-surface-container-lowest rounded-xl border border-surface-variant border-dashed flex flex-col items-center justify-center text-center max-w-2xl mx-auto hidden">
+<div class="w-32 h-32 mb-md bg-surface-container rounded-full flex items-center justify-center text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[64px]">event_busy</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">No Recurring Transactions</h3>
+<p class="font-body-base text-body-base text-on-surface-variant mb-lg max-w-md">Automate your finances. Add bills, subscriptions, or transfers here to keep track of your cash flow.</p>
+<button class="flex items-center justify-center gap-xs bg-primary text-on-primary px-lg py-sm rounded-lg hover:bg-primary-container transition-colors shadow-sm active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="font-label-md text-label-md">Create Your First Template</span>
+</button>
+</div>
+</main>
+</div>
+<script>
+        // Simple JS for tooltip demonstration
+        document.querySelectorAll('.tooltip-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const tooltip = trigger.nextElementSibling;
+                // Toggle this specific tooltip
+                tooltip.classList.toggle('hidden');
+                
+                // Close others
+                document.querySelectorAll('.tooltip-content').forEach(tt => {
+                    if (tt !== tooltip) tt.classList.add('hidden');
+                });
+            });
+        });
+
+        // Close tooltips when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.tooltip-content').forEach(tt => {
+                tt.classList.add('hidden');
+            });
+        });
+        
+        // Prevent closing when clicking inside tooltip
+        document.querySelectorAll('.tooltip-content').forEach(tt => {
+            tt.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+    </script>
+</body></html>
