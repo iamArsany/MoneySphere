@@ -688,7 +688,7 @@ function ReportPreviewSection({
           <section className="flex h-[320px] flex-col rounded-xl border border-[#bdc9c6] bg-white p-4 shadow-sm">
             <h4 className="mb-4 text-lg font-semibold text-[#0b1c30]">{report.cashFlowTitle}</h4>
             {report.cashFlowBars.length > 0 ? (
-              <div className="flex flex-1 items-end gap-3 rounded-lg bg-[#eff4ff] p-4">
+              <div className="flex h-52 items-end gap-1 rounded-lg bg-[#eff4ff] p-3">
                 {report.cashFlowBars.map((bar) => (
                   <CashFlowBar key={bar.id} bar={bar} />
                 ))}
@@ -735,7 +735,7 @@ function ReportPreviewSection({
         <div className="mt-6">
           <div className="mb-4 flex items-center justify-between gap-4">
             <h4 className="text-lg font-semibold text-[#0b1c30]">{report.transactionsTitle}</h4>
-            <button type="button" className="text-sm font-semibold text-[#005c55] hover:underline">
+            <button type="button" onClick={() => { window.location.href = '/transactions' }} className="text-sm font-semibold text-[#005c55] hover:underline">
               {text.viewAll}
             </button>
           </div>
@@ -859,16 +859,16 @@ function SummaryCard({ stat, text }: SummaryCardProps) {
 
 function CashFlowBar({ bar }: { bar: ReportsCashFlowBar }) {
   return (
-    <div className="flex flex-1 flex-col items-center gap-2">
-      <div className="flex flex-1 w-full items-end justify-center">
+    <div className="flex flex-1 flex-col items-center gap-1 min-w-0">
+      <div className="flex w-full flex-1 items-end justify-center">
         <div
-          className={`w-8 rounded-t-sm ${toneBarClass(bar.tone)}`}
-          style={{ height: `${Math.max(8, Math.min(100, bar.percent))}%` }}
+          className={`w-5 rounded-t-sm transition-all duration-500 ${toneBarClass(bar.tone)}`}
+          style={{ height: `${Math.max(4, bar.percent)}%` }}
         />
       </div>
-      <div className="text-center">
-        <div className="text-xs font-semibold text-[#0b1c30]">{bar.label}</div>
-        <div className="text-xs text-[#3e4947]">{bar.valueLabel}</div>
+      <div className="text-center w-full">
+        <div className="text-[10px] font-semibold text-[#0b1c30] truncate">{bar.label}</div>
+        <div className="text-[9px] text-[#3e4947] truncate">{bar.valueLabel}</div>
       </div>
     </div>
   )

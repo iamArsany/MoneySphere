@@ -844,10 +844,186 @@ function TransactionModal({
   )
 }
 
-function TransactionsCalendarComingSoon() {
+function TransactionsCalendar({ transactions, language }: { transactions: TransactionRow[], language: string }) {
+  const isAr = language === 'ar'
+  const [calendarDate, setCalendarDate] = useState(() => new Date())
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+
+  const year = calendarDate.getFullYear()
+  const month = calendarDate.getMonth()
+
+  const MONTH_NAMES_EN = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const MONTH_NAMES_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+  const DAY_NAMES_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const DAY_NAMES_AR = ['أح','إث','ثل','أر','خم','جم','سب']
+
+  const monthNames = isAr ? MONTH_NAMES_AR : MONTH_NAMES_EN
+  const dayNames = isAr ? DAY_NAMES_AR : DAY_NAMES_EN
+
+  const firstDayOfWeek = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  // Group by day number within the viewed month/year
+  const txByDayNum: Record<number, TransactionRow[]> = {}
+  transactions.forEach(tx => {
+    // dateLabel is like "Jun 5", "Jan 12"
+    // We check if it belongs to our current view month
+    const shortMonthEN = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'short' })
+    if (tx.dateLabel.startsWith(shortMonthEN)) {
+      const dayNum = parseInt(tx.dateLabel.split(' ')[1])
+      if (!isNaN(dayNum)) {
+        if (!txByDayNum[dayNum]) txByDayNum[dayNum] = []
+        txByDayNum[dayNum].push(tx)
+      }
+    }
+  })
+
+  const cells: (number | null)[] = [
+    ...Array(firstDayOfWeek).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  ]
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  const today = new Date()
+  const selectedTxs = selectedDay ? (txByDayNum[selectedDay] || []) : []
+
   return (
-    <section className="min-h-[320px] rounded-xl border border-[#bdc9c6] bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-[#0b1c30]">Coming soon</h2>
+    <section className="flex flex-col gap-4">
+      {/* Calendar card */}
+      <div className="overflow-hidden rounded-xl border border-[#bdc9c6] bg-white shadow-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#bdc9c6] bg-[#f8f9ff] px-4 py-3">
+          <button
+            type="button"
+            onClick={() => { setCalendarDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1)); setSelectedDay(null) }}
+            className="rounded-full p-2 text-[#3e4947] transition hover:bg-[#e5eeff] hover:text-[#005c55]"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <h2 className="text-base font-bold text-[#0b1c30]">{monthNames[month]} {year}</h2>
+          <button
+            type="button"
+            onClick={() => { setCalendarDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1)); setSelectedDay(null) }}
+            className="rounded-full p-2 text-[#3e4947] transition hover:bg-[#e5eeff] hover:text-[#005c55]"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Day name headers */}
+        <div className="grid grid-cols-7 border-b border-[#bdc9c6]">
+          {dayNames.map(d => (
+            <div key={d} className="py-2 text-center text-[10px] font-bold uppercase tracking-wide text-[#6e7977]">
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* Grid cells */}
+        <div className="grid grid-cols-7">
+          {cells.map((day, idx) => {
+            const dayTxs = day ? (txByDayNum[day] || []) : []
+            const hasIncome = dayTxs.some(t => t.type === 'income')
+            const hasExpense = dayTxs.some(t => t.type === 'expense')
+            const isSelected = day !== null && selectedDay === day
+            const isToday = day !== null &&
+              today.getFullYear() === year &&
+              today.getMonth() === month &&
+              today.getDate() === day
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                disabled={!day}
+                onClick={() => day && setSelectedDay(isSelected ? null : day)}
+                className={[
+                  'relative min-h-[56px] border-b border-r border-[#f0f4ff] p-1.5 text-left transition',
+                  !day ? 'cursor-default bg-[#f8f9ff]' :
+                  isSelected ? 'bg-[#e5eeff]' :
+                  'cursor-pointer hover:bg-[#f0f9ff]'
+                ].join(' ')}
+              >
+                {day && (
+                  <>
+                    <span className={[
+                      'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                      isToday ? 'bg-[#005c55] text-white' : 'text-[#0b1c30]'
+                    ].join(' ')}>
+                      {day}
+                    </span>
+                    {(hasIncome || hasExpense) && (
+                      <div className="mt-1 flex gap-1">
+                        {hasIncome && <span className="h-2 w-2 rounded-full bg-[#005e3f]" />}
+                        {hasExpense && <span className="h-2 w-2 rounded-full bg-[#ba1a1a]" />}
+                      </div>
+                    )}
+                  </>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-6 px-1 text-xs font-medium text-[#3e4947]">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#005e3f]" />
+          {isAr ? 'دخل' : 'Income'}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#ba1a1a]" />
+          {isAr ? 'مصروف' : 'Expense'}
+        </span>
+      </div>
+
+      {/* Selected day detail */}
+      {selectedDay !== null && (
+        <div className="overflow-hidden rounded-xl border border-[#bdc9c6] bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#bdc9c6] bg-[#f8f9ff] px-4 py-3">
+            <h3 className="font-semibold text-[#0b1c30]">
+              {isAr
+                ? `معاملات ${selectedDay} ${monthNames[month]}`
+                : `${monthNames[month]} ${selectedDay}, ${year}`}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className="rounded p-1 text-[#3e4947] transition hover:bg-[#e5eeff] hover:text-[#ba1a1a]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          {selectedTxs.length === 0 ? (
+            <div className="py-8 text-center text-sm text-[#3e4947]">
+              {isAr ? 'لا توجد معاملات في هذا اليوم' : 'No transactions on this day'}
+            </div>
+          ) : (
+            <div className="divide-y divide-[#f0f4ff]">
+              {selectedTxs.map(tx => (
+                <div key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[#0b1c30]">
+                      {tx.description || tx.category.label}
+                    </p>
+                    <p className="text-xs text-[#3e4947]">
+                      {tx.accountLabel} · {tx.category.label}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 text-sm font-semibold ${
+                    tx.type === 'income' ? 'text-[#005e3f]' :
+                    tx.type === 'expense' ? 'text-[#ba1a1a]' :
+                    'text-[#855300]'
+                  }`}>
+                    {tx.amountLabel}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   )
 }
@@ -1333,7 +1509,7 @@ function TransactionsPageContainer() {
         )}
 
         {!loading && !fetchError && viewMode === 'calendar' && (
-          <TransactionsCalendarComingSoon />
+          <TransactionsCalendar transactions={transactions} language={language} />
         )}
 
         {/* Transactions table */}

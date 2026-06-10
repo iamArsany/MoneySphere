@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 import { selectLanguage } from '../../store'
-import { useMemo, useState, type ChangeEvent, type KeyboardEvent } from 'react'
+import { useMemo, useState, useEffect, type ChangeEvent, type KeyboardEvent } from 'react'
 import {
   BarChart3,
   Bell,
@@ -23,7 +23,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { api } from '../../services/api'
 
 export type AdminDashboardLanguage = 'en' | 'ar'
 
@@ -569,21 +569,55 @@ function heightClassFor(value: number) {
 
 function AdminDashboardPageContainer() {
   const language = useSelector(selectLanguage)
-  const navigate = useNavigate()
-  const fallbackData = useAdminDashboardData()
+  const [metrics, setMetrics] = useState<AdminDashboardMetric[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const res = await api.get('/admin/users?limit=200')
+        const users: any[] = res.data.users || []
+        const now = new Date()
+        const thisMonth = users.filter((u: any) => {
+          const created = new Date(u.createdAt)
+          return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
+        })
+        const activeUsers = users.filter((u: any) => u.status === 'active')
+        const suspendedUsers = users.filter((u: any) => u.status === 'suspended')
+        setMetrics([
+          { id: 'total', label: 'Total Users', value: String(users.length), icon: 'users' as const, changeLabel: `${thisMonth.length} this month`, changeDirection: 'up' as const },
+          { id: 'active', label: 'Active Users', value: String(activeUsers.length), icon: 'userCheck' as const, changeLabel: `${Math.round((activeUsers.length / Math.max(users.length, 1)) * 100)}% active`, changeDirection: 'up' as const },
+          { id: 'new', label: 'New This Month', value: String(thisMonth.length), icon: 'userPlus' as const, changeLabel: 'this month', changeDirection: thisMonth.length > 0 ? 'up' as const : 'down' as const },
+          { id: 'suspended', label: 'Suspended', value: String(suspendedUsers.length), icon: 'lock' as const, changeLabel: suspendedUsers.length > 0 ? 'needs attention' : 'all clear', changeDirection: suspendedUsers.length > 0 ? 'down' as const : 'up' as const },
+        ])
+      } catch (err) {
+        console.error('Admin data fetch failed:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAdminData()
+  }, [])
 
   const navItems: AdminDashboardNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '/admin', isActive: true },
     { id: 'users', label: 'Users', icon: 'users', href: '/admin/users' },
-    { id: 'transactions', label: 'Transactions', icon: 'transactions', href: '/admin/transactions' },
-    { id: 'analytics', label: 'Analytics', icon: 'analytics', href: '/admin/analytics' },
+    { id: 'categories', label: 'Categories', icon: 'categories', href: '/admin/categories' },
     { id: 'notifications', label: 'Notifications', icon: 'notifications', href: '/notifications' },
   ]
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#005c55] border-t-transparent" />
+      </div>
+    )
+  }
 
   return (
     <AdminDashboardPage
       language={language}
-      data={{ ...fallbackData, navItems }}
+      data={{ navItems, metrics, activeUsersTrend: [], registrations: [] }}
     />
   )
 }

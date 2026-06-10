@@ -161,6 +161,10 @@ export const router = createBrowserRouter([
             path: '/admin/users',
             lazy: lazyPage(() => import('../features/admin/AdminUsersPage')),
           },
+          {
+            path: '/admin/categories',
+            lazy: lazyPage(() => import('../features/admin/AdminCategoriesPage')),
+          },
         ],
       },
     ],

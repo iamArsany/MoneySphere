@@ -786,20 +786,12 @@ function UpcomingRecurring({ items, onManageRecurring }: UpcomingRecurringProps)
 
 function PanelHeader({
   title,
-  ariaLabel,
-  onMenuClick,
+  ariaLabel: _ariaLabel,
+  onMenuClick: _onMenuClick,
 }: PanelHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-3">
       <h3 className="text-xl font-semibold text-[#0b1c30]">{title}</h3>
-      <button
-        type="button"
-        aria-label={ariaLabel}
-        onClick={onMenuClick}
-        className="rounded-full p-1 text-[#3e4947] transition hover:bg-[#eff4ff] hover:text-[#005c55]"
-      >
-        <MoreVertical className="h-5 w-5" aria-hidden="true" />
-      </button>
     </div>
   )
 }
@@ -901,10 +893,15 @@ function heightClass(value: number) {
 
 function DashboardPageContainer() {
   const language = useSelector(selectLanguage)
+  const isAr = language === 'ar'
   const authState = useSelector((state: any) => state.auth)
   const navigate = useNavigate()
   const [data, setData] = useState<DashboardPageData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedPeriod, setSelectedPeriod] = useState('1m')
+  const [showCustomPicker, setShowCustomPicker] = useState(false)
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' as const, href: '/dashboard', isActive: true },
@@ -920,9 +917,28 @@ function DashboardPageContainer() {
     const fetchData = async () => {
       try {
         setLoading(true)
+        const now = new Date()
+        let dateFrom = ''
+        let dateTo = new Date().toISOString().split('T')[0]
+        if (selectedPeriod === '1m') {
+          const d = new Date(); d.setDate(d.getDate() - 30)
+          dateFrom = d.toISOString().split('T')[0]
+        } else if (selectedPeriod === '6m') {
+          const d = new Date(); d.setMonth(d.getMonth() - 6)
+          dateFrom = d.toISOString().split('T')[0]
+        } else if (selectedPeriod === '1y') {
+          const d = new Date(); d.setFullYear(d.getFullYear() - 1)
+          dateFrom = d.toISOString().split('T')[0]
+        } else if (selectedPeriod === 'custom' && customFrom) {
+          dateFrom = customFrom
+          if (customTo) dateTo = customTo
+        }
+        const txUrl = dateFrom
+          ? `/transactions?limit=100&startDate=${dateFrom}&endDate=${dateTo}`
+          : '/transactions?limit=100'
         const [accountsRes, transactionsRes, budgetsRes, recurringRes] = await Promise.all([
           api.get('/accounts'),
-          api.get('/transactions?limit=20'),
+          api.get(txUrl),
           api.get('/budgets'),
           api.get('/recurring'),
         ])
@@ -934,8 +950,6 @@ function DashboardPageContainer() {
         const budgets = budgetsRes.data.budgets || []
         const recurring = recurringRes.data.recurringTemplates || recurringRes.data.recurring || []
 
-        const isAr = language === 'ar'
-
         let totalBalance = 0
         let totalIncome = 0
         let totalExpense = 0
@@ -944,7 +958,6 @@ function DashboardPageContainer() {
           totalBalance += parseFloat(acc.currentBalance) || 0
         })
 
-        const now = new Date()
         const currentMonth = now.getMonth()
         const currentYear = now.getFullYear()
 
@@ -964,9 +977,9 @@ function DashboardPageContainer() {
         }
 
         const periodOptions = [
-          { id: '1m', label: isAr ? 'آخر شهر' : 'Last Month', isActive: true },
-          { id: '6m', label: isAr ? 'آخر ٦ أشهر' : 'Last 6 Months' },
-          { id: '1y', label: isAr ? 'آخر سنة' : 'Last Year' },
+          { id: '1m', label: isAr ? 'آخر شهر' : 'Last Month', isActive: selectedPeriod === '1m' },
+          { id: '6m', label: isAr ? 'آخر ٦ أشهر' : 'Last 6 Months', isActive: selectedPeriod === '6m' },
+          { id: '1y', label: isAr ? 'آخر سنة' : 'Last Year', isActive: selectedPeriod === '1y' },
         ]
 
         const stats = [
@@ -1124,7 +1137,7 @@ function DashboardPageContainer() {
     return () => {
       active = false
     }
-  }, [language, authState.user])
+  }, [language, authState.user, selectedPeriod, customFrom, customTo])
 
   if (loading) {
     return (
@@ -1134,14 +1147,55 @@ function DashboardPageContainer() {
     )
   }
 
+  const handlePeriodChange = (id: string) => {
+    if (id === 'custom') {
+      setShowCustomPicker(true)
+    } else {
+      setSelectedPeriod(id)
+      setShowCustomPicker(false)
+    }
+  }
+
   return (
-    <DashboardPage
-      language={language}
-      data={data || { navItems, periodOptions: [], stats: [], chartBars: [], categoryShares: [], recentTransactions: [], activeBudgets: [], upcomingRecurring: [] }}
-      onViewAllTransactions={() => navigate('/transactions')}
-      onAddBudget={() => navigate('/budgets')}
-      onManageRecurring={() => navigate('/transactions/recurring')}
-    />
+    <>
+      {showCustomPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="mb-4 text-lg font-bold text-[#0b1c30]">{isAr ? 'نطاق مخصص' : 'Custom Date Range'}</h3>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold uppercase text-[#3e4947]">{isAr ? 'من' : 'From'}</span>
+                <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}
+                  className="rounded-lg border border-[#bdc9c6] px-3 py-2.5 text-sm outline-none focus:border-[#005c55]" />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-semibold uppercase text-[#3e4947]">{isAr ? 'إلى' : 'To'}</span>
+                <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}
+                  className="rounded-lg border border-[#bdc9c6] px-3 py-2.5 text-sm outline-none focus:border-[#005c55]" />
+              </label>
+            </div>
+            <div className="mt-4 flex gap-3">
+              <button type="button" onClick={() => setShowCustomPicker(false)}
+                className="flex-1 rounded-lg border border-[#bdc9c6] py-2.5 text-sm font-semibold text-[#3e4947] hover:bg-[#f8f9ff]">
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button type="button" onClick={() => { setSelectedPeriod('custom'); setShowCustomPicker(false) }}
+                className="flex-1 rounded-lg bg-[#005c55] py-2.5 text-sm font-semibold text-white hover:bg-[#004943]">
+                {isAr ? 'تطبيق' : 'Apply'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <DashboardPage
+        language={language}
+        data={data || { navItems, periodOptions: [], stats: [], chartBars: [], categoryShares: [], recentTransactions: [], activeBudgets: [], upcomingRecurring: [] }}
+        onPeriodChange={handlePeriodChange}
+        onViewAllTransactions={() => navigate('/transactions')}
+        onAddBudget={() => navigate('/budgets')}
+        onManageRecurring={() => navigate('/transactions/recurring')}
+      />
+    </>
   )
 }
 

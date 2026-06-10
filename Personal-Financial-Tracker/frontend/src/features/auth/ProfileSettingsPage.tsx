@@ -1,7 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { selectLanguage, setLanguage } from '../../store'
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useState, useEffect, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../services/api'
 import {
   Bell,
   Camera,
@@ -714,8 +715,64 @@ function FieldGroup({ label, children }: FieldGroupProps) {
 
 function ProfileSettingsPageContainer() {
   const language = useSelector(selectLanguage)
+  const authState = useSelector((state: any) => state.auth)
   const navigate = useNavigate()
-  const [profile, setProfile] = useState<ProfileSettingsProfileValues>(DEFAULT_PROFILE)
+  const dispatch = useDispatch()
+
+  const [profile, setProfile] = useState<ProfileSettingsProfileValues>({
+    fullName: authState.user?.name || authState.user?.fullName || '',
+    email: authState.user?.email || '',
+    phone: authState.user?.phone || '',
+    interfaceLanguage: (authState.user?.preferredLanguage as ProfileSettingsLanguage) || language,
+    baseCurrency: authState.user?.preferredCurrency || '',
+  })
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // Load fresh profile data on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await api.get('/auth/profile')
+        const u = res.data.user
+        setProfile({
+          fullName: u.fullName || '',
+          email: u.email || '',
+          phone: u.phone || '',
+          interfaceLanguage: (u.preferredLanguage as ProfileSettingsLanguage) || 'en',
+          baseCurrency: u.preferredCurrency || '',
+        })
+      } catch (err) {
+        console.error('Failed to load profile:', err)
+        setLoadError('Could not load profile data.')
+      }
+    }
+    loadProfile()
+  }, [])
+
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true)
+    setSaveSuccess(false)
+    try {
+      await api.put('/auth/profile', {
+        fullName: profile.fullName,
+        phone: profile.phone,
+        preferredLanguage: profile.interfaceLanguage,
+        preferredCurrency: profile.baseCurrency,
+      })
+      setSaveSuccess(true)
+      // Update language if changed
+      if (profile.interfaceLanguage && profile.interfaceLanguage !== language) {
+        dispatch(setLanguage(profile.interfaceLanguage))
+      }
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (err: any) {
+      alert(err?.response?.data?.error?.message || 'Failed to save profile. Please try again.')
+    } finally {
+      setIsSavingProfile(false)
+    }
+  }
 
   const settingsNavItems = [
     { id: 'profile', label: 'Profile', icon: 'profile' as const, href: '#profile', isActive: true },
@@ -725,21 +782,35 @@ function ProfileSettingsPageContainer() {
     { id: 'danger', label: 'Danger Zone', icon: 'danger' as const, href: '#danger-zone' },
   ]
 
-  const dispatch = useDispatch()
   return (
-    <ProfileSettingsPage
-      language={language}
-      data={{ ...DEFAULT_DATA, settingsNavItems, profile }}
-      onProfileChange={(newProfile) => {
-        setProfile(newProfile)
-        if (newProfile.interfaceLanguage && newProfile.interfaceLanguage !== language) {
-          dispatch(setLanguage(newProfile.interfaceLanguage as 'en' | 'ar'))
-        }
-      }}
-      onAvatarChange={(file) => setProfile(prev => ({ ...prev, avatarUrl: URL.createObjectURL(file) }))}
-      onLogin={() => navigate('/login')}
-    />
+    <>
+      {saveSuccess && (
+        <div className="fixed top-4 right-4 z-50 rounded-xl bg-[#005c55] px-5 py-3 text-sm font-semibold text-white shadow-lg animate-in slide-in-from-top-2">
+          {language === 'ar' ? '✓ تم حفظ الملف الشخصي بنجاح' : '✓ Profile saved successfully'}
+        </div>
+      )}
+      {loadError && (
+        <div className="fixed top-4 right-4 z-50 rounded-xl bg-[#ba1a1a] px-5 py-3 text-sm font-semibold text-white shadow-lg">
+          {loadError}
+        </div>
+      )}
+      <ProfileSettingsPage
+        language={language}
+        data={{ ...DEFAULT_DATA, settingsNavItems, profile }}
+        isSavingProfile={isSavingProfile}
+        onProfileChange={(newProfile) => {
+          setProfile(newProfile)
+          if (newProfile.interfaceLanguage && newProfile.interfaceLanguage !== language) {
+            dispatch(setLanguage(newProfile.interfaceLanguage as 'en' | 'ar'))
+          }
+        }}
+        onSaveProfile={handleSaveProfile}
+        onAvatarChange={(file) => setProfile(prev => ({ ...prev, avatarUrl: URL.createObjectURL(file) }))}
+        onLogin={() => navigate('/login')}
+      />
+    </>
   )
 }
 
 export default ProfileSettingsPageContainer
+

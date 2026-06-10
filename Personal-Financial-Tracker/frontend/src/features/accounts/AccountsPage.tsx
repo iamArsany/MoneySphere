@@ -102,6 +102,9 @@ export interface AccountsPageProps {
   onAddAccount?: () => void
   onAccountMenu?: (accountId: string) => void
   onArchiveAccount?: (accountId: string) => void
+  onUnarchiveAccount?: (accountId: string) => void
+  showArchived?: boolean
+  onToggleArchived?: () => void
   onLogout?: () => void
 }
 
@@ -118,6 +121,8 @@ interface TopHeaderProps {
 
 interface PageHeaderProps {
   onAddAccount?: () => void
+  showArchived?: boolean
+  onToggleArchived?: () => void
 }
 
 interface SummaryHeroProps {
@@ -128,12 +133,14 @@ interface AccountsGridProps {
   accounts: AccountListItem[]
   onAccountMenu?: (accountId: string) => void
   onArchiveAccount?: (accountId: string) => void
+  onUnarchiveAccount?: (accountId: string) => void
 }
 
 interface AccountCardProps {
   account: AccountListItem
   onAccountMenu?: (accountId: string) => void
   onArchiveAccount?: (accountId: string) => void
+  onUnarchiveAccount?: (accountId: string) => void
 }
 
 interface UserAvatarProps {
@@ -149,6 +156,9 @@ const EN_TEXT = {
   logout: 'Logout',
   archived: 'Archived',
   archiveAccount: 'Archive Account',
+  unarchiveAccount: 'Unarchive',
+  showArchived: 'Show Archived',
+  hideArchived: 'Hide Archived',
   languageAriaLabel: 'Change language',
   notificationsAriaLabel: 'Notifications',
   menuAriaLabel: 'Open navigation',
@@ -167,6 +177,9 @@ const AR_TEXT = {
   logout: 'تسجيل خروج',
   archived: 'مؤرشف',
   archiveAccount: 'أرشفة الحساب',
+  unarchiveAccount: 'إلغاء الأرشفة',
+  showArchived: 'عرض المؤرشف',
+  hideArchived: 'إخفاء المؤرشف',
   languageAriaLabel: 'تغيير اللغة',
   notificationsAriaLabel: 'الإشعارات',
   menuAriaLabel: 'فتح القائمة',
@@ -257,6 +270,9 @@ export function AccountsPage({
   onAddAccount,
   onAccountMenu,
   onArchiveAccount,
+  onUnarchiveAccount,
+  showArchived,
+  onToggleArchived,
   onLogout,
 }: AccountsPageProps) {
   const fallbackData = useAccountsPageData()
@@ -266,12 +282,13 @@ export function AccountsPage({
   return (
     <>
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <PageHeader onAddAccount={onAddAccount} />
+        <PageHeader onAddAccount={onAddAccount} showArchived={showArchived} onToggleArchived={onToggleArchived} />
         <SummaryHero summary={pageData.summary} />
         <AccountsGrid
           accounts={pageData.accounts}
           onAccountMenu={onAccountMenu}
           onArchiveAccount={onArchiveAccount}
+          onUnarchiveAccount={onUnarchiveAccount}
         />
       </div>
     </>
@@ -378,21 +395,35 @@ function TopHeader({
   )
 }
 
-function PageHeader({ onAddAccount }: PageHeaderProps) {
+function PageHeader({ onAddAccount, showArchived, onToggleArchived }: PageHeaderProps) {
   const TEXT_VAR = useAccountsPageText();
 
   return (
     <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
       <h1 className="hidden text-2xl font-semibold text-[#0b1c30] md:block">{TEXT_VAR.desktopTitle}</h1>
       <h1 className="text-2xl font-semibold text-[#0b1c30] md:hidden">{TEXT_VAR.mobileTitle}</h1>
-      <button
-        type="button"
-        onClick={onAddAccount}
-        className="inline-flex items-center gap-2 rounded-lg bg-[#005c55] px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-[#006a63] active:scale-95"
-      >
-        <Plus className="h-4 w-4" aria-hidden="true" />
-        {TEXT_VAR.addAccount}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onToggleArchived}
+          className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
+            showArchived
+              ? 'border-[#005c55] bg-[#005c55] text-white'
+              : 'border-[#bdc9c6] bg-white text-[#3e4947] hover:bg-[#f8f9ff]'
+          }`}
+        >
+          <Archive className="h-3.5 w-3.5" aria-hidden="true" />
+          {showArchived ? TEXT_VAR.hideArchived : TEXT_VAR.showArchived}
+        </button>
+        <button
+          type="button"
+          onClick={onAddAccount}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#005c55] px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-[#006a63] active:scale-95"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          {TEXT_VAR.addAccount}
+        </button>
+      </div>
     </div>
   )
 }
@@ -430,7 +461,7 @@ function SummaryHero({ summary }: SummaryHeroProps) {
   )
 }
 
-function AccountsGrid({ accounts, onAccountMenu, onArchiveAccount }: AccountsGridProps) {
+function AccountsGrid({ accounts, onAccountMenu, onArchiveAccount, onUnarchiveAccount }: AccountsGridProps) {
   const TEXT_VAR = useAccountsPageText();
 
   if (accounts.length === 0) {
@@ -445,13 +476,14 @@ function AccountsGrid({ accounts, onAccountMenu, onArchiveAccount }: AccountsGri
           account={account}
           onAccountMenu={onAccountMenu}
           onArchiveAccount={onArchiveAccount}
+          onUnarchiveAccount={onUnarchiveAccount}
         />
       ))}
     </section>
   )
 }
 
-function AccountCard({ account, onAccountMenu, onArchiveAccount }: AccountCardProps) {
+function AccountCard({ account, onAccountMenu, onArchiveAccount, onUnarchiveAccount }: AccountCardProps) {
   const TEXT_VAR = useAccountsPageText();
 
   const Icon = ICONS[account.icon]
@@ -551,6 +583,19 @@ function AccountCard({ account, onAccountMenu, onArchiveAccount }: AccountCardPr
           >
             <Archive className="h-4 w-4" aria-hidden="true" />
             {TEXT_VAR.archiveAccount}
+          </button>
+        </div>
+      ) : null}
+
+      {isArchived ? (
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => onUnarchiveAccount?.(account.id)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#005c55] px-3 py-1.5 text-xs font-semibold text-[#005c55] transition hover:bg-[#e5eeff]"
+          >
+            <Archive className="h-3.5 w-3.5" aria-hidden="true" />
+            {TEXT_VAR.unarchiveAccount}
           </button>
         </div>
       ) : null}
@@ -681,10 +726,13 @@ function AccountsPageContainer() {
     { id: 'settings', label: 'Settings', icon: 'settings' as const, href: '/profile-settings' },
   ]
 
+  const [showArchived, setShowArchived] = useState(false)
+
   const fetchAccounts = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/accounts')
+      const url = showArchived ? '/accounts?includeArchived=true' : '/accounts'
+      const response = await api.get(url)
       setAccounts(response.data.accounts || [])
     } catch (err) {
       console.error('Failed to fetch accounts:', err)
@@ -695,7 +743,7 @@ function AccountsPageContainer() {
 
   useEffect(() => {
     fetchAccounts()
-  }, [])
+  }, [showArchived])
 
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -728,13 +776,23 @@ function AccountsPageContainer() {
   }
 
   const handleArchiveAccount = async (id: string) => {
-    if (!window.confirm(language === 'ar' ? 'هل أنت متأكد من أرشفة/حذف هذا الحساب؟' : 'Are you sure you want to archive/delete this account?')) return
+    if (!window.confirm(language === 'ar' ? 'هل أنت متأكد من أرشفة هذا الحساب؟' : 'Archive this account?')) return
     try {
-      await api.delete(`/accounts/${id}`)
+      await api.patch(`/accounts/${id}`, { isArchived: true })
       fetchAccounts()
     } catch (err) {
       console.error('Failed to archive account:', err)
       alert('Failed to archive account')
+    }
+  }
+
+  const handleUnarchiveAccount = async (id: string) => {
+    try {
+      await api.patch(`/accounts/${id}`, { isArchived: false })
+      fetchAccounts()
+    } catch (err) {
+      console.error('Failed to unarchive account:', err)
+      alert('Failed to unarchive account')
     }
   }
 
@@ -805,9 +863,12 @@ function AccountsPageContainer() {
       <AccountsPage
         language={language}
         data={{ summary, accounts: mappedAccounts, navItems }}
+        showArchived={showArchived}
+        onToggleArchived={() => setShowArchived(v => !v)}
         onAddAccount={() => setShowAddModal(true)}
         onAccountMenu={(id) => navigate(`/accounts/${id}`)}
         onArchiveAccount={handleArchiveAccount}
+        onUnarchiveAccount={handleUnarchiveAccount}
         onLogout={() => {
           api.post('/auth/logout').finally(() => {
             api.defaults.headers.common['Authorization'] = ''
