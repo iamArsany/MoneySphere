@@ -972,8 +972,9 @@ function DashboardPageContainer() {
           }
         })
 
+        const currency = authState.user?.preferredCurrency || 'USD'
         const formatMoney = (val: number) => {
-          return `${val.toLocaleString(isAr ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`
+          return `${val.toLocaleString(isAr ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
         }
 
         const periodOptions = [

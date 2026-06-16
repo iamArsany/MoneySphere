@@ -705,6 +705,7 @@ function progressWidthClass(value: number) {
 
 function AccountsPageContainer() {
   const language = useSelector(selectLanguage)
+  const authState = useSelector((state: any) => state.auth)
   const navigate = useNavigate()
   
   const [accounts, setAccounts] = useState<any[]>([])
@@ -714,7 +715,7 @@ function AccountsPageContainer() {
   const [newAccName, setNewAccName] = useState('')
   const [newAccType, setNewAccType] = useState('bank')
   const [newAccBalance, setNewAccBalance] = useState('0')
-  const [newAccCurrency, setNewAccCurrency] = useState('USD')
+  const [newAccCurrency, setNewAccCurrency] = useState(authState.user?.preferredCurrency || 'USD')
   const [submitting, setSubmitting] = useState(false)
 
   const navItems = [
@@ -805,7 +806,7 @@ function AccountsPageContainer() {
   const summary = {
     label: isAr ? 'إجمالي الرصيد' : 'Total Balance',
     balanceLabel: totalBalance.toLocaleString(isAr ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    currencyLabel: 'USD',
+    currencyLabel: authState.user?.preferredCurrency || 'USD',
     trendLabel: isAr ? 'جميع الحسابات النشطة' : 'Across all active accounts',
   }
 
@@ -819,7 +820,7 @@ function AccountsPageContainer() {
       })
     }
     const formatVal = (v: number) => {
-      return `${v.toLocaleString(isAr ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2 })} USD`
+      return `${v.toLocaleString(isAr ? 'ar-EG' : 'en-US', { minimumFractionDigits: 2 })} ${acc.currency || authState.user?.preferredCurrency || 'USD'}`
     }
     return {
       id: acc.id,
