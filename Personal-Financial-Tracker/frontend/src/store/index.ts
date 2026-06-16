@@ -8,6 +8,10 @@ export interface AuthUser {
   email?: string
   avatarUrl?: string
   initials?: string
+  preferredCurrency?: string
+  preferredLanguage?: string
+  fullName?: string
+  phone?: string
 }
 
 export interface AuthState {

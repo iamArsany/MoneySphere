@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { selectLanguage, setLanguage, clearSession } from '../../store'
+import { selectLanguage, setLanguage, clearSession, updateUser } from '../../store'
 import { useState, useEffect, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../services/api'
@@ -793,13 +793,22 @@ function ProfileSettingsPageContainer() {
     setIsSavingProfile(true)
     setSaveSuccess(false)
     try {
-      await api.put('/auth/profile', {
+      const res = await api.put('/auth/profile', {
         fullName: profile.fullName,
         phone: profile.phone,
         preferredLanguage: profile.interfaceLanguage,
         preferredCurrency: profile.baseCurrency,
       })
       setSaveSuccess(true)
+      // Sync updated user data into Redux store so all pages reflect the change
+      dispatch(updateUser({
+        fullName: profile.fullName,
+        name: profile.fullName,
+        phone: profile.phone,
+        preferredCurrency: profile.baseCurrency,
+        preferredLanguage: profile.interfaceLanguage,
+        avatarUrl: profile.avatarUrl,
+      }))
       if (profile.interfaceLanguage && profile.interfaceLanguage !== language) {
         dispatch(setLanguage(profile.interfaceLanguage))
       }
