@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { selectLanguage, setLanguage } from '../../store'
+import { selectLanguage, setLanguage, clearSession } from '../../store'
 import { useState, useEffect, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../services/api'
