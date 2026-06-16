@@ -126,7 +126,8 @@ async function updateProfile(req, res) {
   const { fullName, phone, preferredLanguage, preferredCurrency } = req.body;
   const data = {};
   if (fullName !== undefined) data.fullName = fullName;
-  if (phone !== undefined) data.phone = phone;
+  // Convert empty string to null to avoid unique constraint violation on phone
+  if (phone !== undefined) data.phone = phone === '' ? null : phone;
   if (preferredLanguage !== undefined) data.preferredLanguage = preferredLanguage;
   if (preferredCurrency !== undefined) data.preferredCurrency = preferredCurrency;
   const user = await prisma.user.update({ where: { id: req.user.id }, data, include: { role: true } });
