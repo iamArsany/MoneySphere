@@ -257,10 +257,47 @@ const DEFAULT_PROFILE: ProfileSettingsProfileValues = {
   baseCurrency: '',
 }
 
+const CURRENCY_OPTIONS: ProfileSettingsOption[] = [
+  { value: 'USD', label: 'USD - US Dollar' },
+  { value: 'EUR', label: 'EUR - Euro' },
+  { value: 'GBP', label: 'GBP - British Pound' },
+  { value: 'JPY', label: 'JPY - Japanese Yen' },
+  { value: 'AED', label: 'AED - UAE Dirham' },
+  { value: 'SAR', label: 'SAR - Saudi Riyal' },
+  { value: 'EGP', label: 'EGP - Egyptian Pound' },
+  { value: 'CAD', label: 'CAD - Canadian Dollar' },
+  { value: 'AUD', label: 'AUD - Australian Dollar' },
+  { value: 'CHF', label: 'CHF - Swiss Franc' },
+  { value: 'CNY', label: 'CNY - Chinese Yuan' },
+  { value: 'INR', label: 'INR - Indian Rupee' },
+  { value: 'BRL', label: 'BRL - Brazilian Real' },
+  { value: 'MXN', label: 'MXN - Mexican Peso' },
+  { value: 'SGD', label: 'SGD - Singapore Dollar' },
+  { value: 'HKD', label: 'HKD - Hong Kong Dollar' },
+  { value: 'NOK', label: 'NOK - Norwegian Krone' },
+  { value: 'SEK', label: 'SEK - Swedish Krona' },
+  { value: 'DKK', label: 'DKK - Danish Krone' },
+  { value: 'NZD', label: 'NZD - New Zealand Dollar' },
+  { value: 'ZAR', label: 'ZAR - South African Rand' },
+  { value: 'TRY', label: 'TRY - Turkish Lira' },
+  { value: 'KWD', label: 'KWD - Kuwaiti Dinar' },
+  { value: 'QAR', label: 'QAR - Qatari Riyal' },
+  { value: 'JOD', label: 'JOD - Jordanian Dinar' },
+  { value: 'MAD', label: 'MAD - Moroccan Dirham' },
+  { value: 'TND', label: 'TND - Tunisian Dinar' },
+  { value: 'PKR', label: 'PKR - Pakistani Rupee' },
+  { value: 'BDT', label: 'BDT - Bangladeshi Taka' },
+  { value: 'IDR', label: 'IDR - Indonesian Rupiah' },
+  { value: 'MYR', label: 'MYR - Malaysian Ringgit' },
+  { value: 'THB', label: 'THB - Thai Baht' },
+  { value: 'NGN', label: 'NGN - Nigerian Naira' },
+  { value: 'KES', label: 'KES - Kenyan Shilling' },
+]
+
 const DEFAULT_DATA: ProfileSettingsPageData = {
   topNavItems: [],
   settingsNavItems: [],
-  currencyOptions: [],
+  currencyOptions: CURRENCY_OPTIONS,
   profile: DEFAULT_PROFILE,
   notificationPreferences: [],
   footerLinks: [],
@@ -796,7 +833,7 @@ function ProfileSettingsPageContainer() {
       )}
       <ProfileSettingsPage
         language={language}
-        data={{ ...DEFAULT_DATA, settingsNavItems, profile }}
+        data={{ ...DEFAULT_DATA, settingsNavItems, profile, currencyOptions: CURRENCY_OPTIONS }}
         isSavingProfile={isSavingProfile}
         onProfileChange={(newProfile) => {
           setProfile(newProfile)
