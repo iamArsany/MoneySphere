@@ -678,6 +678,13 @@ function AccountDetailPageContainer() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
+  // Edit Account Modal state
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editType, setEditType] = useState('')
+  const [editColor, setEditColor] = useState('#005c55')
+  const [editSubmitting, setEditSubmitting] = useState(false)
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' as const, href: '/dashboard' },
     { id: 'accounts', label: 'Accounts', icon: 'accounts' as const, href: '/accounts', isActive: true },
@@ -725,6 +732,34 @@ function AccountDetailPageContainer() {
     } catch (err) {
       console.error('Failed to archive account:', err)
       alert('Failed to archive account')
+    }
+  }
+
+  const handleOpenEditModal = () => {
+    if (account) {
+      setEditName(account.accountName || '')
+      setEditType(account.accountType || 'bank')
+      setEditColor(account.color || '#005c55')
+      setShowEditModal(true)
+    }
+  }
+
+  const handleEditAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!accountId || !editName.trim()) return
+    setEditSubmitting(true)
+    try {
+      await api.patch(`/accounts/${accountId}`, {
+        accountName: editName.trim(),
+        accountType: editType,
+        color: editColor,
+      })
+      setShowEditModal(false)
+      loadData()
+    } catch (err: any) {
+      alert(err?.response?.data?.error?.message || 'Failed to update account.')
+    } finally {
+      setEditSubmitting(false)
     }
   }
 
@@ -806,48 +841,121 @@ function AccountDetailPageContainer() {
   }
 
   return (
-    <AccountDetailPage
-      language={language}
-      selectedFilter={filter}
-      data={{
-        user: authState.user ? {
-          name: authState.user.name,
-          avatarUrl: authState.user.avatarUrl,
-          initials: authState.user.initials,
-        } : undefined,
-        navItems,
-        account: {
-          name: accountHeader.name,
-          typeLabel: accountHeader.typeLabel,
-          balanceLabel: accountHeader.balanceLabel,
-          currencyLabel: accountHeader.currencyLabel,
-          incomeLabel: formatMoney(incSum),
-          expenseLabel: formatMoney(expSum),
-        },
-        filters: [
-          { value: 'all', label: isAr ? 'الكل' : 'All' },
-          { value: 'income', label: isAr ? 'دخل' : 'Income' },
-          { value: 'expense', label: isAr ? 'مصروف' : 'Expense' },
-          { value: 'transfer', label: isAr ? 'تحويل' : 'Transfer' },
-        ],
-        dateRanges: [
-          { id: '1m', label: isAr ? 'آخر شهر' : 'Last Month' },
-          { id: '3m', label: isAr ? 'آخر ٣ أشهر' : 'Last 3 Months' },
-          { id: '1y', label: isAr ? 'آخر سنة' : 'Last Year' },
-        ],
-        transactions: mappedTransactions,
-        pagination,
-      }}
-      onFilterChange={(f) => {
-        setFilter(f as any)
-        setPage(1)
-      }}
-      onPageChange={(p) => setPage(p)}
-      onPreviousPage={() => setPage(p => Math.max(1, p - 1))}
-      onNextPage={() => setPage(p => Math.min(totalPages, p + 1))}
-      onArchiveAccount={handleArchiveAccount}
-      onEditAccount={() => alert('Edit Account – use the standard settings or forms')}
-    />
+    <>
+      {/* Edit Account Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 className="mb-4 text-xl font-bold text-[#005c55]">
+              {language === 'ar' ? 'تعديل الحساب' : 'Edit Account'}
+            </h2>
+            <form onSubmit={handleEditAccount} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold uppercase text-[#3e4947]">
+                  {language === 'ar' ? 'اسم الحساب' : 'Account Name'}
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  required
+                  className="rounded-lg border border-[#bdc9c6] px-3 py-2 text-base outline-none focus:border-[#005c55] focus:ring-2 focus:ring-[#005c55]"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold uppercase text-[#3e4947]">
+                  {language === 'ar' ? 'نوع الحساب' : 'Account Type'}
+                </label>
+                <select
+                  value={editType}
+                  onChange={e => setEditType(e.target.value)}
+                  className="rounded-lg border border-[#bdc9c6] px-3 py-2 text-base outline-none focus:border-[#005c55] focus:ring-2 focus:ring-[#005c55]"
+                >
+                  <option value="bank">{language === 'ar' ? 'بنك' : 'Bank'}</option>
+                  <option value="cash">{language === 'ar' ? 'نقدي' : 'Cash'}</option>
+                  <option value="credit">{language === 'ar' ? 'بطاقة ائتمان' : 'Credit Card'}</option>
+                  <option value="savings">{language === 'ar' ? 'مدخرات' : 'Savings'}</option>
+                  <option value="investment">{language === 'ar' ? 'استثمار' : 'Investment'}</option>
+                  <option value="custom">{language === 'ar' ? 'مخصص' : 'Custom'}</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold uppercase text-[#3e4947]">
+                  {language === 'ar' ? 'لون الحساب' : 'Account Color'}
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={editColor}
+                    onChange={e => setEditColor(e.target.value)}
+                    className="h-10 w-10 cursor-pointer rounded-lg border border-[#bdc9c6]"
+                  />
+                  <span className="text-sm text-[#3e4947]">{editColor}</span>
+                </div>
+              </div>
+              <div className="mt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="rounded-lg border border-[#bdc9c6] px-5 py-2 text-sm font-semibold text-[#3e4947] hover:bg-[#f0f4f8]"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="rounded-lg bg-[#005c55] px-5 py-2 text-sm font-semibold text-white hover:bg-[#006a63] disabled:opacity-60"
+                >
+                  {editSubmitting ? (language === 'ar' ? 'جارٍ الحفظ...' : 'Saving...') : (language === 'ar' ? 'حفظ' : 'Save Changes')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <AccountDetailPage
+        language={language}
+        selectedFilter={filter}
+        data={{
+          user: authState.user ? {
+            name: authState.user.name,
+            avatarUrl: authState.user.avatarUrl,
+            initials: authState.user.initials,
+          } : undefined,
+          navItems,
+          account: {
+            name: accountHeader.name,
+            typeLabel: accountHeader.typeLabel,
+            balanceLabel: accountHeader.balanceLabel,
+            currencyLabel: accountHeader.currencyLabel,
+            incomeLabel: formatMoney(incSum),
+            expenseLabel: formatMoney(expSum),
+          },
+          filters: [
+            { value: 'all', label: isAr ? 'الكل' : 'All' },
+            { value: 'income', label: isAr ? 'دخل' : 'Income' },
+            { value: 'expense', label: isAr ? 'مصروف' : 'Expense' },
+            { value: 'transfer', label: isAr ? 'تحويل' : 'Transfer' },
+          ],
+          dateRanges: [
+            { id: '1m', label: isAr ? 'آخر شهر' : 'Last Month' },
+            { id: '3m', label: isAr ? 'آخر ٣ أشهر' : 'Last 3 Months' },
+            { id: '1y', label: isAr ? 'آخر سنة' : 'Last Year' },
+          ],
+          transactions: mappedTransactions,
+          pagination,
+        }}
+        onFilterChange={(f) => {
+          setFilter(f as any)
+          setPage(1)
+        }}
+        onPageChange={(p) => setPage(p)}
+        onPreviousPage={() => setPage(p => Math.max(1, p - 1))}
+        onNextPage={() => setPage(p => Math.min(totalPages, p + 1))}
+        onArchiveAccount={handleArchiveAccount}
+        onEditAccount={handleOpenEditModal}
+      />
+    </>
   )
 }
 
