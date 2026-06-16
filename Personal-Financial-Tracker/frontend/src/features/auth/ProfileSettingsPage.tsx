@@ -779,6 +779,7 @@ function ProfileSettingsPageContainer() {
           phone: u.phone || '',
           interfaceLanguage: (u.preferredLanguage as ProfileSettingsLanguage) || 'en',
           baseCurrency: u.preferredCurrency || '',
+          avatarUrl: u.avatarUrl || undefined,
         })
       } catch (err) {
         console.error('Failed to load profile:', err)
@@ -799,7 +800,6 @@ function ProfileSettingsPageContainer() {
         preferredCurrency: profile.baseCurrency,
       })
       setSaveSuccess(true)
-      // Update language if changed
       if (profile.interfaceLanguage && profile.interfaceLanguage !== language) {
         dispatch(setLanguage(profile.interfaceLanguage))
       }
@@ -808,6 +808,39 @@ function ProfileSettingsPageContainer() {
       alert(err?.response?.data?.error?.message || 'Failed to save profile. Please try again.')
     } finally {
       setIsSavingProfile(false)
+    }
+  }
+
+  // Convert image file to Base64 and save it to the backend
+  const handleAvatarChange = async (file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string
+      // Show preview immediately
+      setProfile(prev => ({ ...prev, avatarUrl: base64 }))
+      try {
+        await api.patch('/users/me', { avatarUrl: base64 })
+      } catch (err: any) {
+        alert(err?.response?.data?.error?.message || 'Failed to upload image. Please try again.')
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Delete account and redirect to login
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      language === 'ar'
+        ? 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.'
+        : 'Are you sure you want to delete your account? This action cannot be undone.'
+    )
+    if (!confirmed) return
+    try {
+      await api.delete('/users/me')
+      dispatch(clearSession())
+      navigate('/login')
+    } catch (err: any) {
+      alert(err?.response?.data?.error?.message || 'Failed to delete account. Please try again.')
     }
   }
 
@@ -842,7 +875,8 @@ function ProfileSettingsPageContainer() {
           }
         }}
         onSaveProfile={handleSaveProfile}
-        onAvatarChange={(file) => setProfile(prev => ({ ...prev, avatarUrl: URL.createObjectURL(file) }))}
+        onAvatarChange={handleAvatarChange}
+        onDeleteAccount={handleDeleteAccount}
         onLogin={() => navigate('/login')}
       />
     </>
