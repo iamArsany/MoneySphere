@@ -13,5 +13,7 @@ router.post("/logout", authenticate, asyncHandler(controller.logout));
 router.post("/refresh", validate(schemas.refresh), asyncHandler(controller.refresh));
 router.post("/forgot-password", validate(schemas.forgotPassword), asyncHandler(controller.forgotPassword));
 router.post("/reset-password", validate(schemas.resetPassword), asyncHandler(controller.resetPassword));
+router.get("/profile", authenticate, asyncHandler(controller.getProfile));
+router.put("/profile", authenticate, asyncHandler(controller.updateProfile));
 
 module.exports = router;

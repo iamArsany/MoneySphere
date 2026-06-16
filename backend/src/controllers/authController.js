@@ -116,4 +116,21 @@ async function resetPassword(req, res) {
   return ok(res, { message: "Password reset successfully." });
 }
 
-module.exports = { register, login, logout, refresh, forgotPassword, resetPassword, sanitizeUser };
+async function getProfile(req, res) {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id }, include: { role: true } });
+  if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found.");
+  return ok(res, { user: sanitizeUser(user) });
+}
+
+async function updateProfile(req, res) {
+  const { fullName, phone, preferredLanguage, preferredCurrency } = req.body;
+  const data = {};
+  if (fullName !== undefined) data.fullName = fullName;
+  if (phone !== undefined) data.phone = phone;
+  if (preferredLanguage !== undefined) data.preferredLanguage = preferredLanguage;
+  if (preferredCurrency !== undefined) data.preferredCurrency = preferredCurrency;
+  const user = await prisma.user.update({ where: { id: req.user.id }, data, include: { role: true } });
+  return ok(res, { user: sanitizeUser(user), message: "Profile updated successfully." });
+}
+
+module.exports = { register, login, logout, refresh, forgotPassword, resetPassword, sanitizeUser, getProfile, updateProfile };
